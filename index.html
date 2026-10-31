@@ -597,6 +597,54 @@
     // Supabase config
     const SUPABASE_URL = 'https://acpriztsaogtmrsjvasz.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_Y4mVzZhMLQH-VhSHsaXetw_Epqx5rg7';
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Shared family password
+    const FAMILY_PASSWORD = "refuge2026";
+
+    // Reservation colors
+    const RESERVATION_COLORS = [
+      { value: '#e8c06a', label: 'Or' },
+      { value: '#6ab8e8', label: 'Bleu' },
+      { value: '#e87a6a', label: 'Rouge' },
+      { value: '#8ae8a0', label: 'Vert' },
+      { value: '#d88ae8', label: 'Violet' },
+      { value: '#e8b06a', label: 'Orange' }
+    ];
+
+    // State
+    let currentUser = null;
+    let currentMonth = new Date();
+    let reservations = [];
+    let familyMembers = [];
+
+    // DOM Elements (set in init)
+    let loginView, appView, loginForm, prenomInput, passwordInput, submitBtn, errorMsg;
+    let logoutBtn, currentUserEl, syncText;
+    let calendarHeaderEl, calendarGridEl, reservationsListEl, colorLegendEl;
+    let modalOverlay, modalClose, reservationForm;
+    let prevMonthBtn, nextMonthBtn;
+
+    // Modal elements (set in openModal)
+    let modalOverlayEl, modalCloseEl, reservationFormEl;
+    let modalTitleEl, reservationIdInput, resTitleInput, resStartInput, resEndInput;
+    let resColorSelectEl, resNotesInputEl, deleteReservationBtnEl, modalSubmitTextEl;
+    let modalCloseEl, modalOverlayEl;
+
+    // Sync status
+    function setSyncStatus(status, text) {
+      const indicator = document.getElementById('syncIndicator');
+      if (!indicator) return;
+      indicator.classList.remove('syncing', 'error');
+      if (status === 'syncing') indicator.classList.add('syncing');
+      else if (status === 'error') indicator.classList.add('error');
+      const textEl = document.getElementById('syncText');
+      if (textEl) textEl.textContent = text || (status === 'ok' ? 'Synchronisé' : status === 'syncing' ? 'Synchronisation...' : 'Erreur');
+    }
+
+    // Initialize Supabase
+    const SUPABASE_URL = 'https://acpriztsaogtmrsjvasz.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_Y4mVzZhMLQH-VhSHsaXetw_Epqx5rg7';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Shared family password
@@ -618,41 +666,9 @@
     let reservations = [];
     let familyMembers = [];
 
-    // DOM Elements (will be set in init)
-    let loginView, appView, loginForm, prenomInput, passwordInput, submitBtn, errorMsg;
-    let logoutBtn, currentUserEl, syncText, calendarHeader, calendarGrid;
-    let reservationsList, colorLegend, modalOverlay, modalClose, reservationForm;
-    let reservationIdInput, resTitleInput, resStartInput, resEndInput, resColorSelect, resNotesInput;
-    let deleteReservationBtn, modalSubmitText, modalOverlay, modalClose, modalTitle;
-    let calendarHeader, calendarGrid, reservationsList, colorLegend;
-    let resTitleInput, resStartInput, resEndInput, resColorSelect, resNotesInput;
-    let deleteReservationBtn, modalSubmitText, modalClose, modalOverlay;
-    let calendarHeaderEl, calendarGridEl, reservationsListEl, colorLegendEl;
-    let resTitleInputEl, resStartInputEl, resEndInputEl, resColorSelectEl, resNotesInputEl;
-    let deleteReservationBtnEl, modalSubmitTextEl, modalCloseEl, modalOverlayEl, modalTitleEl;
-    let prevMonthBtn, nextMonthBtn;
-
-    // Sync status
-    function setSyncStatus(status, text) {
-      const indicator = document.getElementById('syncIndicator');
-      if (!indicator) return;
-      indicator.classList.remove('syncing', 'error');
-      if (status === 'syncing') indicator.classList.add('syncing');
-      else if (status === 'error') indicator.classList.add('error');
-      const textEl = document.getElementById('syncText');
-      if (textEl) textEl.textContent = text || (status === 'ok' ? 'Synchronisé' : status === 'syncing' ? 'Synchronisation...' : 'Erreur');
-    }
-
-    // Initialize Supabase
-    const SUPABASE_URL = 'https://acpriztsaogtmrsjvasz.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_Y4mVzZhMLQH-VhSHsaXetw_Epqx5rg7';
-    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // Shared family password
-    const FAMILY_PASSWORD = "refuge2026";
-
     // Helper: format date for input
     function formatDateForInput(date) {
+      if (typeof date === 'string') return date;
       return date.toISOString().split('T')[0];
     }
 
@@ -759,6 +775,15 @@
       renderCalendar();
     }
 
+    function formatDateForInput(date) {
+      if (typeof date === 'string') return date;
+      return date.toISOString().split('T')[0];
+    }
+
+    function formatDateFR(date) {
+      return date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+    }
+
     function renderReservationsList() {
       const upcoming = [...reservations]
         .filter(r => new Date(r.end_date) >= new Date())
@@ -769,29 +794,29 @@
       if (!listEl) return;
 
       if (upcoming.length === 0) {
-        listEl.innerHTML = '<p style="text-align: center; color: var(--moss); padding: 2rem;">Aucune réservation à venir. Cliquez sur un jour pour en créer une.</p>';
+        const listEl = document.getElementById('reservationsList');
+        if (listEl) listEl.innerHTML = '<p style="text-align: center; color: var(--moss); padding: 2rem;">Aucune réservation à venir. Cliquez sur un jour pour en créer une.</p>';
         return;
       }
 
-      listEl.innerHTML = upcoming.map(r => `
-        <div class="reservation-item" style="border-left: 4px solid ${r.color};">
-          <div class="reservation-item-info">
-            <div class="reservation-item-title">${r.title}</div>
-            <div class="reservation-item-meta">
-              <span>${formatDateFR(new Date(r.start_date))} → ${formatDateFR(new Date(r.end_date))}</span>
-              <span>Par ${r.prenom}</span>
+      const listEl = document.getElementById('reservationsList');
+      if (listEl) {
+        listEl.innerHTML = upcoming.map(r => `
+          <div class="reservation-item" style="border-left: 4px solid ${r.color};">
+            <div class="reservation-item-info">
+              <div class="reservation-item-title">${r.title}</div>
+              <div class="reservation-item-meta">
+                <span>${formatDateFR(new Date(r.start_date))} → ${formatDateFR(new Date(r.end_date))}</span>
+                <span>Par ${r.prenom}</span>
+              </div>
+            </div>
+            <div class="reservation-item-actions">
+              <button class="btn btn-secondary" onclick="openModal(null, '${r.id}')" style="padding: 0.5rem 1rem; font-size: 0.85rem;"><span>Modifier</span></button>
+              <button class="btn btn-danger" onclick="deleteReservation('${r.id}')" style="padding: 0.5rem 1rem; font-size: 0.85rem;"><span>Supprimer</span></button>
             </div>
           </div>
-          <div class="reservation-item-actions">
-            <button class="btn btn-secondary" onclick="openModal(null, '${r.id}')" style="padding: 0.5rem 1rem; font-size: 0.85rem;"><span>Modifier</span></button>
-            <button class="btn btn-danger" onclick="deleteReservation('${r.id}')" style="padding: 0.5rem 1rem; font-size: 0.85rem;"><span>Supprimer</span></button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function formatDateFR(date) {
-      return date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+        `).join('');
+      }
     }
 
     function renderColorLegend() {
@@ -811,7 +836,7 @@
 
     // MODAL FUNCTIONS
     function openModal(dateStr = null, reservationId = null) {
-      const modal = document.getElementById('modalOverlay');
+      const modalOverlay = document.getElementById('modalOverlay');
       const isEdit = !!reservationId;
       
       const titleEl = document.getElementById('modalTitle');
@@ -823,50 +848,56 @@
       const colorSelect = document.getElementById('resColor');
       const notesInput = document.getElementById('resNotes');
       const deleteBtn = document.getElementById('deleteReservationBtn');
-      const submitTextEl2 = document.getElementById('modalSubmitText');
       
       if (isEdit) {
         const res = reservations.find(r => r.id === reservationId);
         if (!res) return;
         if (titleEl) titleEl.textContent = 'Modifier la réservation';
+        const submitTextEl2 = document.getElementById('modalSubmitText');
         if (submitTextEl2) submitTextEl2.textContent = 'Enregistrer';
+        const idInput = document.getElementById('reservationId');
         if (idInput) idInput.value = res.id;
+        const titleInput = document.getElementById('resTitle');
         if (titleInput) titleInput.value = res.title;
+        const startInput = document.getElementById('resStart');
         if (startInput) startInput.value = formatDateForInput(new Date(res.start_date));
+        const endInput = document.getElementById('resEnd');
         if (endInput) endInput.value = formatDateForInput(new Date(res.end_date));
+        const colorSelect = document.getElementById('resColor');
         if (colorSelect) colorSelect.value = res.color;
+        const notesInput = document.getElementById('resNotes');
         if (notesInput) notesInput.value = res.notes || '';
+        const deleteBtn = document.getElementById('deleteReservationBtn');
         if (deleteBtn) {
           deleteBtn.style.display = 'inline-flex';
           deleteBtn.onclick = () => deleteReservation(res.id);
         }
       } else {
         const titleEl2 = document.getElementById('modalTitle');
-        const submitTextEl3 = document.getElementById('modalSubmitText');
-        const idInput2 = document.getElementById('reservationId');
-        const titleInput2 = document.getElementById('resTitle');
-        const startInput2 = document.getElementById('resStart');
-        const endInput2 = document.getElementById('resEnd');
-        const colorSelect2 = document.getElementById('resColor');
-        const notesInput2 = document.getElementById('resNotes');
-        const deleteBtn2 = document.getElementById('deleteReservationBtn');
-        
         if (titleEl2) titleEl2.textContent = 'Nouvelle réservation';
-        if (submitTextEl3) submitTextEl3.textContent = 'Créer';
-        if (idInput2) idInput2.value = '';
-        if (titleInput2) titleInput2.value = '';
-        if (startInput2) startInput2.value = dateStr || formatDateForInput(new Date());
-        if (endInput2) endInput2.value = dateStr || formatDateForInput(new Date());
-        if (colorSelect2) colorSelect2.value = getColorForUser(currentUser);
-        if (notesInput2) notesInput2.value = '';
-        if (deleteBtn2) deleteBtn2.style.display = 'none';
+        const submitTextEl2 = document.getElementById('modalSubmitText');
+        if (submitTextEl2) submitTextEl2.textContent = 'Créer';
+        const idInput = document.getElementById('reservationId');
+        if (idInput) idInput.value = '';
+        const titleInput = document.getElementById('resTitle');
+        if (titleInput) titleInput.value = '';
+        const startInput = document.getElementById('resStart');
+        if (startInput) startInput.value = dateStr || formatDateForInput(new Date());
+        const endInput = document.getElementById('resEnd');
+        if (endInput) endInput.value = dateStr || formatDateForInput(new Date());
+        const colorSelect = document.getElementById('resColor');
+        if (colorSelect) colorSelect.value = getColorForUser(currentUser);
+        const notesInput = document.getElementById('resNotes');
+        if (notesInput) notesInput.value = '';
+        const deleteBtn = document.getElementById('deleteReservationBtn');
+        if (deleteBtn) deleteBtn.style.display = 'none';
       }
       
       const modal = document.getElementById('modalOverlay');
       if (modal) modal.classList.add('open');
       setTimeout(() => {
-        const titleInput3 = document.getElementById('resTitle');
-        if (titleInput3) titleInput3.focus();
+        const titleInput = document.getElementById('resTitle');
+        if (titleInput) titleInput.focus();
       }, 100);
     }
 
@@ -1005,11 +1036,15 @@
         errorMsg.textContent = message;
         errorMsg.classList.add('show');
       }
+      const prenomInput = document.getElementById('prenom');
       if (prenomInput) prenomInput.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+      const passwordInput = document.getElementById('password');
       if (passwordInput) passwordInput.style.borderColor = 'rgba(239, 68, 68, 0.5)';
       setTimeout(() => {
-        if (prenomInput) prenomInput.style.borderColor = '';
-        if (passwordInput) passwordInput.style.borderColor = '';
+        const p = document.getElementById('prenom');
+        if (p) p.style.borderColor = '';
+        const pw = document.getElementById('password');
+        if (pw) pw.style.borderColor = '';
       }, 3000);
     }
 
@@ -1031,6 +1066,7 @@
       if (loginView) loginView.style.display = 'none';
       if (appView) appView.style.display = 'block';
       currentUser = prenom;
+      const currentUserEl = document.getElementById('currentUser');
       if (currentUserEl) currentUserEl.textContent = prenom;
       localStorage.setItem('montorlin-user', JSON.stringify({ prenom, loginTime: Date.now() }));
       
@@ -1064,33 +1100,30 @@
     // INITIALIZATION - runs when DOM is ready
     function init() {
       // Cache DOM elements
-      loginView = document.getElementById('loginView');
-      appView = document.getElementById('appView');
-      loginForm = document.getElementById('loginForm');
-      prenomInput = document.getElementById('prenom');
-      passwordInput = document.getElementById('password');
-      submitBtn = document.getElementById('submitBtn');
-      errorMsg = document.getElementById('errorMsg');
-      logoutBtn = document.getElementById('logoutBtn');
-      currentUserEl = document.getElementById('currentUser');
-      syncText = document.getElementById('syncText');
-      calendarHeaderEl = document.getElementById('calendarHeader');
-      calendarGridEl = document.getElementById('calendarGrid');
-      reservationsListEl = document.getElementById('reservationsList');
-      colorLegendEl = document.getElementById('colorLegend');
-      modalOverlay = document.getElementById('modalOverlay');
-      modalClose = document.getElementById('modalClose');
-      reservationForm = document.getElementById('reservationForm');
-      prevMonthBtn = document.getElementById('prevMonth');
-      nextMonthBtn = document.getElementById('nextMonth');
+      const loginView = document.getElementById('loginView');
+      const appView = document.getElementById('appView');
+      const loginForm = document.getElementById('loginForm');
+      const prenomInput = document.getElementById('prenom');
+      const passwordInput = document.getElementById('password');
+      const submitBtn = document.getElementById('submitBtn');
+      const errorMsg = document.getElementById('errorMsg');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const currentUserEl = document.getElementById('currentUser');
+      const syncText = document.getElementById('syncText');
+      const calendarHeaderEl = document.getElementById('calendarHeader');
+      const calendarGridEl = document.getElementById('calendarGrid');
+      const reservationsListEl = document.getElementById('reservationsList');
+      const colorLegendEl = document.getElementById('colorLegend');
+      const prevMonthBtn = document.getElementById('prevMonth');
+      const nextMonthBtn = document.getElementById('nextMonth');
       
       // Modal elements
-      modalOverlay = document.getElementById('modalOverlay');
-      modalClose = document.getElementById('modalClose');
-      reservationForm = document.getElementById('reservationForm');
+      const modalOverlay = document.getElementById('modalOverlay');
+      const modalClose = document.getElementById('modalClose');
+      const reservationForm = document.getElementById('reservationForm');
       
       // Verify critical elements exist
-      if (!loginForm || !prenomInput || !passwordInput || !submitBtn || !loginView || !appView) {
+      if (!loginForm || !document.getElementById('prenom') || !document.getElementById('password') || !submitBtn || !document.getElementById('loginView') || !document.getElementById('appView')) {
         console.error('Critical DOM elements missing!');
         return;
       }
@@ -1120,15 +1153,21 @@
       renderCalendarHeader();
       
       // Calendar navigation
-      if (prevMonthBtn) prevMonthBtn.addEventListener('click', () => updateMonth(-1));
-      if (nextMonthBtn) nextMonthBtn.addEventListener('click', () => updateMonth(1));
+      const prevBtn2 = document.getElementById('prevMonth');
+      const nextBtn2 = document.getElementById('nextMonth');
+      if (prevBtn2) prevBtn2.addEventListener('click', () => updateMonth(-1));
+      if (nextBtn2) nextBtn2.addEventListener('click', () => updateMonth(1));
     }
 
     // Handle DOM ready
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
+      document.addEventListener('DOMContentLoaded', () => {
+        init();
+        setupEventListeners();
+      });
     } else {
       init();
+      setupEventListeners();
     }
 
     // EVENT LISTENERS (defined after init but use getElementById at call time)
@@ -1204,8 +1243,10 @@
           const prenomInput2 = document.getElementById('prenom');
           const passwordInput2 = document.getElementById('password');
           if (prenomInput2) prenomInput2.value = '';
-          if (passwordInput2) passwordInput2.value = '';
-          if (prenomInput2) prenomInput2.focus();
+          const pw2 = document.getElementById('password');
+          if (pw2) pw2.value = '';
+          const pi2 = document.getElementById('prenom');
+          if (pi2) pi2.focus();
         });
       }
 
