@@ -284,30 +284,19 @@
       <button type="submit" class="btn" id="submitBtn"><span>Entrer</span></button>
     </form>
 
-    <p class="footer-note">Mot de passe partagé par toute la famille · Synchronisé via Firebase</p>
+    <p class="footer-note">Mot de passe partagé par toute la famille · Synchronisé via Supabase</p>
   </main>
 
-  <!-- Firebase Realtime Database SDK (CDN) -->
+  <!-- Supabase SDK (CDN) -->
   <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-    import { getDatabase, ref, push, remove, set, onValue, query, orderByChild, serverTimestamp, onDisconnect } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-    // Firebase config (Realtime Database)
-    const firebaseConfig = {
-      apiKey: "AIzaSyBzQTifoKJrIpipX3H0t-y9uFWcnAQrDZw",
-      authDomain: "site-montorlin.firebaseapp.com",
-      databaseURL: "https://site-montorlin-default-rtdb.firebaseio.com",
-      projectId: "site-montorlin",
-      storageBucket: "site-montorlin.firebasestorage.app",
-      messagingSenderId: "109488883918",
-      appId: "1:109488883918:web:d8c4b9fcc379aea9e7e89f"
-    };
+    // Supabase config
+    const SUPABASE_URL = 'https://acpriztsaogtmrsjvasz.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_Y4mVzZhMLQH-VhSHsaXetw_Epqx5rg7';
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const usersRef = ref(db, 'users');
-    const wordsRef = ref(db, 'words'); // for future use
+    // Initialize Supabase
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // DOM elements
     const form = document.getElementById('loginForm');
@@ -321,8 +310,7 @@
 
     // Sync status indicator
     function setSyncStatus(status) {
-      // Could add visual indicator later
-      console.log('[Firebase]', status);
+      console.log('[Supabase]', status);
     }
 
     // Check if already logged in (localStorage for persistence across sessions)
@@ -330,7 +318,6 @@
     if (savedUser) {
       try {
         const user = JSON.parse(savedUser);
-        // Verify session is still valid (optional: check with Firebase)
         showApp(user.prenom);
         return;
       } catch {
@@ -366,7 +353,7 @@
         return;
       }
 
-      // Success - save user to localStorage AND Firebase
+      // Success - save user to localStorage AND Supabase
       const userData = {
         prenom,
         loginTime: Date.now(),
@@ -376,19 +363,18 @@
       try {
         setSyncStatus('syncing');
         
-        // Save to Firebase (creates/updates user in global DB)
-        const userRef = ref(db, 'users/' + prenom.toLowerCase().replace(/\s+/g, '-'));
-        await set(userRef, {
-          prenom,
-          lastSeen: Date.now(),
-          online: true
-        });
+        // Upsert user in Supabase (creates/updates user in global DB)
+        const { error: upsertError } = await supabase
+          .from('users')
+          .upsert({
+            prenom,
+            last_seen: new Date().toISOString(),
+            online: true
+          }, { onConflict: 'prenom' });
         
-        // Set up cleanup when user leaves
-        onDisconnect(ref(db, 'users/' + prenom.toLowerCase().replace(/\s+/g, '-'))).update({
-          online: false,
-          lastSeen: Date.now()
-        });
+        if (upsertError) {
+          console.warn('Supabase upsert warning:', upsertError.message);
+        }
 
         // Save locally for instant load
         localStorage.setItem('montorlin-user', JSON.stringify({
@@ -398,7 +384,7 @@
 
         setSyncStatus('ok');
       } catch (error) {
-        console.error('Firebase error:', error);
+        console.error('Supabase error:', error);
         // Continue anyway - localStorage works offline
       }
 
