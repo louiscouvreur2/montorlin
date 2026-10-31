@@ -525,6 +525,13 @@
     </header>
 
     <div class="calendar-container">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2 class="calendar-header-title" style="font-size: 1.3rem; color: var(--cream);"></h2>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-secondary" id="prevMonth" style="padding: 0.5rem 1rem;"><span>◀</span></button>
+          <button class="btn btn-secondary" id="nextMonth" style="padding: 0.5rem 1rem;"><span>▶</span></button>
+        </div>
+      </div>
       <div class="calendar-header" id="calendarHeader"></div>
       <div class="calendar-grid" id="calendarGrid"></div>
     </div>
@@ -595,40 +602,7 @@
     // Shared family password
     const FAMILY_PASSWORD = "refuge2026";
 
-    // DOM Elements
-    const loginView = document.getElementById('loginView');
-    const appView = document.getElementById('appView');
-    const loginForm = document.getElementById('loginForm');
-    const prenomInput = document.getElementById('prenom');
-    const passwordInput = document.getElementById('password');
-    const submitBtn = document.getElementById('submitBtn');
-    const errorMsg = document.getElementById('errorMsg');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const currentUserEl = document.getElementById('currentUser');
-    const syncText = document.getElementById('syncText');
-    const calendarHeader = document.getElementById('calendarHeader');
-    const calendarGrid = document.getElementById('calendarGrid');
-    const reservationsList = document.getElementById('reservationsList');
-    const colorLegend = document.getElementById('colorLegend');
-    const modalOverlay = document.getElementById('modalOverlay');
-    const modalClose = document.getElementById('modalClose');
-    const reservationForm = document.getElementById('reservationForm');
-    const reservationIdInput = document.getElementById('reservationId');
-    const resTitleInput = document.getElementById('resTitle');
-    const resStartInput = document.getElementById('resStart');
-    const resEndInput = document.getElementById('resEnd');
-    const resColorSelect = document.getElementById('resColor');
-    const resNotesInput = document.getElementById('resNotes');
-    const deleteReservationBtn = document.getElementById('deleteReservationBtn');
-    const modalSubmitText = document.getElementById('modalSubmitText');
-
-    // State
-    let currentUser = null;
-    let currentMonth = new Date();
-    let reservations = [];
-    let familyMembers = [];
-
-    // Reservation colors (matching CSS custom properties)
+    // Reservation colors
     const RESERVATION_COLORS = [
       { value: '#e8c06a', label: 'Or' },
       { value: '#6ab8e8', label: 'Bleu' },
@@ -636,23 +610,45 @@
       { value: '#8ae8a0', label: 'Vert' },
       { value: '#d88ae8', label: 'Violet' },
       { value: '#e8b06a', label: 'Orange' }
-    };
+    ];
+
+    // State
+    let currentUser = null;
+    let currentMonth = new Date();
+    let reservations = [];
+    let familyMembers = [];
+
+    // DOM Elements (will be set in init)
+    let loginView, appView, loginForm, prenomInput, passwordInput, submitBtn, errorMsg;
+    let logoutBtn, currentUserEl, syncText, calendarHeader, calendarGrid;
+    let reservationsList, colorLegend, modalOverlay, modalClose, reservationForm;
+    let reservationIdInput, resTitleInput, resStartInput, resEndInput, resColorSelect, resNotesInput;
+    let deleteReservationBtn, modalSubmitText, modalOverlay, modalClose, modalTitle;
+    let calendarHeader, calendarGrid, reservationsList, colorLegend;
+    let resTitleInput, resStartInput, resEndInput, resColorSelect, resNotesInput;
+    let deleteReservationBtn, modalSubmitText, modalClose, modalOverlay;
+    let calendarHeaderEl, calendarGridEl, reservationsListEl, colorLegendEl;
+    let resTitleInputEl, resStartInputEl, resEndInputEl, resColorSelectEl, resNotesInputEl;
+    let deleteReservationBtnEl, modalSubmitTextEl, modalCloseEl, modalOverlayEl, modalTitleEl;
+    let prevMonthBtn, nextMonthBtn;
 
     // Sync status
     function setSyncStatus(status, text) {
       const indicator = document.getElementById('syncIndicator');
+      if (!indicator) return;
       indicator.classList.remove('syncing', 'error');
       if (status === 'syncing') indicator.classList.add('syncing');
       else if (status === 'error') indicator.classList.add('error');
-      document.getElementById('syncText').textContent = text || (status === 'ok' ? 'Synchronisé' : status === 'syncing' ? 'Synchronisation...' : 'Erreur');
+      const textEl = document.getElementById('syncText');
+      if (textEl) textEl.textContent = text || (status === 'ok' ? 'Synchronisé' : status === 'syncing' ? 'Synchronisation...' : 'Erreur');
     }
 
     // Initialize Supabase
     const SUPABASE_URL = 'https://acpriztsaogtmrsjvasz.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_Y4mVzZhMLQH-VhSHsaXetw_Epqx5rg7';
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // FAMILY PASSWORD
+    // Shared family password
     const FAMILY_PASSWORD = "refuge2026";
 
     // Helper: format date for input
@@ -660,20 +656,11 @@
       return date.toISOString().split('T')[0];
     }
 
-    function parseDate(dateStr) {
-      return new Date(dateStr + 'T00:00:00');
-    }
-
     function formatDateFR(date) {
       return date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
     }
 
-    function formatTimeFR(date) {
-      return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    }
-
     function getColorForUser(prenom) {
-      // Consistent color per user based on name hash
       const colors = RESERVATION_COLORS.map(c => c.value);
       let hash = 0;
       for (let i = 0; i < prenom.length; i++) hash = prenom.charCodeAt(i) + ((hash << 5) - hash);
@@ -682,27 +669,26 @@
 
     // CALENDAR FUNCTIONS
     function renderCalendarHeader() {
+      const headerEl = document.getElementById('calendarHeader');
+      if (!headerEl) return;
       const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
-      calendarHeader.innerHTML = days.map(d => `<div class="calendar-day-name">${d}</div>`).join('');
+      headerEl.innerHTML = days.map(d => `<div class="calendar-day-name">${d}</div>`).join('');
     }
 
     function getMonthDays(year, month) {
       const firstDay = new Date(year, month, 1);
       const lastDay = new Date(year, month + 1, 0);
       const daysInMonth = lastDay.getDate();
-      const startingDay = (firstDay.getDay() + 6) % 7; // Monday = 0
+      const startingDay = (firstDay.getDay() + 6) % 7;
       const prevMonthLastDay = new Date(year, month, 0).getDate();
 
       const days = [];
-      // Previous month days
       for (let i = startingDay - 1; i >= 0; i--) {
         days.push({ date: new Date(year, month - 1, prevMonthLastDay - i), otherMonth: true });
       }
-      // Current month days
       for (let d = 1; d <= daysInMonth; d++) {
         days.push({ date: new Date(year, month, d), otherMonth: false });
       }
-      // Next month days to fill grid
       const totalCells = Math.ceil((startingDay + daysInMonth) / 7) * 7;
       for (let d = 1; days.length < totalCells; d++) {
         days.push({ date: new Date(year, month + 1, d), otherMonth: true });
@@ -724,12 +710,14 @@
       const month = currentMonth.getMonth();
       const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
       
-      // Update header with month/year
       const headerTitle = document.querySelector('.calendar-header-title');
       if (headerTitle) headerTitle.textContent = `${monthNames[month]} ${year}`;
 
       const days = getMonthDays(year, month);
-      calendarGrid.innerHTML = days.map(day => {
+      const gridEl = document.getElementById('calendarGrid');
+      if (!gridEl) return;
+      
+      gridEl.innerHTML = days.map(day => {
         const dateStr = formatDateForInput(day.date);
         const dayReservations = getReservationsForDay(dateStr);
         const isToday = day.date.toDateString() === new Date().toDateString();
@@ -750,7 +738,6 @@
         `;
       }).join('');
 
-      // Add click handlers to day cells for adding reservation
       document.querySelectorAll('.calendar-day:not(.other-month)').forEach(dayEl => {
         dayEl.addEventListener('click', (e) => {
           if (!e.target.closest('.reservation-chip')) {
@@ -759,7 +746,6 @@
         });
       });
 
-      // Add click handlers to reservation chips
       document.querySelectorAll('.reservation-chip').forEach(chip => {
         chip.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -773,19 +759,21 @@
       renderCalendar();
     }
 
-    // RESERVATIONS LIST
     function renderReservationsList() {
       const upcoming = [...reservations]
         .filter(r => new Date(r.end_date) >= new Date())
         .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
         .slice(0, 10);
 
+      const listEl = document.getElementById('reservationsList');
+      if (!listEl) return;
+
       if (upcoming.length === 0) {
-        reservationsList.innerHTML = '<p style="text-align: center; color: var(--moss); padding: 2rem;">Aucune réservation à venir. Cliquez sur un jour pour en créer une.</p>';
+        listEl.innerHTML = '<p style="text-align: center; color: var(--moss); padding: 2rem;">Aucune réservation à venir. Cliquez sur un jour pour en créer une.</p>';
         return;
       }
 
-      reservationsList.innerHTML = upcoming.map(r => `
+      listEl.innerHTML = upcoming.map(r => `
         <div class="reservation-item" style="border-left: 4px solid ${r.color};">
           <div class="reservation-item-info">
             <div class="reservation-item-title">${r.title}</div>
@@ -802,11 +790,18 @@
       `).join('');
     }
 
+    function formatDateFR(date) {
+      return date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+    }
+
     function renderColorLegend() {
       const userColors = {};
       reservations.forEach(r => { userColors[r.prenom] = r.color; });
       
-      colorLegend.innerHTML = Object.entries(userColors).map(([prenom, color]) => `
+      const legendEl = document.getElementById('colorLegend');
+      if (!legendEl) return;
+      
+      legendEl.innerHTML = Object.entries(userColors).map(([prenom, color]) => `
         <div class="color-legend-item">
           <span class="color-legend-dot" style="background: ${color};"></span>
           ${prenom}
@@ -819,49 +814,85 @@
       const modal = document.getElementById('modalOverlay');
       const isEdit = !!reservationId;
       
+      const titleEl = document.getElementById('modalTitle');
+      const submitTextEl = document.getElementById('modalSubmitText');
+      const idInput = document.getElementById('reservationId');
+      const titleInput = document.getElementById('resTitle');
+      const startInput = document.getElementById('resStart');
+      const endInput = document.getElementById('resEnd');
+      const colorSelect = document.getElementById('resColor');
+      const notesInput = document.getElementById('resNotes');
+      const deleteBtn = document.getElementById('deleteReservationBtn');
+      const submitTextEl2 = document.getElementById('modalSubmitText');
+      
       if (isEdit) {
         const res = reservations.find(r => r.id === reservationId);
         if (!res) return;
-        document.getElementById('modalTitle').textContent = 'Modifier la réservation';
-        modalSubmitText.textContent = 'Enregistrer';
-        reservationIdInput.value = res.id;
-        resTitleInput.value = res.title;
-        resStartInput.value = formatDateForInput(new Date(res.start_date));
-        resEndInput.value = formatDateForInput(new Date(res.end_date));
-        resColorSelect.value = res.color;
-        resNotesInput.value = res.notes || '';
-        deleteReservationBtn.style.display = 'inline-flex';
-        deleteReservationBtn.onclick = () => deleteReservation(res.id);
+        if (titleEl) titleEl.textContent = 'Modifier la réservation';
+        if (submitTextEl2) submitTextEl2.textContent = 'Enregistrer';
+        if (idInput) idInput.value = res.id;
+        if (titleInput) titleInput.value = res.title;
+        if (startInput) startInput.value = formatDateForInput(new Date(res.start_date));
+        if (endInput) endInput.value = formatDateForInput(new Date(res.end_date));
+        if (colorSelect) colorSelect.value = res.color;
+        if (notesInput) notesInput.value = res.notes || '';
+        if (deleteBtn) {
+          deleteBtn.style.display = 'inline-flex';
+          deleteBtn.onclick = () => deleteReservation(res.id);
+        }
       } else {
-        document.getElementById('modalTitle').textContent = 'Nouvelle réservation';
-        modalSubmitText.textContent = 'Créer';
-        reservationIdInput.value = '';
-        resTitleInput.value = '';
-        resStartInput.value = dateStr || formatDateForInput(new Date());
-        resEndInput.value = dateStr || formatDateForInput(new Date());
-        resColorSelect.value = getColorForUser(currentUser);
-        resNotesInput.value = '';
-        deleteReservationBtn.style.display = 'none';
+        const titleEl2 = document.getElementById('modalTitle');
+        const submitTextEl3 = document.getElementById('modalSubmitText');
+        const idInput2 = document.getElementById('reservationId');
+        const titleInput2 = document.getElementById('resTitle');
+        const startInput2 = document.getElementById('resStart');
+        const endInput2 = document.getElementById('resEnd');
+        const colorSelect2 = document.getElementById('resColor');
+        const notesInput2 = document.getElementById('resNotes');
+        const deleteBtn2 = document.getElementById('deleteReservationBtn');
+        
+        if (titleEl2) titleEl2.textContent = 'Nouvelle réservation';
+        if (submitTextEl3) submitTextEl3.textContent = 'Créer';
+        if (idInput2) idInput2.value = '';
+        if (titleInput2) titleInput2.value = '';
+        if (startInput2) startInput2.value = dateStr || formatDateForInput(new Date());
+        if (endInput2) endInput2.value = dateStr || formatDateForInput(new Date());
+        if (colorSelect2) colorSelect2.value = getColorForUser(currentUser);
+        if (notesInput2) notesInput2.value = '';
+        if (deleteBtn2) deleteBtn2.style.display = 'none';
       }
       
-      modalOverlay.classList.add('open');
-      resTitleInput.focus();
+      const modal = document.getElementById('modalOverlay');
+      if (modal) modal.classList.add('open');
+      setTimeout(() => {
+        const titleInput3 = document.getElementById('resTitle');
+        if (titleInput3) titleInput3.focus();
+      }, 100);
     }
 
     function closeModal() {
-      modalOverlay.classList.remove('open');
+      const modal = document.getElementById('modalOverlay');
+      if (modal) modal.classList.remove('open');
       setTimeout(() => {
-        reservationForm.reset();
-        reservationIdInput.value = '';
-        deleteReservationBtn.style.display = 'none';
+        const form = document.getElementById('reservationForm');
+        if (form) form.reset();
+        const idInput = document.getElementById('reservationId');
+        if (idInput) idInput.value = '';
+        const deleteBtn = document.getElementById('deleteReservationBtn');
+        if (deleteBtn) deleteBtn.style.display = 'none';
       }, 300);
+    }
+
+    function formatDateForInput(date) {
+      if (typeof date === 'string') return date;
+      return date.toISOString().split('T')[0];
     }
 
     // RESERVATION CRUD
     async function loadReservations() {
       setSyncStatus('syncing', 'Chargement...');
       try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from('reservations')
           .select('*')
           .order('start_date', { ascending: true });
@@ -882,12 +913,21 @@
     async function saveReservation(e) {
       e.preventDefault();
       
-      const isEdit = !!reservationIdInput.value;
-      const title = resTitleInput.value.trim();
-      const start = resStartInput.value;
-      const end = resEndInput.value;
-      const color = resColorSelect.value;
-      const notes = resNotesInput.value.trim();
+      const idInput = document.getElementById('reservationId');
+      const titleInput = document.getElementById('resTitle');
+      const startInput = document.getElementById('resStart');
+      const endInput = document.getElementById('resEnd');
+      const colorSelect = document.getElementById('resColor');
+      const notesInput = document.getElementById('resNotes');
+      const errorMsg = document.getElementById('errorMsg');
+      const submitTextEl = document.getElementById('modalSubmitText');
+      
+      const isEdit = !!idInput?.value;
+      const title = titleInput?.value?.trim();
+      const start = startInput?.value;
+      const end = endInput?.value;
+      const color = colorSelect?.value;
+      const notes = notesInput?.value?.trim();
       
       if (!title || !start || !end) {
         showError('Titre, arrivée et départ requis.');
@@ -912,13 +952,13 @@
         setSyncStatus('syncing', isEdit ? 'Mise à jour...' : 'Création...');
         
         if (isEdit) {
-          const { error } = await supabase
+          const { error } = await supabaseClient
             .from('reservations')
             .update(reservationData)
-            .eq('id', reservationIdInput.value);
+            .eq('id', document.getElementById('reservationId')?.value);
           if (error) throw error;
         } else {
-          const { error } = await supabase
+          const { error } = await supabaseClient
             .from('reservations')
             .insert(reservationData);
           if (error) throw error;
@@ -939,7 +979,7 @@
       
       try {
         setSyncStatus('syncing', 'Suppression...');
-        const { error } = await supabase
+        const { error } = await supabaseClient
           .from('reservations')
           .delete()
           .eq('id', id);
@@ -955,32 +995,45 @@
       }
     }
 
-    // UI HELPERS
     function showError(message) {
-      errorMsg.textContent = message;
-      errorMsg.classList.add('show');
-      prenomInput.style.borderColor = 'rgba(239, 68, 68, 0.5)';
-      passwordInput.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+      const errorMsg = document.getElementById('errorMsg');
+      const prenomInput = document.getElementById('prenom');
+      const passwordInput = document.getElementById('password');
+      const submitBtn = document.getElementById('submitBtn');
+      
+      if (errorMsg) {
+        errorMsg.textContent = message;
+        errorMsg.classList.add('show');
+      }
+      if (prenomInput) prenomInput.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+      if (passwordInput) passwordInput.style.borderColor = 'rgba(239, 68, 68, 0.5)';
       setTimeout(() => {
-        prenomInput.style.borderColor = '';
-        passwordInput.style.borderColor = '';
+        if (prenomInput) prenomInput.style.borderColor = '';
+        if (passwordInput) passwordInput.style.borderColor = '';
       }, 3000);
     }
 
     function resetButton() {
-      submitBtn.disabled = false;
-      submitBtn.querySelector('span').textContent = 'Entrer';
-      submitBtn.style.background = '';
+      const submitBtn = document.getElementById('submitBtn');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        const span = submitBtn.querySelector('span');
+        if (span) span.textContent = 'Entrer';
+        submitBtn.style.background = '';
+      }
     }
 
     function showApp(prenom) {
-      loginView.style.display = 'none';
-      appView.style.display = 'block';
+      const loginView = document.getElementById('loginView');
+      const appView = document.getElementById('appView');
+      const currentUserEl = document.getElementById('currentUser');
+      
+      if (loginView) loginView.style.display = 'none';
+      if (appView) appView.style.display = 'block';
       currentUser = prenom;
-      currentUserEl.textContent = prenom;
+      if (currentUserEl) currentUserEl.textContent = prenom;
       localStorage.setItem('montorlin-user', JSON.stringify({ prenom, loginTime: Date.now() }));
       
-      // Load family members from users table
       loadFamilyMembers();
       loadReservations();
       renderCalendarHeader();
@@ -988,7 +1041,7 @@
 
     async function loadFamilyMembers() {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from('users')
           .select('prenom')
           .order('prenom');
@@ -998,73 +1051,51 @@
       } catch (e) { console.warn('Could not load family members:', e); }
     }
 
-    // EVENT LISTENERS
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const prenom = prenomInput.value.trim();
-      const password = passwordInput.value;
+    function setSyncStatus(status, text) {
+      const indicator = document.getElementById('syncIndicator');
+      if (!indicator) return;
+      indicator.classList.remove('syncing', 'error');
+      if (status === 'syncing') indicator.classList.add('syncing');
+      else if (status === 'error') indicator.classList.add('error');
+      const textEl = document.getElementById('syncText');
+      if (textEl) textEl.textContent = text || (status === 'ok' ? 'Synchronisé' : status === 'syncing' ? 'Synchronisation...' : 'Erreur');
+    }
 
-      errorMsg.classList.remove('show');
-      submitBtn.disabled = true;
-      submitBtn.querySelector('span').textContent = 'Connexion...';
-
-      await new Promise(r => setTimeout(r, 600));
-
-      if (password !== FAMILY_PASSWORD) {
-        showError("Ce n'est pas le bon mot de passe familial.");
-        resetButton();
-        return;
-      }
-
-      if (!prenom) {
-        showError("Entre ton prénom.");
-        resetButton();
-        return;
-      }
-
-      // Save to Supabase
-      try {
-        setSyncStatus('syncing', 'Connexion...');
-        await supabase
-          .from('users')
-          .upsert({ prenom, last_seen: new Date().toISOString(), online: true }, { onConflict: 'prenom' });
-        setSyncStatus('ok');
-      } catch (e) { console.warn('User upsert failed:', e); }
-
-      localStorage.setItem('montorlin-user', JSON.stringify({ prenom, loginTime: Date.now() }));
-      
-      submitBtn.querySelector('span').textContent = 'Bienvenue...';
-      submitBtn.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
-      
-      setTimeout(() => showApp(prenom), 800);
-    });
-
-    logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('montorlin-user');
-      currentUser = null;
-      reservations = [];
-      loginView.style.display = 'block';
-      appView.style.display = 'none';
-      prenomInput.value = '';
-      passwordInput.value = '';
-      prenomInput.focus();
-    });
-
-    modalClose.addEventListener('click', closeModal);
-    modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
-    reservationForm.addEventListener('submit', saveReservation);
-
-    // Keyboard navigation for calendar
-    document.addEventListener('keydown', (e) => {
-      if (appView.style.display === 'none') return;
-      if (e.key === 'ArrowLeft') { updateMonth(-1); }
-      else if (e.key === 'ArrowRight') { updateMonth(1); }
-      else if (e.key === 'Escape') { closeModal(); }
-    });
-
-    // Initialize
+    // INITIALIZATION - runs when DOM is ready
     function init() {
+      // Cache DOM elements
+      loginView = document.getElementById('loginView');
+      appView = document.getElementById('appView');
+      loginForm = document.getElementById('loginForm');
+      prenomInput = document.getElementById('prenom');
+      passwordInput = document.getElementById('password');
+      submitBtn = document.getElementById('submitBtn');
+      errorMsg = document.getElementById('errorMsg');
+      logoutBtn = document.getElementById('logoutBtn');
+      currentUserEl = document.getElementById('currentUser');
+      syncText = document.getElementById('syncText');
+      calendarHeaderEl = document.getElementById('calendarHeader');
+      calendarGridEl = document.getElementById('calendarGrid');
+      reservationsListEl = document.getElementById('reservationsList');
+      colorLegendEl = document.getElementById('colorLegend');
+      modalOverlay = document.getElementById('modalOverlay');
+      modalClose = document.getElementById('modalClose');
+      reservationForm = document.getElementById('reservationForm');
+      prevMonthBtn = document.getElementById('prevMonth');
+      nextMonthBtn = document.getElementById('nextMonth');
+      
+      // Modal elements
+      modalOverlay = document.getElementById('modalOverlay');
+      modalClose = document.getElementById('modalClose');
+      reservationForm = document.getElementById('reservationForm');
+      
+      // Verify critical elements exist
+      if (!loginForm || !prenomInput || !passwordInput || !submitBtn || !loginView || !appView) {
+        console.error('Critical DOM elements missing!');
+        return;
+      }
+
+      // Calendar header
       renderCalendarHeader();
       
       // Check existing session
@@ -1079,15 +1110,135 @@
         }
       }
       
-      // Calendar navigation buttons
+      // Calendar navigation
       const prevBtn = document.getElementById('prevMonth');
       const nextBtn = document.getElementById('nextMonth');
       if (prevBtn) prevBtn.addEventListener('click', () => updateMonth(-1));
       if (nextBtn) nextBtn.addEventListener('click', () => updateMonth(1));
+      
+      // Calendar header
+      renderCalendarHeader();
+      
+      // Calendar navigation
+      if (prevMonthBtn) prevMonthBtn.addEventListener('click', () => updateMonth(-1));
+      if (nextMonthBtn) nextMonthBtn.addEventListener('click', () => updateMonth(1));
     }
 
-    // Wait for DOM
-    document.addEventListener('DOMContentLoaded', init);
+    // Handle DOM ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+    // EVENT LISTENERS (defined after init but use getElementById at call time)
+    function setupEventListeners() {
+      // Login form
+      const form = document.getElementById('loginForm');
+      if (form) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          
+          const prenomInput = document.getElementById('prenom');
+          const passwordInput = document.getElementById('password');
+          const submitBtn = document.getElementById('submitBtn');
+          const errorMsg = document.getElementById('errorMsg');
+          
+          const prenom = prenomInput?.value?.trim();
+          const password = passwordInput?.value;
+
+          if (errorMsg) errorMsg.classList.remove('show');
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            const span = submitBtn.querySelector('span');
+            if (span) span.textContent = 'Connexion...';
+          }
+
+          await new Promise(r => setTimeout(r, 600));
+
+          if (password !== FAMILY_PASSWORD) {
+            showError("Ce n'est pas le bon mot de passe familial.");
+            resetButton();
+            return;
+          }
+
+          if (!prenom) {
+            showError("Entre ton prénom.");
+            resetButton();
+            return;
+          }
+
+          // Save to Supabase
+          try {
+            setSyncStatus('syncing', 'Connexion...');
+            await supabaseClient
+              .from('users')
+              .upsert({ prenom: document.getElementById('prenom')?.value?.trim(), last_seen: new Date().toISOString(), online: true }, { onConflict: 'prenom' });
+            setSyncStatus('ok');
+          } catch (e) { console.warn('User upsert failed:', e); }
+
+          localStorage.setItem('montorlin-user', JSON.stringify({ prenom: document.getElementById('prenom')?.value?.trim(), loginTime: Date.now() }));
+          
+          const submitBtn2 = document.getElementById('submitBtn');
+          if (submitBtn2) {
+            const span2 = submitBtn2.querySelector('span');
+            if (span2) span2.textContent = 'Bienvenue...';
+            submitBtn2.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
+          }
+          
+          setTimeout(() => showApp(document.getElementById('prenom')?.value?.trim()), 800);
+        });
+      }
+
+      // Logout
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          localStorage.removeItem('montorlin-user');
+          currentUser = null;
+          reservations = [];
+          const loginView = document.getElementById('loginView');
+          const appView = document.getElementById('appView');
+          if (loginView) loginView.style.display = 'block';
+          if (appView) appView.style.display = 'none';
+          const prenomInput2 = document.getElementById('prenom');
+          const passwordInput2 = document.getElementById('password');
+          if (prenomInput2) prenomInput2.value = '';
+          if (passwordInput2) passwordInput2.value = '';
+          if (prenomInput2) prenomInput2.focus();
+        });
+      }
+
+      // Modal
+      const modalClose = document.getElementById('modalClose');
+      const modalOverlay = document.getElementById('modalOverlay');
+      if (modalClose) modalClose.addEventListener('click', closeModal);
+      if (modalOverlay) modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
+
+      // Reservation form
+      const reservationForm = document.getElementById('reservationForm');
+      if (reservationForm) reservationForm.addEventListener('submit', saveReservation);
+
+      // Keyboard navigation
+      document.addEventListener('keydown', (e) => {
+        const appView = document.getElementById('appView');
+        if (appView?.style.display === 'none') return;
+        if (e.key === 'ArrowLeft') { updateMonth(-1); }
+        else if (e.key === 'ArrowRight') { updateMonth(1); }
+        else if (e.key === 'Escape') { closeModal(); }
+      });
+    }
+
+    // Run init when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        init();
+        setupEventListeners();
+      });
+    } else {
+      init();
+      setupEventListeners();
+    }
 
     // Also handle calendar nav from header buttons
     document.addEventListener('click', (e) => {
