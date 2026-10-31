@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chez nous — Le refuge de la famille</title>
+  <title>Montorlin</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -161,7 +161,6 @@
     }
     .logo-icon svg { width: 36px; height: 36px; color: var(--forest-dark); }
     h1 { font-size: 2.2rem; font-weight: 400; letter-spacing: 0.05em; color: var(--cream); margin-bottom: 0.25rem; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
-    .subtitle { color: var(--moss-light); font-size: 1.1rem; font-style: italic; font-weight: 300; opacity: 0.9; }
     .form-group { margin-bottom: 1.5rem; }
     label { display: block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--moss-light); margin-bottom: 0.5rem; opacity: 0.8; }
     input {
@@ -268,8 +267,7 @@
           <polyline points="9 22 9 12 15 12 15 22"></polyline>
         </svg>
       </div>
-      <h1>Chez nous</h1>
-      <p class="subtitle">Le refuge de la famille</p>
+      <h1>Montorlin</h1>
     </header>
 
     <div class="error-message" id="errorMsg" role="alert"></div>
@@ -277,32 +275,67 @@
     <form id="loginForm" novalidate>
       <div class="form-group">
         <label for="prenom">TON PRÉNOM</label>
-        <input type="text" id="prenom" name="prenom" autocomplete="given-name" placeholder="Ton prénom" required aria-required="true" aria-describedby="prenom-hint">
+        <input type="text" id="prenom" name="prenom" autocomplete="given-name" placeholder="Ton prénom" required aria-required="true">
       </div>
       <div class="form-group">
         <label for="password">MOT DE PASSE</label>
-        <input type="password" id="password" name="password" autocomplete="current-password" placeholder="Celui de la famille" required aria-required="true" aria-describedby="password-hint">
+        <input type="password" id="password" name="password" autocomplete="current-password" placeholder="Celui de la famille" required aria-required="true">
       </div>
       <button type="submit" class="btn" id="submitBtn"><span>Entrer</span></button>
     </form>
 
-    <p class="footer-note">Mot de passe partagé par toute la famille · Données locales uniquement</p>
+    <p class="footer-note">Mot de passe partagé par toute la famille · Synchronisé via Firebase</p>
   </main>
 
-  <script>
-    // Shared family password (simple, no backend)
-    const FAMILY_PASSWORD = "refuge2026";
-    const FAMILY_MEMBERS = ["Léa", "Thomas", "Marie", "Antoine", "Papa", "Maman"];
+  <!-- Firebase Realtime Database SDK (CDN) -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getDatabase, ref, push, remove, set, onValue, query, orderByChild, serverTimestamp, onDisconnect } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
+    // Firebase config (Realtime Database)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBzQTifoKJrIpipX3H0t-y9uFWcnAQrDZw",
+      authDomain: "site-montorlin.firebaseapp.com",
+      databaseURL: "https://site-montorlin-default-rtdb.firebaseio.com",
+      projectId: "site-montorlin",
+      storageBucket: "site-montorlin.firebasestorage.app",
+      messagingSenderId: "109488883918",
+      appId: "1:109488883918:web:d8c4b9fcc379aea9e7e89f"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const usersRef = ref(db, 'users');
+    const wordsRef = ref(db, 'words'); // for future use
+
+    // DOM elements
     const form = document.getElementById('loginForm');
     const prenomInput = document.getElementById('prenom');
     const passwordInput = document.getElementById('password');
     const submitBtn = document.getElementById('submitBtn');
     const errorMsg = document.getElementById('errorMsg');
 
-    // Check if already logged in (sessionStorage for this session)
-    if (sessionStorage.getItem('chez-nous-user')) {
-      redirectToApp();
+    // Shared family password
+    const FAMILY_PASSWORD = "refuge2026";
+
+    // Sync status indicator
+    function setSyncStatus(status) {
+      // Could add visual indicator later
+      console.log('[Firebase]', status);
+    }
+
+    // Check if already logged in (localStorage for persistence across sessions)
+    const savedUser = localStorage.getItem('montorlin-user');
+    if (savedUser) {
+      try {
+        const user = JSON.parse(savedUser);
+        // Verify session is still valid (optional: check with Firebase)
+        showApp(user.prenom);
+        return;
+      } catch {
+        localStorage.removeItem('montorlin-user');
+      }
     }
 
     form.addEventListener('submit', async (e) => {
@@ -314,7 +347,7 @@
       // Reset error
       errorMsg.classList.remove('show');
       submitBtn.disabled = true;
-      submitBtn.querySelector('span').textContent = 'Vérification...';
+      submitBtn.querySelector('span').textContent = 'Connexion...';
 
       // Simulate brief check
       await new Promise(r => setTimeout(r, 600));
@@ -326,25 +359,55 @@
         return;
       }
 
-      // Validate name (optional: check against known family)
+      // Validate name
       if (!prenom) {
         showError("Entre ton prénom.");
         resetButton();
         return;
       }
 
-      // Success - store in sessionStorage
-      sessionStorage.setItem('chez-nous-user', JSON.stringify({
+      // Success - save user to localStorage AND Firebase
+      const userData = {
         prenom,
-        loginTime: Date.now()
-      }));
+        loginTime: Date.now(),
+        lastSeen: Date.now()
+      };
+
+      try {
+        setSyncStatus('syncing');
+        
+        // Save to Firebase (creates/updates user in global DB)
+        const userRef = ref(db, 'users/' + prenom.toLowerCase().replace(/\s+/g, '-'));
+        await set(userRef, {
+          prenom,
+          lastSeen: Date.now(),
+          online: true
+        });
+        
+        // Set up cleanup when user leaves
+        onDisconnect(ref(db, 'users/' + prenom.toLowerCase().replace(/\s+/g, '-'))).update({
+          online: false,
+          lastSeen: Date.now()
+        });
+
+        // Save locally for instant load
+        localStorage.setItem('montorlin-user', JSON.stringify({
+          prenom,
+          loginTime: Date.now()
+        }));
+
+        setSyncStatus('ok');
+      } catch (error) {
+        console.error('Firebase error:', error);
+        // Continue anyway - localStorage works offline
+      }
 
       // Brief success feedback
       submitBtn.querySelector('span').textContent = 'Bienvenue...';
       submitBtn.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
       
       setTimeout(() => {
-        redirectToApp();
+        showApp(prenomInput.value.trim());
       }, 800);
     });
 
@@ -365,8 +428,7 @@
       submitBtn.style.background = '';
     }
 
-    function redirectToApp() {
-      // For now, just show success state (later: redirect to actual app)
+    function showApp(prenom) {
       document.body.innerHTML = `
         <div class="stars" aria-hidden="true"></div>
         <div class="mountains" aria-hidden="true">
@@ -382,9 +444,9 @@
               <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
           </div>
-          <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Bienvenue ${JSON.parse(sessionStorage.getItem('chez-nous-user') || '{}').prenom || 'famille'} 👋</h1>
-          <p style="color: var(--moss-light); font-size: 1.2rem; margin-bottom: 2rem;">Tu es maintenant connecté au refuge familial.</p>
-          <button class="btn" onclick="sessionStorage.clear(); location.reload();" style="max-width: 200px; margin: 0 auto;"><span>Déconnexion</span></button>
+          <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Montorlin</h1>
+          <p style="color: var(--moss-light); font-size: 1.2rem; margin-bottom: 2rem;">Bienvenue ${prenom} 👋</p>
+          <button class="btn" onclick="localStorage.clear(); location.reload();" style="max-width: 200px; margin: 0 auto;"><span>Déconnexion</span></button>
         </main>
         <div class="stars" aria-hidden="true"></div>
         <div class="mountains" aria-hidden="true">
