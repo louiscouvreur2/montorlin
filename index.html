@@ -572,7 +572,7 @@
           <select id="resColor">
             <option value="#e8c06a">🟡 Or</option>
             <option value="#6ab8e8">🔵 Bleu</option>
-            <option value="#e87a6a">🔴 Rouge</option>
+            < option value="#e87a6a">🔴 Rouge</option>
             <option value="#8ae8a0">🟢 Vert</option>
             <option value="#d88ae8">🟣 Violet</option>
             <option value="#e8b06a">🟠 Orange</option>
@@ -597,7 +597,7 @@
     // Supabase config
     const SUPABASE_URL = 'https://acpriztsaogtmrsjvasz.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_Y4mVzZhMLQH-VhSHsaXetw_Epqx5rg7';
-    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Shared family password
     const FAMILY_PASSWORD = "refuge2026";
@@ -618,11 +618,10 @@
     let reservations = [];
     let familyMembers = [];
 
-    // DOM Elements (set in init)
+    // DOM Elements (will be set in init)
     let loginView, appView, loginForm, prenomInput, passwordInput, submitBtn, errorMsg;
     let logoutBtn, currentUserEl, syncText;
     let calendarHeaderEl, calendarGridEl, reservationsListEl, colorLegendEl;
-    let modalOverlay, modalClose, reservationForm;
     let prevMonthBtn, nextMonthBtn;
 
     // Modal elements (set in openModal)
@@ -819,6 +818,10 @@
       }
     }
 
+    function formatDateFR(date) {
+      return date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+    }
+
     function renderColorLegend() {
       const userColors = {};
       reservations.forEach(r => { userColors[r.prenom] = r.color; });
@@ -874,7 +877,7 @@
         }
       } else {
         const titleEl2 = document.getElementById('modalTitle');
-        if (titleEl2) titleEl2.textContent = 'Nouvelle réservation';
+        if (titleEl) titleEl.textContent = 'Nouvelle réservation';
         const submitTextEl2 = document.getElementById('modalSubmitText');
         if (submitTextEl2) submitTextEl2.textContent = 'Créer';
         const idInput = document.getElementById('reservationId');
@@ -1210,7 +1213,7 @@
           // Save to Supabase
           try {
             setSyncStatus('syncing', 'Connexion...');
-            await supabaseClient
+            await supabase
               .from('users')
               .upsert({ prenom: document.getElementById('prenom')?.value?.trim(), last_seen: new Date().toISOString(), online: true }, { onConflict: 'prenom' });
             setSyncStatus('ok');
