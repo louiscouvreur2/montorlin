@@ -20,6 +20,7 @@
       --white: #faf8f3;
       --text: #1a2e1a;
       --text-light: #3d5a3d;
+      --reservation-colors: #e8c06a, #6ab8e8, #e87a6a, #8ae8a0, #d88ae8, #e8b06a;
     }
     @media (prefers-color-scheme: dark) {
       :root {
@@ -42,13 +43,9 @@
       font-family: 'Georgia', 'Times New Roman', serif;
       background: var(--forest);
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
       color: var(--white);
       position: relative;
-      overflow: hidden;
+      overflow-x: hidden;
     }
     body::before {
       content: '';
@@ -126,15 +123,16 @@
       0% { opacity: 0.2; }
       100% { opacity: 0.5; }
     }
-    .login-card {
+    .card {
       position: relative;
       z-index: 10;
       background: linear-gradient(145deg, rgba(26, 46, 26, 0.95), rgba(13, 26, 13, 0.98));
       border: 1px solid rgba(74, 107, 58, 0.3);
       border-radius: 24px;
-      padding: 3rem 2.5rem;
+      padding: 2rem;
       width: 100%;
-      max-width: 420px;
+      max-width: 1000px;
+      margin: 1rem auto;
       box-shadow: 
         0 20px 60px rgba(0, 0, 0, 0.5),
         0 0 0 1px rgba(74, 107, 58, 0.2),
@@ -143,7 +141,7 @@
     }
     .logo {
       text-align: center;
-      margin-bottom: 2.5rem;
+      margin-bottom: 2rem;
     }
     .logo-icon {
       width: 72px;
@@ -161,9 +159,11 @@
     }
     .logo-icon svg { width: 36px; height: 36px; color: var(--forest-dark); }
     h1 { font-size: 2.2rem; font-weight: 400; letter-spacing: 0.05em; color: var(--cream); margin-bottom: 0.25rem; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+    h2 { font-size: 1.4rem; font-weight: 400; color: var(--cream); margin-bottom: 1rem; }
+    h3 { font-size: 1.1rem; font-weight: 500; color: var(--moss-light); margin-bottom: 0.75rem; }
     .form-group { margin-bottom: 1.5rem; }
     label { display: block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--moss-light); margin-bottom: 0.5rem; opacity: 0.8; }
-    input {
+    input, select, textarea {
       width: 100%;
       padding: 1rem 1.25rem;
       background: rgba(13, 26, 13, 0.8);
@@ -175,20 +175,19 @@
       transition: all 0.3s ease;
       outline: none;
     }
-    input::placeholder { color: rgba(200, 220, 200, 0.4); }
-    input:focus {
+    input::placeholder, textarea::placeholder { color: rgba(200, 220, 200, 0.4); }
+    input:focus, select:focus, textarea:focus {
       border-color: var(--gold);
       box-shadow: 0 0 0 4px rgba(212, 168, 67, 0.15), 0 0 20px rgba(212, 168, 67, 0.1);
       background: rgba(13, 26, 13, 0.95);
     }
-    input:not(:placeholder-shown) { border-color: var(--moss-light); }
+    input:not(:placeholder-shown), select:not([value=""]) { border-color: var(--moss-light); }
     .btn {
-      width: 100%;
-      padding: 1.1rem 2rem;
+      padding: 1rem 2rem;
       border: none;
       border-radius: 12px;
       font-family: inherit;
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 600;
       letter-spacing: 0.05em;
       text-transform: uppercase;
@@ -210,6 +209,10 @@
     .btn:active { transform: scale(0.98); }
     .btn:disabled { opacity: 0.6; cursor: not-allowed; }
     .btn:disabled::before { background-position: 0 0; }
+    .btn-secondary { background: var(--forest-light); color: var(--cream); }
+    .btn-secondary::before { background: linear-gradient(90deg, var(--moss) 0%, var(--moss-light) 100%); }
+    .btn-danger { background: var(--forest-light); color: #e87a6a; }
+    .btn-danger::before { background: linear-gradient(90deg, #c85a4a 0%, #e87a6a 100%); }
     .error-message {
       display: none;
       text-align: center;
@@ -237,12 +240,226 @@
     }
     .footer-note a { color: var(--gold-light); text-decoration: none; }
     .footer-note a:hover { text-decoration: underline; }
-    @media (max-width: 480px) {
-      body { padding: 1rem; }
-      .login-card { padding: 2rem 1.5rem; border-radius: 20px; }
+
+    /* Calendar Styles */
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .user-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(212, 168, 67, 0.15);
+      border: 1px solid rgba(212, 168, 67, 0.3);
+      border-radius: 999px;
+      font-size: 0.9rem;
+      color: var(--gold-light);
+    }
+    .user-badge .dot {
+      width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    .calendar-container { overflow-x: auto; }
+    .calendar-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 8px;
+      padding: 0 4px;
+    }
+    .calendar-day-name {
+      text-align: center;
+      padding: 0.75rem 0;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--moss-light);
+      opacity: 0.7;
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+    .calendar-day {
+      min-height: 100px;
+      background: rgba(13, 26, 13, 0.6);
+      border: 1px solid rgba(74, 107, 58, 0.3);
+      border-radius: 12px;
+      padding: 0.5rem;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    .calendar-day:hover {
+      background: rgba(13, 26, 13, 0.9);
+      border-color: var(--gold);
+    }
+    .calendar-day.other-month { opacity: 0.3; }
+    .calendar-day.today {
+      border-color: var(--gold);
+      box-shadow: inset 0 0 0 2px var(--gold);
+    }
+    .calendar-day.today::before {
+      content: '';
+      position: absolute;
+      top: 4px; right: 4px;
+      width: 8px; height: 8px;
+      background: var(--gold);
+      border-radius: 50%;
+    }
+    .day-number {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--cream);
+      margin-bottom: 0.5rem;
+    }
+    .calendar-day.other-month .day-number { color: var(--moss); }
+    .reservations-list { display: flex; flex-direction: column; gap: 4px; }
+    .reservation-chip {
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+      border: 1px solid transparent;
+    }
+    .reservation-chip:hover { transform: scale(1.02); z-index: 10; border-color: rgba(255,255,255,0.3); }
+    .more-reservations {
+      font-size: 0.65rem;
+      color: var(--moss-light);
+      text-align: center;
+      padding: 2px;
+      opacity: 0.7;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 1rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    .modal-overlay.open { opacity: 1; visibility: visible; }
+    .modal {
+      background: linear-gradient(145deg, rgba(26, 46, 26, 0.98), rgba(13, 26, 13, 0.99));
+      border: 1px solid rgba(74, 107, 58, 0.4);
+      border-radius: 20px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.6);
+      transform: scale(0.95);
+      transition: transform 0.3s ease;
+    }
+    .modal-overlay.open .modal { transform: scale(1); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .modal-title { font-size: 1.5rem; color: var(--cream); }
+    .modal-close {
+      background: none; border: none; color: var(--moss-light); font-size: 1.5rem; cursor: pointer; padding: 0.5rem;
+      opacity: 0.7; transition: opacity 0.2s;
+    }
+    .modal-close:hover { opacity: 1; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+    textarea { min-height: 100px; resize: vertical; font-family: inherit; }
+
+    .reservation-detail {
+      background: rgba(13, 26, 13, 0.6);
+      border: 1px solid rgba(74, 107, 58, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+    }
+    .reservation-detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      gap: 1rem;
+    }
+    .reservation-detail-title { font-size: 1.2rem; color: var(--cream); font-weight: 500; }
+    .reservation-detail-meta { display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem; color: var(--moss-light); }
+    .reservation-detail-dates { display: flex; gap: 1rem; font-size: 0.85rem; }
+    .reservation-actions { display: flex; gap: 0.75rem; margin-top: 1rem; }
+    .reservation-actions .btn { flex: 1; }
+
+    .reservations-panel {
+      background: rgba(13, 26, 13, 0.5);
+      border: 1px solid rgba(74, 107, 58, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .reservations-list-full { display: flex; flex-direction: column; gap: 0.75rem; }
+    .reservation-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: rgba(13, 26, 13, 0.6);
+      border: 1px solid rgba(74, 107, 58, 0.3);
+      border-radius: 10px;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .reservation-item-info { flex: 1; min-width: 200px; }
+    .reservation-item-title { font-weight: 600; color: var(--cream); margin-bottom: 0.25rem; }
+    .reservation-item-meta { display: flex; gap: 1rem; font-size: 0.8rem; color: var(--moss-light); flex-wrap: wrap; }
+    .reservation-item-actions { display: flex; gap: 0.5rem; }
+
+    .color-legend { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(74, 107, 58, 0.2); }
+    .color-legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--moss-light); }
+    .color-legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+    .sync-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(74, 107, 58, 0.15);
+      border: 1px solid rgba(74, 107, 58, 0.3);
+      border-radius: 999px;
+      font-size: 0.8rem;
+      color: var(--moss-light);
+    }
+    .sync-indicator .dot {
+      width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite;
+    }
+    .sync-indicator.syncing .dot { background: #f59e0b; animation: none; }
+    .sync-indicator.error .dot { background: #ef4444; animation: none; }
+
+    @media (max-width: 768px) {
+      .card { padding: 1.5rem; margin: 0.5rem; border-radius: 16px; }
       h1 { font-size: 1.8rem; }
       .logo-icon { width: 64px; height: 64px; }
       .logo-icon svg { width: 32px; height: 32px; }
+      .calendar-day { min-height: 80px; padding: 0.35rem; }
+      .day-number { font-size: 1rem; }
+      .form-row { grid-template-columns: 1fr; }
+      .reservation-item { flex-direction: column; align-items: flex-start; }
+      .reservation-item-actions { width: 100%; justify-content: flex-end; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
@@ -259,7 +476,8 @@
   </div>
   <div class="moon" aria-hidden="true"></div>
 
-  <main class="login-card" role="main">
+  <!-- LOGIN VIEW -->
+  <main id="loginView" class="card" style="max-width: 420px; text-align: center;">
     <header class="logo">
       <div class="logo-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -287,6 +505,84 @@
     <p class="footer-note">Mot de passe partagé par toute la famille · Synchronisé via Supabase</p>
   </main>
 
+  <!-- APP VIEW (hidden initially) -->
+  <main id="appView" class="card" style="display: none; max-width: 1000px;">
+    <header class="app-header">
+      <div>
+        <h1>Montorlin</h1>
+      </div>
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <div class="sync-indicator" id="syncIndicator">
+          <span class="dot"></span>
+          <span id="syncText">Synchronisé</span>
+        </div>
+        <div class="user-badge">
+          <span class="dot"></span>
+          <span id="currentUser"></span>
+        </div>
+        <button class="btn btn-secondary" id="logoutBtn" style="padding: 0.75rem 1.5rem;"><span>Déconnexion</span></button>
+      </div>
+    </header>
+
+    <div class="calendar-container">
+      <div class="calendar-header" id="calendarHeader"></div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+    <div class="reservations-panel">
+      <h3>Réservations à venir</h3>
+      <div class="reservations-list-full" id="reservationsList"></div>
+    </div>
+
+    <div class="color-legend" id="colorLegend"></div>
+  </main>
+
+  <!-- MODAL FOR RESERVATION -->
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <header class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Nouvelle réservation</h2>
+        <button class="modal-close" id="modalClose" aria-label="Fermer">✕</button>
+      </header>
+      <form id="reservationForm">
+        <input type="hidden" id="reservationId">
+        <div class="form-group">
+          <label for="resTitle">Titre</label>
+          <input type="text" id="resTitle" placeholder="Ex: Week-end ski, Anniversaire Léa..." required maxlength="100">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="resStart">Arrivée</label>
+            <input type="date" id="resStart" required>
+          </div>
+          <div class="form-group">
+            <label for="resEnd">Départ</label>
+            <input type="date" id="resEnd" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="resColor">Couleur</label>
+          <select id="resColor">
+            <option value="#e8c06a">🟡 Or</option>
+            <option value="#6ab8e8">🔵 Bleu</option>
+            <option value="#e87a6a">🔴 Rouge</option>
+            <option value="#8ae8a0">🟢 Vert</option>
+            <option value="#d88ae8">🟣 Violet</option>
+            <option value="#e8b06a">🟠 Orange</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="resNotes">Notes</label>
+          <textarea id="resNotes" placeholder="Détails, nombre de personnes, matériel..."></textarea>
+        </div>
+        <div class="reservation-actions">
+          <button type="button" class="btn btn-danger" id="deleteReservationBtn" style="display: none;"><span>Supprimer</span></button>
+          <button type="submit" class="btn"><span id="modalSubmitText">Créer</span></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Supabase SDK (CDN) -->
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
@@ -294,109 +590,372 @@
     // Supabase config
     const SUPABASE_URL = 'https://acpriztsaogtmrsjvasz.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_Y4mVzZhMLQH-VhSHsaXetw_Epqx5rg7';
-
-    // Initialize Supabase
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // DOM elements
-    const form = document.getElementById('loginForm');
-    const prenomInput = document.getElementById('prenom');
-    const passwordInput = document.getElementById('password');
-    const submitBtn = document.getElementById('submitBtn');
-    const errorMsg = document.getElementById('errorMsg');
 
     // Shared family password
     const FAMILY_PASSWORD = "refuge2026";
 
-    // Sync status indicator
-    function setSyncStatus(status) {
-      console.log('[Supabase]', status);
+    // DOM Elements
+    const loginView = document.getElementById('loginView');
+    const appView = document.getElementById('appView');
+    const loginForm = document.getElementById('loginForm');
+    const prenomInput = document.getElementById('prenom');
+    const passwordInput = document.getElementById('password');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMsg = document.getElementById('errorMsg');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const currentUserEl = document.getElementById('currentUser');
+    const syncText = document.getElementById('syncText');
+    const calendarHeader = document.getElementById('calendarHeader');
+    const calendarGrid = document.getElementById('calendarGrid');
+    const reservationsList = document.getElementById('reservationsList');
+    const colorLegend = document.getElementById('colorLegend');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalClose = document.getElementById('modalClose');
+    const reservationForm = document.getElementById('reservationForm');
+    const reservationIdInput = document.getElementById('reservationId');
+    const resTitleInput = document.getElementById('resTitle');
+    const resStartInput = document.getElementById('resStart');
+    const resEndInput = document.getElementById('resEnd');
+    const resColorSelect = document.getElementById('resColor');
+    const resNotesInput = document.getElementById('resNotes');
+    const deleteReservationBtn = document.getElementById('deleteReservationBtn');
+    const modalSubmitText = document.getElementById('modalSubmitText');
+
+    // State
+    let currentUser = null;
+    let currentMonth = new Date();
+    let reservations = [];
+    let familyMembers = [];
+
+    // Reservation colors (matching CSS custom properties)
+    const RESERVATION_COLORS = [
+      { value: '#e8c06a', label: 'Or' },
+      { value: '#6ab8e8', label: 'Bleu' },
+      { value: '#e87a6a', label: 'Rouge' },
+      { value: '#8ae8a0', label: 'Vert' },
+      { value: '#d88ae8', label: 'Violet' },
+      { value: '#e8b06a', label: 'Orange' }
+    };
+
+    // Sync status
+    function setSyncStatus(status, text) {
+      const indicator = document.getElementById('syncIndicator');
+      indicator.classList.remove('syncing', 'error');
+      if (status === 'syncing') indicator.classList.add('syncing');
+      else if (status === 'error') indicator.classList.add('error');
+      document.getElementById('syncText').textContent = text || (status === 'ok' ? 'Synchronisé' : status === 'syncing' ? 'Synchronisation...' : 'Erreur');
     }
 
-    // Check if already logged in (localStorage for persistence across sessions)
-    const savedUser = localStorage.getItem('montorlin-user');
-    if (savedUser) {
-      try {
-        const user = JSON.parse(savedUser);
-        showApp(user.prenom);
+    // Initialize Supabase
+    const SUPABASE_URL = 'https://acpriztsaogtmrsjvasz.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_Y4mVzZhMLQH-VhSHsaXetw_Epqx5rg7';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // FAMILY PASSWORD
+    const FAMILY_PASSWORD = "refuge2026";
+
+    // Helper: format date for input
+    function formatDateForInput(date) {
+      return date.toISOString().split('T')[0];
+    }
+
+    function parseDate(dateStr) {
+      return new Date(dateStr + 'T00:00:00');
+    }
+
+    function formatDateFR(date) {
+      return date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+    }
+
+    function formatTimeFR(date) {
+      return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function getColorForUser(prenom) {
+      // Consistent color per user based on name hash
+      const colors = RESERVATION_COLORS.map(c => c.value);
+      let hash = 0;
+      for (let i = 0; i < prenom.length; i++) hash = prenom.charCodeAt(i) + ((hash << 5) - hash);
+      return colors[Math.abs(hash) % colors.length];
+    }
+
+    // CALENDAR FUNCTIONS
+    function renderCalendarHeader() {
+      const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+      calendarHeader.innerHTML = days.map(d => `<div class="calendar-day-name">${d}</div>`).join('');
+    }
+
+    function getMonthDays(year, month) {
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const daysInMonth = lastDay.getDate();
+      const startingDay = (firstDay.getDay() + 6) % 7; // Monday = 0
+      const prevMonthLastDay = new Date(year, month, 0).getDate();
+
+      const days = [];
+      // Previous month days
+      for (let i = startingDay - 1; i >= 0; i--) {
+        days.push({ date: new Date(year, month - 1, prevMonthLastDay - i), otherMonth: true });
+      }
+      // Current month days
+      for (let d = 1; d <= daysInMonth; d++) {
+        days.push({ date: new Date(year, month, d), otherMonth: false });
+      }
+      // Next month days to fill grid
+      const totalCells = Math.ceil((startingDay + daysInMonth) / 7) * 7;
+      for (let d = 1; days.length < totalCells; d++) {
+        days.push({ date: new Date(year, month + 1, d), otherMonth: true });
+      }
+      return days;
+    }
+
+    function getReservationsForDay(dateStr) {
+      return reservations.filter(r => {
+        const start = new Date(r.start_date);
+        const end = new Date(r.end_date);
+        const check = new Date(dateStr);
+        return check >= start && check <= end;
+      });
+    }
+
+    function renderCalendar() {
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth();
+      const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+      
+      // Update header with month/year
+      const headerTitle = document.querySelector('.calendar-header-title');
+      if (headerTitle) headerTitle.textContent = `${monthNames[month]} ${year}`;
+
+      const days = getMonthDays(year, month);
+      calendarGrid.innerHTML = days.map(day => {
+        const dateStr = formatDateForInput(day.date);
+        const dayReservations = getReservationsForDay(dateStr);
+        const isToday = day.date.toDateString() === new Date().toDateString();
+        const isOtherMonth = day.otherMonth;
+        
+        return `
+          <div class="calendar-day ${isOtherMonth ? 'other-month' : ''} ${isToday ? 'today' : ''}" data-date="${dateStr}">
+            <div class="day-number">${day.date.getDate()}</div>
+            <div class="reservations-list">
+              ${dayReservations.slice(0, 4).map(r => `
+                <div class="reservation-chip" style="background: ${r.color}; border-color: ${r.color};" data-id="${r.id}" title="${r.title} - ${r.prenom}${r.notes ? ': ' + r.notes : ''}">
+                  ${r.title} (${r.prenom})
+                </div>
+              `).join('')}
+              ${dayReservations.length > 4 ? `<div class="more-reservations">+${dayReservations.length - 4} autres</div>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Add click handlers to day cells for adding reservation
+      document.querySelectorAll('.calendar-day:not(.other-month)').forEach(dayEl => {
+        dayEl.addEventListener('click', (e) => {
+          if (!e.target.closest('.reservation-chip')) {
+            openModal(dayEl.dataset.date);
+          }
+        });
+      });
+
+      // Add click handlers to reservation chips
+      document.querySelectorAll('.reservation-chip').forEach(chip => {
+        chip.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openModal(null, chip.dataset.id);
+        });
+      });
+    }
+
+    function updateMonth(delta) {
+      currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + delta, 1);
+      renderCalendar();
+    }
+
+    // RESERVATIONS LIST
+    function renderReservationsList() {
+      const upcoming = [...reservations]
+        .filter(r => new Date(r.end_date) >= new Date())
+        .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
+        .slice(0, 10);
+
+      if (upcoming.length === 0) {
+        reservationsList.innerHTML = '<p style="text-align: center; color: var(--moss); padding: 2rem;">Aucune réservation à venir. Cliquez sur un jour pour en créer une.</p>';
         return;
-      } catch {
-        localStorage.removeItem('montorlin-user');
+      }
+
+      reservationsList.innerHTML = upcoming.map(r => `
+        <div class="reservation-item" style="border-left: 4px solid ${r.color};">
+          <div class="reservation-item-info">
+            <div class="reservation-item-title">${r.title}</div>
+            <div class="reservation-item-meta">
+              <span>${formatDateFR(new Date(r.start_date))} → ${formatDateFR(new Date(r.end_date))}</span>
+              <span>Par ${r.prenom}</span>
+            </div>
+          </div>
+          <div class="reservation-item-actions">
+            <button class="btn btn-secondary" onclick="openModal(null, '${r.id}')" style="padding: 0.5rem 1rem; font-size: 0.85rem;"><span>Modifier</span></button>
+            <button class="btn btn-danger" onclick="deleteReservation('${r.id}')" style="padding: 0.5rem 1rem; font-size: 0.85rem;"><span>Supprimer</span></button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderColorLegend() {
+      const userColors = {};
+      reservations.forEach(r => { userColors[r.prenom] = r.color; });
+      
+      colorLegend.innerHTML = Object.entries(userColors).map(([prenom, color]) => `
+        <div class="color-legend-item">
+          <span class="color-legend-dot" style="background: ${color};"></span>
+          ${prenom}
+        </div>
+      `).join('');
+    }
+
+    // MODAL FUNCTIONS
+    function openModal(dateStr = null, reservationId = null) {
+      const modal = document.getElementById('modalOverlay');
+      const isEdit = !!reservationId;
+      
+      if (isEdit) {
+        const res = reservations.find(r => r.id === reservationId);
+        if (!res) return;
+        document.getElementById('modalTitle').textContent = 'Modifier la réservation';
+        modalSubmitText.textContent = 'Enregistrer';
+        reservationIdInput.value = res.id;
+        resTitleInput.value = res.title;
+        resStartInput.value = formatDateForInput(new Date(res.start_date));
+        resEndInput.value = formatDateForInput(new Date(res.end_date));
+        resColorSelect.value = res.color;
+        resNotesInput.value = res.notes || '';
+        deleteReservationBtn.style.display = 'inline-flex';
+        deleteReservationBtn.onclick = () => deleteReservation(res.id);
+      } else {
+        document.getElementById('modalTitle').textContent = 'Nouvelle réservation';
+        modalSubmitText.textContent = 'Créer';
+        reservationIdInput.value = '';
+        resTitleInput.value = '';
+        resStartInput.value = dateStr || formatDateForInput(new Date());
+        resEndInput.value = dateStr || formatDateForInput(new Date());
+        resColorSelect.value = getColorForUser(currentUser);
+        resNotesInput.value = '';
+        deleteReservationBtn.style.display = 'none';
+      }
+      
+      modalOverlay.classList.add('open');
+      resTitleInput.focus();
+    }
+
+    function closeModal() {
+      modalOverlay.classList.remove('open');
+      setTimeout(() => {
+        reservationForm.reset();
+        reservationIdInput.value = '';
+        deleteReservationBtn.style.display = 'none';
+      }, 300);
+    }
+
+    // RESERVATION CRUD
+    async function loadReservations() {
+      setSyncStatus('syncing', 'Chargement...');
+      try {
+        const { data, error } = await supabase
+          .from('reservations')
+          .select('*')
+          .order('start_date', { ascending: true });
+        
+        if (error) throw error;
+        
+        reservations = data || [];
+        renderCalendar();
+        renderReservationsList();
+        renderColorLegend();
+        setSyncStatus('ok', 'Synchronisé');
+      } catch (error) {
+        console.error('Load reservations error:', error);
+        setSyncStatus('error', 'Erreur chargement');
       }
     }
 
-    form.addEventListener('submit', async (e) => {
+    async function saveReservation(e) {
       e.preventDefault();
       
-      const prenom = prenomInput.value.trim();
-      const password = passwordInput.value;
-
-      // Reset error
-      errorMsg.classList.remove('show');
-      submitBtn.disabled = true;
-      submitBtn.querySelector('span').textContent = 'Connexion...';
-
-      // Simulate brief check
-      await new Promise(r => setTimeout(r, 600));
-
-      // Validate password
-      if (password !== FAMILY_PASSWORD) {
-        showError("Ce n'est pas le bon mot de passe familial.");
-        resetButton();
+      const isEdit = !!reservationIdInput.value;
+      const title = resTitleInput.value.trim();
+      const start = resStartInput.value;
+      const end = resEndInput.value;
+      const color = resColorSelect.value;
+      const notes = resNotesInput.value.trim();
+      
+      if (!title || !start || !end) {
+        showError('Titre, arrivée et départ requis.');
+        return;
+      }
+      if (new Date(end) < new Date(start)) {
+        showError('La date de départ doit être après l\'arrivée.');
         return;
       }
 
-      // Validate name
-      if (!prenom) {
-        showError("Entre ton prénom.");
-        resetButton();
-        return;
-      }
-
-      // Success - save user to localStorage AND Supabase
-      const userData = {
-        prenom,
-        loginTime: Date.now(),
-        lastSeen: Date.now()
+      const reservationData = {
+        title,
+        start_date: start,
+        end_date: end,
+        color,
+        notes,
+        prenom: currentUser,
+        updated_at: new Date().toISOString()
       };
 
       try {
-        setSyncStatus('syncing');
+        setSyncStatus('syncing', isEdit ? 'Mise à jour...' : 'Création...');
         
-        // Upsert user in Supabase (creates/updates user in global DB)
-        const { error: upsertError } = await supabase
-          .from('users')
-          .upsert({
-            prenom,
-            last_seen: new Date().toISOString(),
-            online: true
-          }, { onConflict: 'prenom' });
-        
-        if (upsertError) {
-          console.warn('Supabase upsert warning:', upsertError.message);
+        if (isEdit) {
+          const { error } = await supabase
+            .from('reservations')
+            .update(reservationData)
+            .eq('id', reservationIdInput.value);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from('reservations')
+            .insert(reservationData);
+          if (error) throw error;
         }
-
-        // Save locally for instant load
-        localStorage.setItem('montorlin-user', JSON.stringify({
-          prenom,
-          loginTime: Date.now()
-        }));
-
-        setSyncStatus('ok');
+        
+        closeModal();
+        await loadReservations();
+        setSyncStatus('ok', 'Synchronisé');
       } catch (error) {
-        console.error('Supabase error:', error);
-        // Continue anyway - localStorage works offline
+        console.error('Save reservation error:', error);
+        showError('Erreur lors de la sauvegarde: ' + error.message);
+        setSyncStatus('error', 'Erreur');
       }
+    }
 
-      // Brief success feedback
-      submitBtn.querySelector('span').textContent = 'Bienvenue...';
-      submitBtn.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
+    async function deleteReservation(id) {
+      if (!confirm('Supprimer cette réservation ?')) return;
       
-      setTimeout(() => {
-        showApp(prenomInput.value.trim());
-      }, 800);
-    });
+      try {
+        setSyncStatus('syncing', 'Suppression...');
+        const { error } = await supabase
+          .from('reservations')
+          .delete()
+          .eq('id', id);
+        if (error) throw error;
+        
+        closeModal();
+        await loadReservations();
+        setSyncStatus('ok', 'Synchronisé');
+      } catch (error) {
+        console.error('Delete error:', error);
+        showError('Erreur suppression: ' + error.message);
+        setSyncStatus('error', 'Erreur');
+      }
+    }
 
+    // UI HELPERS
     function showError(message) {
       errorMsg.textContent = message;
       errorMsg.classList.add('show');
@@ -415,45 +974,126 @@
     }
 
     function showApp(prenom) {
-      document.body.innerHTML = `
-        <div class="stars" aria-hidden="true"></div>
-        <div class="mountains" aria-hidden="true">
-          <div class="mountain mountain-1"></div>
-          <div class="mountain mountain-2"></div>
-          <div class="mountain mountain-3"></div>
-          <div class="mountain mountain-4"></div>
-        </div>
-        <div class="moon" aria-hidden="true"></div>
-        <main class="login-card" style="text-align: center; padding: 4rem 2.5rem;">
-          <div class="logo-icon" style="margin: 0 auto 1.5rem; width: 80px; height: 80px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#1a2e1a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="40" height="40">
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-          </div>
-          <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Montorlin</h1>
-          <p style="color: var(--moss-light); font-size: 1.2rem; margin-bottom: 2rem;">Bienvenue ${prenom} 👋</p>
-          <button class="btn" onclick="localStorage.clear(); location.reload();" style="max-width: 200px; margin: 0 auto;"><span>Déconnexion</span></button>
-        </main>
-        <div class="stars" aria-hidden="true"></div>
-        <div class="mountains" aria-hidden="true">
-          <div class="mountain mountain-1"></div>
-          <div class="mountain mountain-2"></div>
-          <div class="mountain mountain-3"></div>
-          <div class="mountain mountain-4"></div>
-        </div>
-        <div class="moon" aria-hidden="true"></div>
-      `;
+      loginView.style.display = 'none';
+      appView.style.display = 'block';
+      currentUser = prenom;
+      currentUserEl.textContent = prenom;
+      localStorage.setItem('montorlin-user', JSON.stringify({ prenom, loginTime: Date.now() }));
+      
+      // Load family members from users table
+      loadFamilyMembers();
+      loadReservations();
+      renderCalendarHeader();
     }
 
-    // Enter key on inputs submits
-    [prenomInput, passwordInput].forEach(input => {
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') form.dispatchEvent(new Event('submit'));
-      });
+    async function loadFamilyMembers() {
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('prenom')
+          .order('prenom');
+        if (!error && data) {
+          familyMembers = data.map(u => u.prenom);
+        }
+      } catch (e) { console.warn('Could not load family members:', e); }
+    }
+
+    // EVENT LISTENERS
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const prenom = prenomInput.value.trim();
+      const password = passwordInput.value;
+
+      errorMsg.classList.remove('show');
+      submitBtn.disabled = true;
+      submitBtn.querySelector('span').textContent = 'Connexion...';
+
+      await new Promise(r => setTimeout(r, 600));
+
+      if (password !== FAMILY_PASSWORD) {
+        showError("Ce n'est pas le bon mot de passe familial.");
+        resetButton();
+        return;
+      }
+
+      if (!prenom) {
+        showError("Entre ton prénom.");
+        resetButton();
+        return;
+      }
+
+      // Save to Supabase
+      try {
+        setSyncStatus('syncing', 'Connexion...');
+        await supabase
+          .from('users')
+          .upsert({ prenom, last_seen: new Date().toISOString(), online: true }, { onConflict: 'prenom' });
+        setSyncStatus('ok');
+      } catch (e) { console.warn('User upsert failed:', e); }
+
+      localStorage.setItem('montorlin-user', JSON.stringify({ prenom, loginTime: Date.now() }));
+      
+      submitBtn.querySelector('span').textContent = 'Bienvenue...';
+      submitBtn.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
+      
+      setTimeout(() => showApp(prenom), 800);
     });
 
-    // Focus first input
-    prenomInput.focus();
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('montorlin-user');
+      currentUser = null;
+      reservations = [];
+      loginView.style.display = 'block';
+      appView.style.display = 'none';
+      prenomInput.value = '';
+      passwordInput.value = '';
+      prenomInput.focus();
+    });
+
+    modalClose.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
+    reservationForm.addEventListener('submit', saveReservation);
+
+    // Keyboard navigation for calendar
+    document.addEventListener('keydown', (e) => {
+      if (appView.style.display === 'none') return;
+      if (e.key === 'ArrowLeft') { updateMonth(-1); }
+      else if (e.key === 'ArrowRight') { updateMonth(1); }
+      else if (e.key === 'Escape') { closeModal(); }
+    });
+
+    // Initialize
+    function init() {
+      renderCalendarHeader();
+      
+      // Check existing session
+      const savedUser = localStorage.getItem('montorlin-user');
+      if (savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+          showApp(user.prenom);
+          return;
+        } catch {
+          localStorage.removeItem('montorlin-user');
+        }
+      }
+      
+      // Calendar navigation buttons
+      const prevBtn = document.getElementById('prevMonth');
+      const nextBtn = document.getElementById('nextMonth');
+      if (prevBtn) prevBtn.addEventListener('click', () => updateMonth(-1));
+      if (nextBtn) nextBtn.addEventListener('click', () => updateMonth(1));
+    }
+
+    // Wait for DOM
+    document.addEventListener('DOMContentLoaded', init);
+
+    // Also handle calendar nav from header buttons
+    document.addEventListener('click', (e) => {
+      if (e.target.id === 'prevMonth') updateMonth(-1);
+      else if (e.target.id === 'nextMonth') updateMonth(1);
+    });
   </script>
 </body>
 </html>
