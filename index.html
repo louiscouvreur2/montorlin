@@ -594,12 +594,11 @@
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-    // CONSTANTS ONLY at module level
+    // CONSTANTS ONLY at module level - no let/const for state
     const SUPABASE_URL = 'https://acpriztsaogtmrsjvasz.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_Y4mVzZhMLQH-VhSHsaXetw_Epqx5rg7';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const FAMILY_PASSWORD = "refuge2026";
-
     const RESERVATION_COLORS = [
       { value: '#e8c06a', label: 'Or' },
       { value: '#6ab8e8', label: 'Bleu' },
@@ -609,14 +608,9 @@
       { value: '#e8b06a', label: 'Orange' }
     ];
 
-    // State - ONLY truly global state at module level
-    let currentUser = null;
-    let currentMonth = new Date();
-    let reservations = [];
-    let familyMembers = [];
-
-    // NO DOM element declarations at module level!
-    // ALL DOM queries happen INSIDE functions
+    // NO STATE at module level except constants!
+    // NO let/const for DOM elements at module level!
+    // ALL state and DOM queries happen INSIDE functions
 
     // Sync status
     function setSyncStatus(status, text) {
@@ -646,11 +640,8 @@
       { value: '#e8b06a', label: 'Orange' }
     ];
 
-    // State - ONLY truly global state at module level
-    let currentUser = null;
-    let currentMonth = new Date();
-    let reservations = [];
-    let familyMembers = [];
+    // ALL STATE - will be declared inside functions
+    // NO let/const at module level for state or DOM elements!
 
     // Helper: format date for input
     function formatDateForInput(date) {
