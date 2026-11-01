@@ -623,26 +623,6 @@
       if (textEl) textEl.textContent = text || (status === 'ok' ? 'Synchronisé' : status === 'syncing' ? 'Synchronisation...' : 'Erreur');
     }
 
-    // Supabase client
-    const supabase = createClient(
-      'https://acpriztsaogtmrsjvasz.supabase.co',
-      'sb_publishable_Y4mVzZhMLQH-VhSHsaXetw_Epqx5rg7'
-    );
-
-    // Constants
-    const FAMILY_PASSWORD = "refuge2026";
-    const RESERVATION_COLORS = [
-      { value: '#e8c06a', label: 'Or' },
-      { value: '#6ab8e8', label: 'Bleu' },
-      { value: '#e87a6a', label: 'Rouge' },
-      { value: '#8ae8a0', label: 'Vert' },
-      { value: '#d88ae8', label: 'Violet' },
-      { value: '#e8b06a', label: 'Orange' }
-    ];
-
-    // ALL STATE - will be declared inside functions
-    // NO let/const at module level for state or DOM elements!
-
     // CALENDAR FUNCTIONS
     function renderCalendarHeader() {
       const headerEl = document.getElementById('calendarHeader');
