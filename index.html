@@ -629,12 +629,6 @@
       if (textEl) textEl.textContent = text || (status === 'ok' ? 'Synchronisé' : status === 'syncing' ? 'Synchronisation...' : 'Erreur');
     }
 
-    // Supabase client
-    const supabase = createClient(
-      'https://acpriztsaogtmrsjvasz.supabase.co',
-      'sb_publishable_Y4mVzZhMLQH-VhSHsaXetw_Epqx5rg7'
-    );
-
     // Helper: format date for input
     function formatDateForInput(date) {
       if (typeof date === 'string') return date;
