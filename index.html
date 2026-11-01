@@ -1066,6 +1066,7 @@
     // Handle DOM ready
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
+        console.log("[DEBUG] Calling init and setupEventListeners");
         init();
         setupEventListeners();
       });
@@ -1088,6 +1089,7 @@
           const errorMsg = document.getElementById('errorMsg');
           
           const prenom = prenomInput?.value?.trim();
+          console.log("[DEBUG] Login attempt:", prenom, password);
           const password = passwordInput?.value;
 
           if (errorMsg) errorMsg.classList.remove('show');
@@ -1099,6 +1101,7 @@
 
           await new Promise(r => setTimeout(r, 600));
 
+          console.log("[DEBUG] Password check:", password, "vs", FAMILY_PASSWORD);
           if (password !== FAMILY_PASSWORD) {
             showError("Ce n'est pas le bon mot de passe familial.");
             resetButton();
@@ -1114,11 +1117,12 @@
           // Save to Supabase
           try {
             setSyncStatus('syncing', 'Connexion...');
+            console.log("[DEBUG] Calling supabase upsert...");
             await supabase
               .from('users')
               .upsert({ prenom: document.getElementById('prenom')?.value?.trim(), last_seen: new Date().toISOString(), online: true }, { onConflict: 'prenom' });
             setSyncStatus('ok');
-          } catch (e) { console.warn('User upsert failed:', e); }
+          } catch (e) { console.error('[DEBUG] User upsert failed:', e); }
 
           localStorage.setItem('montorlin-user', JSON.stringify({ prenom: document.getElementById('prenom')?.value?.trim(), loginTime: Date.now() }));
           
@@ -1129,6 +1133,7 @@
             submitBtn2.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
           }
           
+          console.log("[DEBUG] Calling showApp...");
           setTimeout(() => showApp(document.getElementById('prenom')?.value?.trim()), 800);
         });
       }
@@ -1174,9 +1179,11 @@
       });
     }
 
+    console.log("[DEBUG] Module loaded, readyState:", document.readyState);
     // Run init when DOM is ready
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
+        console.log("[DEBUG] Calling init and setupEventListeners");
         init();
         setupEventListeners();
       });
