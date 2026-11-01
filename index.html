@@ -594,11 +594,12 @@
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-    // CONSTANTS ONLY at module level - no let/const for state
+    // CONSTANTS ONLY at module level
     const SUPABASE_URL = 'https://acpriztsaogtmrsjvasz.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_Y4mVzZhMLQH-VhSHsaXetw_Epqx5rg7';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const FAMILY_PASSWORD = "refuge2026";
+
     const RESERVATION_COLORS = [
       { value: '#e8c06a', label: 'Or' },
       { value: '#6ab8e8', label: 'Bleu' },
@@ -608,9 +609,14 @@
       { value: '#e8b06a', label: 'Orange' }
     ];
 
-    // NO STATE at module level except constants!
-    // NO let/const for DOM elements at module level!
-    // ALL state and DOM queries happen INSIDE functions
+    // State
+    let currentUser = null;
+    let currentMonth = new Date();
+    let reservations = [];
+    let familyMembers = [];
+
+    // NO DOM element declarations at module level!
+    // ALL DOM queries happen INSIDE functions
 
     // Sync status
     function setSyncStatus(status, text) {
@@ -621,6 +627,29 @@
       else if (status === 'error') indicator.classList.add('error');
       const textEl = document.getElementById('syncText');
       if (textEl) textEl.textContent = text || (status === 'ok' ? 'Synchronisé' : status === 'syncing' ? 'Synchronisation...' : 'Erreur');
+    }
+
+    // Supabase client
+    const supabase = createClient(
+      'https://acpriztsaogtmrsjvasz.supabase.co',
+      'sb_publishable_Y4mVzZhMLQH-VhSHsaXetw_Epqx5rg7'
+    );
+
+    // Helper: format date for input
+    function formatDateForInput(date) {
+      if (typeof date === 'string') return date;
+      return date.toISOString().split('T')[0];
+    }
+
+    function formatDateFR(date) {
+      return date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+    }
+
+    function getColorForUser(prenom) {
+      const colors = RESERVATION_COLORS.map(c => c.value);
+      let hash = 0;
+      for (let i = 0; i < prenom.length; i++) hash = prenom.charCodeAt(i) + ((hash << 5) - hash);
+      return colors[Math.abs(hash) % colors.length];
     }
 
     // CALENDAR FUNCTIONS
@@ -783,6 +812,7 @@
       const modalOverlay = document.getElementById('modalOverlay');
       const isEdit = !!reservationId;
       
+      // Declare all DOM elements once at the top
       const titleEl = document.getElementById('modalTitle');
       const submitTextEl = document.getElementById('modalSubmitText');
       const idInput = document.getElementById('reservationId');
@@ -797,42 +827,26 @@
         const res = reservations.find(r => r.id === reservationId);
         if (!res) return;
         if (titleEl) titleEl.textContent = 'Modifier la réservation';
-        const submitTextEl2 = document.getElementById('modalSubmitText');
-        if (submitTextEl2) submitTextEl2.textContent = 'Enregistrer';
-        const idInput = document.getElementById('reservationId');
+        if (submitTextEl) submitTextEl.textContent = 'Enregistrer';
         if (idInput) idInput.value = res.id;
-        const titleInput = document.getElementById('resTitle');
         if (titleInput) titleInput.value = res.title;
-        const startInput = document.getElementById('resStart');
         if (startInput) startInput.value = formatDateForInput(new Date(res.start_date));
-        const endInput = document.getElementById('resEnd');
         if (endInput) endInput.value = formatDateForInput(new Date(res.end_date));
-        const colorSelect = document.getElementById('resColor');
         if (colorSelect) colorSelect.value = res.color;
-        const notesInput = document.getElementById('resNotes');
         if (notesInput) notesInput.value = res.notes || '';
-        const deleteBtn = document.getElementById('deleteReservationBtn');
         if (deleteBtn) {
           deleteBtn.style.display = 'inline-flex';
           deleteBtn.onclick = () => deleteReservation(res.id);
         }
       } else {
         if (titleEl) titleEl.textContent = 'Nouvelle réservation';
-        const submitTextEl2 = document.getElementById('modalSubmitText');
-        if (submitTextEl2) submitTextEl2.textContent = 'Créer';
-        const idInput = document.getElementById('reservationId');
+        if (submitTextEl) submitTextEl.textContent = 'Créer';
         if (idInput) idInput.value = '';
-        const titleInput = document.getElementById('resTitle');
         if (titleInput) titleInput.value = '';
-        const startInput = document.getElementById('resStart');
         if (startInput) startInput.value = dateStr || formatDateForInput(new Date());
-        const endInput = document.getElementById('resEnd');
         if (endInput) endInput.value = dateStr || formatDateForInput(new Date());
-        const colorSelect = document.getElementById('resColor');
         if (colorSelect) colorSelect.value = getColorForUser(currentUser);
-        const notesInput = document.getElementById('resNotes');
         if (notesInput) notesInput.value = '';
-        const deleteBtn = document.getElementById('deleteReservationBtn');
         if (deleteBtn) deleteBtn.style.display = 'none';
       }
       
@@ -1089,9 +1103,10 @@
           const errorMsg = document.getElementById('errorMsg');
           
           const prenom = prenomInput?.value?.trim();
-          console.log("[DEBUG] Login attempt:", prenom, password);
           const password = passwordInput?.value;
 
+          console.log("[DEBUG] Login attempt:", prenom, password);
+          
           if (errorMsg) errorMsg.classList.remove('show');
           if (submitBtn) {
             submitBtn.disabled = true;
@@ -1102,6 +1117,7 @@
           await new Promise(r => setTimeout(r, 600));
 
           console.log("[DEBUG] Password check:", password, "vs", FAMILY_PASSWORD);
+          
           if (password !== FAMILY_PASSWORD) {
             showError("Ce n'est pas le bon mot de passe familial.");
             resetButton();
@@ -1179,7 +1195,6 @@
       });
     }
 
-    console.log("[DEBUG] Module loaded, readyState:", document.readyState);
     // Run init when DOM is ready
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
