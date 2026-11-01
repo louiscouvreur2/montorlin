@@ -623,6 +623,26 @@
       if (textEl) textEl.textContent = text || (status === 'ok' ? 'Synchronisé' : status === 'syncing' ? 'Synchronisation...' : 'Erreur');
     }
 
+    // Supabase client
+    const supabase = createClient(
+      'https://acpriztsaogtmrsjvasz.supabase.co',
+      'sb_publishable_Y4mVzZhMLQH-VhSHsaXetw_Epqx5rg7'
+    );
+
+    // Constants
+    const FAMILY_PASSWORD = "refuge2026";
+    const RESERVATION_COLORS = [
+      { value: '#e8c06a', label: 'Or' },
+      { value: '#6ab8e8', label: 'Bleu' },
+      { value: '#e87a6a', label: 'Rouge' },
+      { value: '#8ae8a0', label: 'Vert' },
+      { value: '#d88ae8', label: 'Violet' },
+      { value: '#e8b06a', label: 'Orange' }
+    ];
+
+    // ALL STATE - will be declared inside functions
+    // NO let/const at module level for state or DOM elements!
+
     // CALENDAR FUNCTIONS
     function renderCalendarHeader() {
       const headerEl = document.getElementById('calendarHeader');
@@ -866,7 +886,7 @@
     async function loadReservations() {
       setSyncStatus('syncing', 'Chargement...');
       try {
-        const { data, error } = await supabaseClient
+        const { data, error } = await supabase
           .from('reservations')
           .select('*')
           .order('start_date', { ascending: true });
@@ -926,13 +946,13 @@
         setSyncStatus('syncing', isEdit ? 'Mise à jour...' : 'Création...');
         
         if (isEdit) {
-          const { error } = await supabaseClient
+          const { error } = await supabase
             .from('reservations')
             .update(reservationData)
             .eq('id', document.getElementById('reservationId')?.value);
           if (error) throw error;
         } else {
-          const { error } = await supabaseClient
+          const { error } = await supabase
             .from('reservations')
             .insert(reservationData);
           if (error) throw error;
@@ -953,7 +973,7 @@
       
       try {
         setSyncStatus('syncing', 'Suppression...');
-        const { error } = await supabaseClient
+        const { error } = await supabase
           .from('reservations')
           .delete()
           .eq('id', id);
@@ -1016,7 +1036,7 @@
 
     async function loadFamilyMembers() {
       try {
-        const { data, error } = await supabaseClient
+        const { data, error } = await supabase
           .from('users')
           .select('prenom')
           .order('prenom');
@@ -1114,7 +1134,7 @@
           // Save to Supabase
           try {
             setSyncStatus('syncing', 'Connexion...');
-            await supabaseClient
+            await supabase
               .from('users')
               .upsert({ prenom: document.getElementById('prenom')?.value?.trim(), last_seen: new Date().toISOString(), online: true }, { onConflict: 'prenom' });
             setSyncStatus('ok');
