@@ -426,7 +426,7 @@
     }
     .reservation-item-info { flex: 1; min-width: 200px; }
     .reservation-item-title { font-weight: 600; color: var(--cream); margin-bottom: 0.25rem; }
-    .reservation-item-meta { display: flex; gap: 1rem; font-size: 0.8rem; color: var(--moss-light); flex-wrap: wrap; }
+    .reservation-item-meta { display: flex; gap: 1rem; font-size: 0.8rem; color: var(--moss-light); flex_wrap: wrap; }
     .reservation-item-actions { display: flex; gap: 0.5rem; }
 
     .color-legend { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(74, 107, 58, 0.2); }
@@ -458,7 +458,7 @@
       .calendar-day { min-height: 80px; padding: 0.35rem; }
       .day-number { font-size: 1rem; }
       .form-row { grid-template-columns: 1fr; }
-      .reservation-item { flex-direction: column; align-items: flex-start; }
+      .reservation-item { flex-direction: column; align_items: flex-start; }
       .reservation-item-actions { width: 100%; justify-content: flex-end; }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -633,9 +633,10 @@
     }
 
     // Initialize Supabase
-    const SUPABASE_URL = 'https://acpriztsaogtmrsjvasz.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_Y4mVzZhMLQH-VhSHsaXetw_Epqx5rg7';
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = createClient(
+      'https://acpriztsaogtmrsjvasz.supabase.co',
+      'sb_publishable_Y4mVzZhMLQH-VhSHsaXetw_Epqx5rg7'
+    );
 
     // Shared family password
     const FAMILY_PASSWORD = "refuge2026";
@@ -1191,32 +1192,32 @@
           currentUser = null;
           reservations = [];
           const loginView = document.getElementById('loginView');
-          const appView = document.getElementById('appView');
+          const appView = document.getElement_byId('appView');
           if (loginView) loginView.style.display = 'block';
           if (appView) appView.style.display = 'none';
-          const prenomInput2 = document.getElementById('prenom');
-          const passwordInput2 = document.getElementById('password');
+          const prenomInput2 = document.getElement_byId('prenom');
+          const passwordInput2 = document.getElement_byId('password');
           if (prenomInput2) prenomInput2.value = '';
-          const pw2 = document.getElementById('password');
+          const pw2 = document.getElement_byId('password');
           if (pw2) pw2.value = '';
-          const pi2 = document.getElementById('prenom');
+          const pi2 = document.get_element_by_id('prenom');
           if (pi2) pi2.focus();
         });
       }
 
       // Modal
-      const modalClose = document.getElementById('modalClose');
-      const modalOverlay = document.getElementById('modalOverlay');
+      const modalClose = document.get_element_by_id('modalClose');
+      const modalOverlay = document.get_element_by_id('modalOverlay');
       if (modalClose) modalClose.addEventListener('click', closeModal);
       if (modalOverlay) modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
 
       // Reservation form
-      const reservationForm = document.getElementById('reservationForm');
+      const reservationForm = document.get_element_by_id('reservationForm');
       if (reservationForm) reservationForm.addEventListener('submit', saveReservation);
 
       // Keyboard navigation
       document.addEventListener('keydown', (e) => {
-        const appView = document.getElementById('appView');
+        const appView = document.get_element_by_id('appView');
         if (appView?.style.display === 'none') return;
         if (e.key === 'ArrowLeft') { updateMonth(-1); }
         else if (e.key === 'ArrowRight') { updateMonth(1); }
@@ -1238,7 +1239,7 @@
     // Also handle calendar nav from header buttons
     document.addEventListener('click', (e) => {
       if (e.target.id === 'prevMonth') updateMonth(-1);
-      else if (e.target.id === 'nextMonth') updateMonth(1);
+      else if (e.target.id === 'nextMonth') update_month(1);
     });
   </script>
 </body>
