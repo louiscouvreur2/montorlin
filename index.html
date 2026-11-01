@@ -210,7 +210,7 @@
     .btn:disabled { opacity: 0.6; cursor: not-allowed; }
     .btn:disabled::before { background-position: 0 0; }
     .btn-secondary { background: var(--forest-light); color: var(--cream); }
-    .btn-secondary::before { background: linear_gradusent(90deg, var(--moss) 0%, var(--moss-light) 100%); }
+    .btn-secondary::before { background: linear-gradient(90deg, var(--moss) 0%, var(--moss-light) 100%); }
     .btn-danger { background: var(--forest-light); color: #e87a6a; }
     .btn-danger::before { background: linear-gradient(90deg, #c85a4a 0%, #e87a6a 100%); }
     .error-message {
@@ -594,7 +594,7 @@
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-    // Supabase config
+    // Supabase config - ONLY CONSTANTS at module level
     const SUPABASE_URL = 'https://acpriztsaogtmrsjvasz.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_Y4mVzZhMLQH-VhSHsaXetw_Epqx5rg7';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -612,22 +612,14 @@
       { value: '#e8b06a', label: 'Orange' }
     ];
 
-    // State
+    // State - ONLY truly global state at module level
     let currentUser = null;
     let currentMonth = new Date();
     let reservations = [];
     let familyMembers = [];
 
-    // DOM Elements (will be set in init)
-    let loginView, appView, loginForm, prenomInput, passwordInput, submitBtn, errorMsg;
-    let logoutBtn, currentUserEl, syncText;
-    let calendarHeaderEl, calendarGridEl, reservationsListEl, colorLegendEl;
-    let prevMonthBtn, nextMonthBtn;
-
-    // Modal elements (set in openModal)
-    let modalOverlayEl, modalCloseEl, reservationFormEl;
-    let modalTitleEl, reservationIdInput, resTitleInput, resStartInput, resEndInput;
-    let resColorSelectEl, resNotesInputEl, deleteReservationBtnEl, modalSubmitTextEl;
+    // ALL DOM elements and function-scoped variables will be declared inside functions
+    // NO let/const for DOM elements at module level!
 
     // Sync status
     function setSyncStatus(status, text) {
@@ -658,7 +650,7 @@
       { value: '#e8b06a', label: 'Orange' }
     ];
 
-    // State
+    // State - ONLY truly global state at module level
     let currentUser = null;
     let currentMonth = new Date();
     let reservations = [];
@@ -875,7 +867,6 @@
           deleteBtn.onclick = () => deleteReservation(res.id);
         }
       } else {
-        const titleEl2 = document.getElementById('modalTitle');
         if (titleEl) titleEl.textContent = 'Nouvelle réservation';
         const submitTextEl2 = document.getElementById('modalSubmitText');
         if (submitTextEl2) submitTextEl2.textContent = 'Créer';
@@ -885,7 +876,7 @@
         if (titleInput) titleInput.value = '';
         const startInput = document.getElementById('resStart');
         if (startInput) startInput.value = dateStr || formatDateForInput(new Date());
-        const endInput = document.getElement byId('resEnd');
+        const endInput = document.getElementById('resEnd');
         if (endInput) endInput.value = dateStr || formatDateForInput(new Date());
         const colorSelect = document.getElementById('resColor');
         if (colorSelect) colorSelect.value = getColorForUser(currentUser);
@@ -1030,10 +1021,6 @@
 
     function showError(message) {
       const errorMsg = document.getElementById('errorMsg');
-      const prenomInput = document.getElementById('prenom');
-      const passwordInput = document.getElementById('password');
-      const submitBtn = document.getElementById('submitBtn');
-      
       if (errorMsg) {
         errorMsg.textContent = message;
         errorMsg.classList.add('show');
@@ -1101,35 +1088,6 @@
 
     // INITIALIZATION - runs when DOM is ready
     function init() {
-      // Cache DOM elements
-      const loginView = document.getElementById('loginView');
-      const appView = document.getElementById('appView');
-      const loginForm = document.getElementById('loginForm');
-      const prenomInput = document.getElementById('prenom');
-      const passwordInput = document.getElementById('password');
-      const submitBtn = document.getElementById('submitBtn');
-      const errorMsg = document.getElementById('errorMsg');
-      const logoutBtn = document.getElementById('logoutBtn');
-      const currentUserEl = document.getElementById('currentUser');
-      const syncText = document.getElementById('syncText');
-      const calendarHeaderEl = document.getElementById('calendarHeader');
-      const calendarGridEl = document.getElementById('calendarGrid');
-      const reservationsListEl = document.getElementById('reservationsList');
-      const colorLegendEl = document.getElementById('colorLegend');
-      const prevMonthBtn = document.getElementById('prevMonth');
-      const nextMonthBtn = document.getElementById('nextMonth');
-      
-      // Modal elements
-      const modalOverlay = document.getElementById('modalOverlay');
-      const modalClose = document.getElementById('modalClose');
-      const reservationForm = document.getElementById('reservationForm');
-      
-      // Verify critical elements exist
-      if (!loginForm || !document.getElementById('prenom') || !document.getElementById('password') || !submitBtn || !document.getElementById('loginView') || !document.getElementById('appView')) {
-        console.error('Critical DOM elements missing!');
-        return;
-      }
-
       // Calendar header
       renderCalendarHeader();
       
@@ -1166,7 +1124,7 @@
       setupEventListeners();
     }
 
-    // EVENT LISTENERS (defined after init but use getElementById at call time)
+    // EVENT LISTENERS - all DOM queries inside functions
     function setupEventListeners() {
       // Login form
       const form = document.getElementById('loginForm');
