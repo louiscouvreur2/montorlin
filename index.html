@@ -738,11 +738,6 @@
       renderCalendar();
     }
 
-    function formatDateForInput(date) {
-      if (typeof date === 'string') return date;
-      return date.toISOString().split('T')[0];
-    }
-
     function formatDateFR(date) {
       return date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
     }
@@ -863,11 +858,6 @@
         const deleteBtn = document.getElementById('deleteReservationBtn');
         if (deleteBtn) deleteBtn.style.display = 'none';
       }, 300);
-    }
-
-    function formatDateForInput(date) {
-      if (typeof date === 'string') return date;
-      return date.toISOString().split('T')[0];
     }
 
     // RESERVATION CRUD
