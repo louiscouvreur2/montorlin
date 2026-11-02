@@ -748,13 +748,12 @@
       if (!listEl) return;
 
       if (upcoming.length === 0) {
-        const listEl = document.getElementById('reservationsList');
         if (listEl) listEl.innerHTML = '<p style="text-align: center; color: var(--moss); padding: 2rem;">Aucune réservation à venir. Cliquez sur un jour pour en créer une.</p>';
         return;
       }
 
-      const listEl = document.getElementById('reservationsList');
       if (listEl) {
+        listEl.innerHTML = upcoming.map(r => `
         listEl.innerHTML = upcoming.map(r => `
           <div class="reservation-item" style="border-left: 4px solid ${r.color};">
             <div class="reservation-item-info">
