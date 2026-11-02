@@ -773,10 +773,6 @@
       }
     }
 
-    function formatDateFR(date) {
-      return date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
-    }
-
     function renderColorLegend() {
       const userColors = {};
       reservations.forEach(r => { userColors[r.prenom] = r.color; });
