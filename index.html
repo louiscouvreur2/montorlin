@@ -738,10 +738,6 @@
       renderCalendar();
     }
 
-    function formatDateFR(date) {
-      return date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
-    }
-
     function renderReservationsList() {
       const upcoming = [...reservations]
         .filter(r => new Date(r.end_date) >= new Date())
