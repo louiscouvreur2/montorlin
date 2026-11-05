@@ -754,7 +754,6 @@
 
       if (listEl) {
         listEl.innerHTML = upcoming.map(r => `
-        listEl.innerHTML = upcoming.map(r => `
           <div class="reservation-item" style="border-left: 4px solid ${r.color};">
             <div class="reservation-item-info">
               <div class="reservation-item-title">${r.title}</div>
@@ -833,7 +832,6 @@
       const modal = document.getElementById('modalOverlay');
       if (modal) modal.classList.add('open');
       setTimeout(() => {
-        const titleInput = document.getElementById('resTitle');
         if (titleInput) titleInput.focus();
       }, 100);
     }
@@ -1037,21 +1035,6 @@
       const nextBtn = document.getElementById('nextMonth');
       if (prevBtn) prevBtn.addEventListener('click', () => updateMonth(-1));
       if (nextBtn) nextBtn.addEventListener('click', () => updateMonth(1));
-      
-      // Calendar header
-      renderCalendarHeader();
-    }
-
-    // Handle DOM ready
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        console.log("[DEBUG] Calling init and setupEventListeners");
-        init();
-        setupEventListeners();
-      });
-    } else {
-      init();
-      setupEventListeners();
     }
 
     // EVENT LISTENERS - all DOM queries inside functions
@@ -1160,10 +1143,15 @@
       });
     }
 
+    // Also handle calendar nav from header buttons
+    document.addEventListener('click', (e) => {
+      if (e.target.id === 'prevMonth') updateMonth(-1);
+      else if (e.target.id === 'nextMonth') updateMonth(1);
+    });
+
     // Run init when DOM is ready
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
-        console.log("[DEBUG] Calling init and setupEventListeners");
         init();
         setupEventListeners();
       });
@@ -1171,12 +1159,6 @@
       init();
       setupEventListeners();
     }
-
-    // Also handle calendar nav from header buttons
-    document.addEventListener('click', (e) => {
-      if (e.target.id === 'prevMonth') updateMonth(-1);
-      else if (e.target.id === 'nextMonth') updateMonth(1);
-    });
   </script>
 </body>
 </html>
