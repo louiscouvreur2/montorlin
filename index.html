@@ -1022,7 +1022,6 @@
       if (loginView) loginView.style.display = 'none';
       if (appView) appView.style.display = 'block';
       currentUser = prenom;
-      const currentUserEl = document.getElementById('currentUser');
       if (currentUserEl) currentUserEl.textContent = prenom;
       localStorage.setItem('montorlin-user', JSON.stringify({ prenom, loginTime: Date.now() }));
       
