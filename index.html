@@ -1425,6 +1425,62 @@
       requestAnimationFrame(() => overlay.classList.add('open'));
     }
 
+    // Custom edit modal (replaces native prompt)
+    function showEditModal(title, label, currentValue, onConfirm) {
+      const existing = document.getElementById('editModalOverlay');
+      if (existing) existing.remove();
+      
+      const overlay = document.createElement('div');
+      overlay.id = 'editModalOverlay';
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal">
+          <header class="modal-header">
+            <h2 class="modal-title">${title}</h2>
+            <button class="modal-close" aria-label="Fermer">✕</button>
+          </header>
+          <div class="photo-modal-body">
+            <form class="edit-form" id="editForm">
+              <div class="form-group">
+                <label for="editInput">${label}</label>
+                <input type="text" id="editInput" value="${currentValue}" maxlength="100" autocomplete="off">
+              </div>
+              <div class="reservation-actions">
+                <button type="button" class="btn btn-secondary" id="editCancel"><span>Annuler</span></button>
+                <button type="submit" class="btn"><span>Enregistrer</span></button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      
+      const closeModal = () => {
+        overlay.classList.remove('open');
+        setTimeout(() => overlay.remove(), 300);
+      };
+      
+      const form = overlay.querySelector('#editForm');
+      const input = overlay.querySelector('#editInput');
+      
+      overlay.querySelector('.modal-close').addEventListener('click', closeModal);
+      overlay.querySelector('#editCancel').addEventListener('click', closeModal);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+      
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const value = input.value.trim();
+        closeModal();
+        if (onConfirm) onConfirm(value);
+      });
+      
+      // Trigger open
+      requestAnimationFrame(() => {
+        overlay.classList.add('open');
+        setTimeout(() => input.focus(), 100);
+      });
+    }
+
     // RESERVATION CRUD - Firebase Realtime Database
     async function loadReservations() {
       console.log("[DEBUG] loadReservations called");
@@ -1940,23 +1996,29 @@
       const album = albums.find(a => a.id === albumId);
       if (!album) return;
       
-      const newName = prompt('Modifier le nom de l\'album:', album.name);
-      if (!newName || newName.trim() === album.name) return;
-      
-      try {
-        setSyncStatus('syncing', 'Modification...');
-        await set(ref(db, 'albums/' + albumId), {
-          ...album,
-          name: newName.trim(),
-          updatedAt: Date.now(),
-          updatedBy: currentUser
-        });
-        setSyncStatus('ok', 'Album modifié');
-      } catch (error) {
-        console.error('Edit album error:', error);
-        showError('Erreur modification: ' + error.message);
-        setSyncStatus('error', 'Erreur');
-      }
+      showEditModal(
+        'Modifier le nom de l\'album',
+        'Nouveau nom :',
+        album.name,
+        async (newName) => {
+          if (!newName || newName.trim() === album.name) return;
+          
+          try {
+            setSyncStatus('syncing', 'Modification...');
+            await set(ref(db, 'albums/' + albumId), {
+              ...album,
+              name: newName.trim(),
+              updatedAt: Date.now(),
+              updatedBy: currentUser
+            });
+            setSyncStatus('ok', 'Album modifié');
+          } catch (error) {
+            console.error('Edit album error:', error);
+            showError('Erreur modification: ' + error.message);
+            setSyncStatus('error', 'Erreur');
+          }
+        }
+      );
     }
 
     async function deleteAlbum(albumId) {
