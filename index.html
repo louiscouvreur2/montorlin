@@ -593,6 +593,7 @@
   <!-- Firebase Realtime Database SDK (CDN) -->
   <script type="module">
     console.log("[DEBUG] Module script STARTED - Firebase initialization");
+    alert("[DEBUG] Module script LOADED - if you see this, JS is running!");
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import { getDatabase, ref, push, remove, set, onValue, query, orderByChild, limitToLast, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
