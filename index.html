@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Montorlin</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -21,6 +21,8 @@
       --text: #1a2e1a;
       --text-light: #3d5a3d;
       --reservation-colors: #e8c06a, #6ab8e8, #e87a6a, #8ae8a0, #d88ae8, #e8b06a;
+      /* Mobile-first touch target */
+      --touch-target: 44px;
     }
     @media (prefers-color-scheme: dark) {
       :root {
@@ -39,13 +41,15 @@
         --text-light: #c8d0c8;
       }
     }
+    html { -webkit-text-size-adjust: 100%; }
     body {
       font-family: 'Georgia', 'Times New Roman', serif;
       background: var(--forest);
       min-height: 100vh;
-      color: var(--white);
+      color: var(--cream);
       position: relative;
       overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
     body::before {
       content: '';
@@ -129,10 +133,10 @@
       background: linear-gradient(145deg, rgba(26, 46, 26, 0.95), rgba(13, 26, 13, 0.98));
       border: 1px solid rgba(74, 107, 58, 0.3);
       border-radius: 24px;
-      padding: 2rem;
+      padding: 1.5rem;
       width: 100%;
       max-width: 1000px;
-      margin: 1rem auto;
+      margin: 0.75rem auto;
       box-shadow: 
         0 20px 60px rgba(0, 0, 0, 0.5),
         0 0 0 1px rgba(74, 107, 58, 0.2),
@@ -141,12 +145,12 @@
     }
     .logo {
       text-align: center;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
     .logo-icon {
-      width: 72px;
-      height: 72px;
-      margin: 0 auto 1rem;
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 0.75rem;
       background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
       border-radius: 50%;
       display: flex;
@@ -157,25 +161,26 @@
         0 0 0 2px rgba(212, 168, 67, 0.2),
         inset 0 2px 4px rgba(255, 255, 255, 0.2);
     }
-    .logo-icon svg { width: 36px; height: 36px; color: var(--forest-dark); }
-    h1 { font-size: 2.2rem; font-weight: 400; letter-spacing: 0.05em; color: var(--cream); margin-bottom: 0.25rem; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
-    h2 { font-size: 1.4rem; font-weight: 400; color: var(--cream); margin-bottom: 1rem; }
-    h3 { font-size: 1.1rem; font-weight: 500; color: var(--moss-light); margin-bottom: 0.75rem; }
-    .form-group { margin-bottom: 1.5rem; }
-    label { display: block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--moss-light); margin-bottom: 0.5rem; opacity: 0.8; }
+    .logo-icon svg { width: 32px; height: 32px; color: var(--forest-dark); }
+    h1 { font-size: 1.8rem; font-weight: 400; letter-spacing: 0.05em; color: var(--cream); margin-bottom: 0.25rem; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+    h2 { font-size: 1.3rem; font-weight: 400; color: var(--cream); margin-bottom: 0.75rem; }
+    h3 { font-size: 1.1rem; font-weight: 500; color: var(--cream); margin-bottom: 0.5rem; }
+    .form-group { margin-bottom: 1.25rem; }
+    label { display: block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-light); margin-bottom: 0.4rem; opacity: 0.9; }
     input, select, textarea {
       width: 100%;
-      padding: 1rem 1.25rem;
+      padding: 0.875rem 1rem;
       background: rgba(13, 26, 13, 0.8);
       border: 2px solid rgba(74, 107, 58, 0.3);
       border-radius: 12px;
       color: var(--cream);
       font-family: inherit;
-      font-size: 1.05rem;
+      font-size: 1rem;
       transition: all 0.3s ease;
       outline: none;
+      min-height: var(--touch-target);
     }
-    input::placeholder, textarea::placeholder { color: rgba(200, 220, 200, 0.4); }
+    input::placeholder, textarea::placeholder { color: rgba(200, 220, 200, 0.5); }
     input:focus, select:focus, textarea:focus {
       border-color: var(--gold);
       box-shadow: 0 0 0 4px rgba(212, 168, 67, 0.15), 0 0 20px rgba(212, 168, 67, 0.1);
@@ -183,11 +188,11 @@
     }
     input:not(:placeholder-shown), select:not([value=""]) { border-color: var(--moss-light); }
     .btn {
-      padding: 1rem 2rem;
+      padding: 0.875rem 1.5rem;
       border: none;
       border-radius: 12px;
       font-family: inherit;
-      font-size: 1rem;
+      font-size: 0.9rem;
       font-weight: 600;
       letter-spacing: 0.05em;
       text-transform: uppercase;
@@ -195,6 +200,12 @@
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
+      min-height: var(--touch-target);
+      min-width: var(--touch-target);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
     }
     .btn::before {
       content: '';
@@ -213,6 +224,7 @@
     .btn-secondary::before { background: linear-gradient(90deg, var(--moss) 0%, var(--moss-light) 100%); }
     .btn-danger { background: var(--forest-light); color: #e87a6a; }
     .btn-danger::before { background: linear-gradient(90deg, #c85a4a 0%, #e87a6a 100%); }
+    .btn-icon { padding: 0.625rem; }
     .error-message {
       display: none;
       text-align: center;
@@ -221,7 +233,7 @@
       border: 1px solid rgba(239, 68, 68, 0.3);
       border-radius: 10px;
       color: #fca5a5;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       margin-bottom: 1rem;
       animation: shake 0.4s ease;
     }
@@ -233,260 +245,100 @@
     .error-message.show { display: block; }
     .footer-note {
       text-align: center;
-      margin-top: 2rem;
-      font-size: 0.8rem;
+      margin-top: 1.5rem;
+      font-size: 0.75rem;
       color: var(--moss);
       opacity: 0.6;
     }
     .footer-note a { color: var(--gold-light); text-decoration: none; }
     .footer-note a:hover { text-decoration: underline; }
 
-    /* Calendar Styles */
+    /* App Header - Mobile First */
     .app-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 2rem;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    .user-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      background: rgba(212, 168, 67, 0.15);
-      border: 1px solid rgba(212, 168, 67, 0.3);
-      border-radius: 999px;
-      font-size: 0.9rem;
-      color: var(--gold-light);
-    }
-    .user-badge .dot {
-      width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite;
-    }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-    .calendar-container { overflow-x: auto; }
-    .calendar-header {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-      margin-bottom: 8px;
-      padding: 0 4px;
-    }
-    .calendar-day-name {
-      text-align: center;
-      padding: 0.75rem 0;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--moss-light);
-      opacity: 0.7;
-    }
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-    }
-    .calendar-day {
-      min-height: 100px;
-      background: rgba(13, 26, 13, 0.6);
-      border: 1px solid rgba(74, 107, 58, 0.3);
-      border-radius: 12px;
-      padding: 0.5rem;
-      position: relative;
-      transition: all 0.2s ease;
-    }
-    .calendar-day:hover {
-      background: rgba(13, 26, 13, 0.9);
-      border-color: var(--gold);
-    }
-    .calendar-day.other-month { opacity: 0.3; }
-    .calendar-day.today {
-      border-color: var(--gold);
-      box-shadow: inset 0 0 0 2px var(--gold);
-    }
-    .calendar-day.today::before {
-      content: '';
-      position: absolute;
-      top: 4px; right: 4px;
-      width: 8px; height: 8px;
-      background: var(--gold);
-      border-radius: 50%;
-    }
-    .day-number {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--cream);
-      margin-bottom: 0.5rem;
-    }
-    .calendar-day.other-month .day-number { color: var(--moss); }
-    .reservations-list { display: flex; flex-direction: column; gap: 4px; }
-    .reservation-chip {
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      cursor: pointer;
-      transition: transform 0.15s ease;
-      border: 1px solid transparent;
-    }
-    .reservation-chip:hover { transform: scale(1.02); z-index: 10; border-color: rgba(255,255,255,0.3); }
-    .more-reservations {
-      font-size: 0.65rem;
-      color: var(--moss-light);
-      text-align: center;
-      padding: 2px;
-      opacity: 0.7;
-    }
-
-    /* Modal */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(4px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      padding: 1rem;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-    }
-    .modal-overlay.open { opacity: 1; visibility: visible; }
-    .modal {
-      background: linear-gradient(145deg, rgba(26, 46, 26, 0.98), rgba(13, 26, 13, 0.99));
-      border: 1px solid rgba(74, 107, 58, 0.4);
-      border-radius: 20px;
-      padding: 2rem;
-      width: 100%;
-      max-width: 500px;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 25px 80px rgba(0,0,0,0.6);
-      transform: scale(0.95);
-      transition: transform 0.3s ease;
-    }
-    .modal-overlay.open .modal { transform: scale(1); }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-    .modal-title { font-size: 1.5rem; color: var(--cream); }
-    .modal-close {
-      background: none; border: none; color: var(--moss-light); font-size: 1.5rem; cursor: pointer; padding: 0.5rem;
-      opacity: 0.7; transition: opacity 0.2s;
-    }
-    .modal-close:hover { opacity: 1; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
-    textarea { min-height: 100px; resize: vertical; font-family: inherit; }
-
-    .reservation-detail {
-      background: rgba(13, 26, 13, 0.6);
-      border: 1px solid rgba(74, 107, 58, 0.3);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-top: 1rem;
-    }
-    .reservation-detail-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
       margin-bottom: 1rem;
-      gap: 1rem;
-    }
-    .reservation-detail-title { font-size: 1.2rem; color: var(--cream); font-weight: 500; }
-    .reservation-detail-meta { display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem; color: var(--moss-light); }
-    .reservation-detail-dates { display: flex; gap: 1rem; font-size: 0.85rem; }
-    .reservation-actions { display: flex; gap: 0.75rem; margin-top: 1rem; }
-    .reservation-actions .btn { flex: 1; }
-
-    .reservations-panel {
-      background: rgba(13, 26, 13, 0.5);
-      border: 1px solid rgba(74, 107, 58, 0.2);
-      border-radius: 16px;
-      padding: 1.5rem;
-      margin-top: 1.5rem;
-    }
-    .reservations-list-full { display: flex; flex-direction: column; gap: 0.75rem; }
-    .reservation-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem;
-      background: rgba(13, 26, 13, 0.6);
-      border: 1px solid rgba(74, 107, 58, 0.3);
-      border-radius: 10px;
-      gap: 1rem;
       flex-wrap: wrap;
+      gap: 0.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(74, 107, 58, 0.2);
     }
-    .reservation-item-info { flex: 1; min-width: 200px; }
-    .reservation-item-title { font-weight: 600; color: var(--cream); margin-bottom: 0.25rem; }
-    .reservation-item-meta { display: flex; gap: 1rem; font-size: 0.8rem; color: var(--moss-light); flex-wrap: wrap; }
-    .reservation-item-actions { display: flex; gap: 0.5rem; }
-
-    .color-legend { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(74, 107, 58, 0.2); }
-    .color-legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--moss-light); }
-    .color-legend-dot { width: 12px; height: 12px; border-radius: 3px; }
-
-    .sync-indicator {
-      display: inline-flex;
+    .app-header h1 { font-size: 1.4rem; margin: 0; }
+    .header-actions {
+      display: flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.5rem 1rem;
+    }
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.375rem 0.75rem;
       background: rgba(74, 107, 58, 0.15);
       border: 1px solid rgba(74, 107, 58, 0.3);
       border-radius: 999px;
-      font-size: 0.8rem;
-      color: var(--moss-light);
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--gold-light);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
-    .sync-indicator .dot {
-      width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite;
+    .status-indicator .dot {
+      width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite;
     }
-    .sync-indicator.syncing .dot { background: #f59e0b; animation: none; }
-    .sync-indicator.error .dot { background: #ef4444; animation: none; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--forest-dark);
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .header-btn {
+      padding: 0.5rem 0.875rem;
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
 
-    @media (max-width: 768px) {
-      .card { padding: 1.5rem; margin: 0.5rem; border-radius: 16px; }
-      h1 { font-size: 1.8rem; }
-      .logo-icon { width: 64px; height: 64px; }
-      .logo-icon svg { width: 32px; height: 32px; }
-      .calendar-day { min-height: 80px; padding: 0.35rem; }
-      .day-number { font-size: 1rem; }
-      .form-row { grid-template-columns: 1fr; }
-      .reservation-item { flex-direction: column; align-items: flex-start; }
-      .reservation-item-actions { width: 100%; justify-content: flex-end; }
-      .tab-nav { flex-direction: column; }
-      .tab-btn { text-align: center; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-    }
-
-    /* TAB NAVIGATION STYLES */
+    /* Tab Navigation - Horizontal Scroll on Mobile */
     .tab-nav {
       display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
+      gap: 0.375rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
       border-bottom: 1px solid rgba(74, 107, 58, 0.2);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      padding: 0 0.25rem 0.75rem;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
     }
+    .tab-nav::-webkit-scrollbar { display: none; }
     .tab-btn {
-      flex: 1;
-      padding: 0.75rem 1rem;
+      flex: 0 0 auto;
+      scroll-snap-align: start;
+      padding: 0.625rem 1rem;
       background: var(--forest-light);
       border: 1px solid rgba(74, 107, 58, 0.3);
-      border-radius: 10px;
+      border-radius: 999px;
       color: var(--moss-light);
       font-family: inherit;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.2s ease;
+      white-space: nowrap;
+      min-height: var(--touch-target);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
     }
     .tab-btn:hover {
       background: var(--forest);
@@ -504,6 +356,270 @@
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(4px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Calendar Styles */
+    .calendar-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .calendar-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      padding: 0 0.25rem;
+    }
+    .calendar-header-title { font-size: 1.1rem; color: var(--cream); margin: 0; }
+    .calendar-nav {
+      display: flex;
+      gap: 0.375rem;
+    }
+    .calendar-nav-btn {
+      width: var(--touch-target);
+      height: var(--touch-target);
+      border-radius: 10px;
+      background: var(--forest-light);
+      border: 1px solid rgba(74, 107, 58, 0.3);
+      color: var(--gold-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+    .calendar-nav-btn:hover {
+      background: var(--forest);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+    .calendar-nav-btn:active { transform: scale(0.95); }
+    .calendar-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+      margin-bottom: 6px;
+      padding: 0 3px;
+    }
+    .calendar-day-name {
+      text-align: center;
+      padding: 0.5rem 0;
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--gold-light);
+      opacity: 0.9;
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+    }
+    .calendar-day {
+      min-height: 72px;
+      background: rgba(13, 26, 13, 0.6);
+      border: 1px solid rgba(74, 107, 58, 0.3);
+      border-radius: 10px;
+      padding: 0.375rem;
+      position: relative;
+      transition: all 0.2s ease;
+      min-width: 0;
+    }
+    .calendar-day:hover {
+      background: rgba(13, 26, 13, 0.9);
+      border-color: var(--gold);
+    }
+    .calendar-day.other-month { opacity: 0.3; }
+    .calendar-day.today {
+      border-color: var(--gold);
+      box-shadow: inset 0 0 0 2px var(--gold);
+    }
+    .calendar-day.today::before {
+      content: '';
+      position: absolute;
+      top: 3px; right: 3px;
+      width: 6px; height: 6px;
+      background: var(--gold);
+      border-radius: 50%;
+    }
+    .day-number {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--cream);
+      margin-bottom: 0.25rem;
+      line-height: 1.2;
+    }
+    .calendar-day.other-month .day-number { color: var(--moss); }
+    .reservations-list { display: flex; flex-direction: column; gap: 3px; }
+    .reservation-chip {
+      padding: 3px 6px;
+      border-radius: 5px;
+      font-size: 0.6rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+      border: 1px solid transparent;
+      min-height: 28px;
+      display: flex;
+      align-items: center;
+    }
+    .reservation-chip:hover { transform: scale(1.02); z-index: 10; border-color: rgba(255,255,255,0.3); }
+    .more-reservations {
+      font-size: 0.55rem;
+      color: var(--moss-light);
+      text-align: center;
+      padding: 2px;
+      opacity: 0.7;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 1rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    .modal-overlay.open { opacity: 1; visibility: visible; }
+    .modal {
+      background: linear-gradient(145deg, rgba(26, 46, 26, 0.98), rgba(13, 26, 13, 0.99));
+      border: 1px solid rgba(74, 107, 58, 0.4);
+      border-radius: 20px;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.6);
+      transform: scale(0.95);
+      transition: transform 0.3s ease;
+    }
+    .modal-overlay.open .modal { transform: scale(1); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+    .modal-title { font-size: 1.3rem; color: var(--cream); margin: 0; }
+    .modal-close {
+      background: none; border: none; color: var(--moss-light); font-size: 1.5rem; cursor: pointer; padding: 0.5rem;
+      opacity: 0.7; transition: opacity 0.2s; min-width: var(--touch-target); min-height: var(--touch-target);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-close:hover { opacity: 1; color: var(--cream); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    textarea { min-height: 90px; resize: vertical; font-family: inherit; }
+
+    .reservation-detail {
+      background: rgba(13, 26, 13, 0.6);
+      border: 1px solid rgba(74, 107, 58, 0.3);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-top: 1rem;
+    }
+    .reservation-detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .reservation-detail-title { font-size: 1.1rem; color: var(--cream); font-weight: 500; margin: 0; }
+    .reservation-detail-meta { display: flex; flex-direction: column; gap: 0.375rem; font-size: 0.8rem; color: var(--moss-light); }
+    .reservation-detail-dates { display: flex; gap: 1rem; font-size: 0.75rem; }
+    .reservation-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+    .reservation-actions .btn { flex: 1; }
+
+    .reservations-panel {
+      background: rgba(13, 26, 13, 0.5);
+      border: 1px solid rgba(74, 107, 58, 0.2);
+      border-radius: 16px;
+      padding: 1.25rem;
+      margin-top: 1rem;
+    }
+    .reservations-list-full { display: flex; flex-direction: column; gap: 0.625rem; }
+    .reservation-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.875rem;
+      background: rgba(13, 26, 13, 0.6);
+      border: 1px solid rgba(74, 107, 58, 0.3);
+      border-radius: 10px;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .reservation-item-info { flex: 1; min-width: 180px; }
+    .reservation-item-title { font-weight: 600; color: var(--cream); margin-bottom: 0.2rem; font-size: 0.95rem; }
+    .reservation-item-meta { display: flex; gap: 1rem; font-size: 0.7rem; color: var(--moss-light); flex-wrap: wrap; }
+    .reservation-item-actions { display: flex; gap: 0.375rem; }
+    .reservation-item-actions .btn { padding: 0.5rem 0.875rem; font-size: 0.75rem; }
+
+    .color-legend { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(74, 107, 58, 0.2); }
+    .color-legend-item { display: flex; align-items: center; gap: 0.375rem; font-size: 0.7rem; color: var(--moss-light); }
+    .color-legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+    .sync-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.375rem 0.75rem;
+      background: rgba(74, 107, 58, 0.15);
+      border: 1px solid rgba(74, 107, 58, 0.3);
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--gold-light);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .sync-indicator .dot {
+      width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite;
+    }
+    .sync-indicator.syncing .dot { background: #f59e0b; animation: none; }
+    .sync-indicator.error .dot { background: #ef4444; animation: none; }
+
+    /* Mobile-first responsive */
+    @media (min-width: 480px) {
+      .card { padding: 2rem; margin: 1rem auto; border-radius: 24px; }
+      h1 { font-size: 2.2rem; }
+      .logo-icon { width: 72px; height: 72px; }
+      .logo-icon svg { width: 36px; height: 36px; }
+      .calendar-day { min-height: 100px; padding: 0.5rem; }
+      .day-number { font-size: 1.1rem; }
+      .form-row { grid-template-columns: 1fr 1fr; }
+      .reservation-item { flex-wrap: nowrap; }
+      .reservation-item-actions { width: auto; }
+      .tab-nav { flex-wrap: nowrap; overflow-x: visible; }
+      .tab-btn { flex: 1; text-align: center; }
+      .header-actions { gap: 1rem; }
+    }
+    @media (min-width: 768px) {
+      .calendar-container { overflow-x: visible; }
+      .calendar-nav-btn { width: 40px; height: 40px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+    /* High contrast for accessibility */
+    @media (prefers-contrast: high) {
+      :root {
+        --cream: #ffffff;
+        --gold: #ffd700;
+        --moss-light: #90ee90;
+        --forest: #000000;
+        --forest-dark: #000000;
+        --forest-light: #1a1a1a;
+      }
+      .calendar-day { border-width: 2px; }
+      .btn { border: 2px solid currentColor; }
     }
   </style>
 </head>
@@ -540,58 +656,54 @@
         <label for="password">MOT DE PASSE</label>
         <input type="password" id="password" name="password" autocomplete="current-password" placeholder="Celui de la famille" required aria-required="true">
       </div>
-      <button type="submit" class="btn" id="submitBtn"><span>Entrer</span></button>
+      <button type="submit" class="btn" style="width: 100%;" id="submitBtn"><span>Entrer</span></button>
     </form>
 
     <p class="footer-note">Mot de passe partagé par toute la famille · Synchronisé via Firebase</p>
   </main>
 
   <!-- APP VIEW (hidden initially) -->
-  <main id="appView" class="card" style="display: none; max-width: 1000px;">
+  <main id="appView" class="card" style="display: none;">
     <header class="app-header">
-      <div>
-        <h1>Montorlin</h1>
-      </div>
-      <div style="display: flex; align-items: center; gap: 1rem;">
-        <div class="sync-indicator" id="syncIndicator">
+      <h1>Montorlin</h1>
+      <div class="header-actions">
+        <div class="status-indicator" id="syncIndicator">
           <span class="dot"></span>
           <span id="syncText">Synchronisé</span>
         </div>
-        <div class="user-badge">
-          <span class="dot"></span>
-          <span id="currentUser"></span>
-        </div>
-        <button class="btn btn-secondary" id="logoutBtn" style="padding: 0.75rem 1.5rem;"><span>Déconnexion</span></button>
+        <div class="user-avatar" id="userAvatar" aria-label="Utilisateur connecté">?</div>
+        <button class="btn btn-secondary header-btn" id="logoutBtn"><span>Déconnexion</span></button>
       </div>
     </header>
 
     <!-- TAB NAVIGATION -->
-    <nav class="tab-nav" id="tabNav">
-      <button class="tab-btn active" data-tab="accueil" id="tabAccueil">🏠 Accueil</button>
-      <button class="tab-btn" data-tab="reservations" id="tabReservations">📅 Réservations</button>
-      <button class="tab-btn" data-tab="album" id="tabAlbum">📸 Album</button>
+    <nav class="tab-nav" id="tabNav" role="tablist" aria-label="Navigation principale">
+      <button class="tab-btn active" role="tab" aria-selected="true" data-tab="accueil" id="tabAccueil">🏠 Accueil</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="reservations" id="tabReservations">📅 Réservations</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="album" id="tabAlbum">📸 Album</button>
     </nav>
 
     <!-- TAB ACCUEIL -->
-    <div class="tab-content" id="tabContentAccueil">
-      <div style="text-align: center; padding: 3rem; color: var(--moss-light);">
+    <div class="tab-content" id="tabContentAccueil" role="tabpanel" aria-labelledby="tabAccueil">
+      <div style="text-align: center; padding: 2rem 1rem; color: var(--moss-light);">
         <h3>🏠 Accueil</h3>
         <p>Bienvenue à Montorlin !</p>
+        <p style="font-size: 0.85rem; margin-top: 0.5rem; opacity: 0.7;">Sélectionne un onglet pour commencer.</p>
       </div>
     </div>
 
     <!-- TAB RÉSERVATIONS -->
-    <div class="tab-content" id="tabContentReservations" style="display: none;">
+    <div class="tab-content" id="tabContentReservations" role="tabpanel" aria-labelledby="tabReservations" style="display: none;">
       <div class="calendar-container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-          <h2 class="calendar-header-title" style="font-size: 1.3rem; color: var(--cream);"></h2>
-          <div style="display: flex; gap: 0.5rem;">
-            <button class="btn btn-secondary" id="prevMonth" style="padding: 0.5rem 1rem;"><span>◀</span></button>
-            <button class="btn btn-secondary" id="nextMonth" style="padding: 0.5rem 1rem;"><span>▶</span></button>
+        <div class="calendar-header-row">
+          <h2 class="calendar-header-title" id="calendarTitle"></h2>
+          <div class="calendar-nav">
+            <button class="calendar-nav-btn" id="prevMonth" aria-label="Mois précédent" title="Mois précédent">◀</button>
+            <button class="calendar-nav-btn" id="nextMonth" aria-label="Mois suivant" title="Mois suivant">▶</button>
           </div>
         </div>
-        <div class="calendar-header" id="calendarHeader"></div>
-        <div class="calendar-grid" id="calendarGrid"></div>
+        <div class="calendar-header" id="calendarHeader" role="rowheader"></div>
+        <div class="calendar-grid" id="calendarGrid" role="grid"></div>
       </div>
 
       <div class="reservations-panel">
@@ -603,8 +715,8 @@
     </div>
 
     <!-- TAB ALBUM -->
-    <div class="tab-content" id="tabContentAlbum" style="display: none;">
-      <div style="text-align: center; padding: 3rem; color: var(--moss-light);">
+    <div class="tab-content" id="tabContentAlbum" role="tabpanel" aria-labelledby="tabAlbum" style="display: none;">
+      <div style="text-align: center; padding: 2rem 1rem; color: var(--moss-light);">
         <h3>📸 Album</h3>
         <p>Photos de famille à venir...</p>
       </div>
@@ -746,7 +858,7 @@
     function renderCalendarHeader() {
       const headerEl = document.getElementById('calendarHeader');
       if (!headerEl) return;
-      const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+      const days = ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM'];
       headerEl.innerHTML = days.map(d => `<div class="calendar-day-name">${d}</div>`).join('');
     }
 
@@ -785,7 +897,7 @@
       const month = currentMonth.getMonth();
       const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
       
-      const headerTitle = document.querySelector('.calendar-header-title');
+      const headerTitle = document.getElementById('calendarTitle');
       if (headerTitle) headerTitle.textContent = `${monthNames[month]} ${year}`;
 
       const days = getMonthDays(year, month);
@@ -799,15 +911,15 @@
         const isOtherMonth = day.otherMonth;
         
         return `
-          <div class="calendar-day ${isOtherMonth ? 'other-month' : ''} ${isToday ? 'today' : ''}" data-date="${dateStr}">
+          <div class="calendar-day ${isOtherMonth ? 'other-month' : ''} ${isToday ? 'today' : ''}" data-date="${dateStr}" role="gridcell" aria-label="${dateStr}${dayReservations.length ? ': ' + dayReservations.map(r => r.title).join(', ') : ''}">
             <div class="day-number">${day.date.getDate()}</div>
             <div class="reservations-list">
-              ${dayReservations.slice(0, 4).map(r => `
+              ${dayReservations.slice(0, 3).map(r => `
                 <div class="reservation-chip" style="background: ${r.color}; border-color: ${r.color};" data-id="${r.id}" title="${r.title} - ${r.prenom}${r.notes ? ': ' + r.notes : ''}">
-                  ${r.title} (${r.prenom})
+                  ${r.title}
                 </div>
               `).join('')}
-              ${dayReservations.length > 4 ? `<div class="more-reservations">+${dayReservations.length - 4} autres</div>` : ''}
+              ${dayReservations.length > 3 ? `<div class="more-reservations">+${dayReservations.length - 3} autres</div>` : ''}
             </div>
           </div>
         `;
@@ -844,7 +956,7 @@
       if (!listEl) return;
 
       if (upcoming.length === 0) {
-        if (listEl) listEl.innerHTML = '<p style="text-align: center; color: var(--moss); padding: 2rem;">Aucune réservation à venir. Cliquez sur un jour pour en créer une.</p>';
+        if (listEl) listEl.innerHTML = '<p style="text-align: center; color: var(--moss-light); padding: 2rem;">Aucune réservation à venir. Cliquez sur un jour pour en créer une.</p>';
         return;
       }
 
@@ -1047,11 +1159,6 @@
       }
     }
 
-    // Expose functions to global scope for onclick handlers
-    window.openModal = openModal;
-    window.deleteReservation = deleteReservation;
-    window.saveReservation = saveReservation;
-
     function showError(message) {
       const errorMsg = document.getElementById('errorMsg');
       if (errorMsg) {
@@ -1084,16 +1191,17 @@
       console.log("[DEBUG] showApp called with:", prenom);
       const loginView = document.getElementById('loginView');
       const appView = document.getElementById('appView');
-      const currentUserEl = document.getElementById('currentUser');
-      
-      console.log("[DEBUG] loginView:", loginView);
-      console.log("[DEBUG] appView:", appView);
-      console.log("[DEBUG] currentUserEl:", currentUserEl);
       
       if (loginView) loginView.style.display = 'none';
       if (appView) appView.style.display = 'block';
       currentUser = prenom;
-      if (currentUserEl) currentUserEl.textContent = prenom;
+      
+      const userAvatar = document.getElementById('userAvatar');
+      if (userAvatar) userAvatar.textContent = prenom.charAt(0).toUpperCase();
+      
+      const syncIndicator = document.getElementById('syncIndicator');
+      if (syncIndicator) syncIndicator.style.display = 'inline-flex';
+      
       localStorage.setItem('montorlin-user', JSON.stringify({ prenom, loginTime: Date.now() }));
       
       loadFamilyMembers();
@@ -1256,14 +1364,25 @@
         btn.addEventListener('click', () => {
           const tab = btn.dataset.tab;
           // Update active button
-          tabBtns.forEach(b => b.classList.remove('active'));
+          tabBtns.forEach(b => {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+          });
           btn.classList.add('active');
+          btn.setAttribute('aria-selected', 'true');
           // Show/hide tab content
-          document.querySelectorAll('.tab-content, #tabContentReservations').forEach(content => {
+          document.querySelectorAll('.tab-content').forEach(content => {
             content.style.display = 'none';
           });
           const targetContent = document.getElementById('tabContent' + tab.charAt(0).toUpperCase() + tab.slice(1));
-          if (targetContent) targetContent.style.display = 'block';
+          if (targetContent) {
+            targetContent.style.display = 'block';
+            targetContent.setAttribute('aria-hidden', 'false');
+          }
+          // Update aria-hidden on others
+          document.querySelectorAll('.tab-content').forEach(content => {
+            if (content !== targetContent) content.setAttribute('aria-hidden', 'true');
+          });
         });
       });
     }
