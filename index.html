@@ -567,9 +567,17 @@
 
     <!-- TAB NAVIGATION -->
     <nav class="tab-nav" id="tabNav">
-      <button class="tab-btn active" data-tab="reservations" id="tabReservations">📅 Réservations</button>
-      <button class="tab-btn" data-tab="tab2" id="tabTab2">📋 Onglet 2</button>
+      <button class="tab-btn active" data-tab="accueil" id="tabAccueil">🏠 Accueil</button>
+      <button class="tab-btn" data-tab="reservations" id="tabReservations">📅 Réservations</button>
+      <button class="tab-btn" data-tab="album" id="tabAlbum">📸 Album</button>
     </nav>
+
+    <div class="calendar-container" id="tabContentAccueil" style="display: none;">
+      <div style="text-align: center; padding: 3rem; color: var(--moss-light);">
+        <h3>🏠 Accueil</h3>
+        <p>Bienvenue à Montorlin !</p>
+      </div>
+    </div>
 
     <div class="calendar-container" id="tabContentReservations">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
@@ -591,11 +599,11 @@
     <div class="color-legend" id="colorLegend"></div>
   </div>
 
-  <!-- TAB 2 CONTENT -->
-  <div class="tab-content" id="tabContentTab2" style="display: none;">
+  <!-- TAB ALBUM CONTENT -->
+  <div class="tab-content" id="tabContentAlbum" style="display: none;">
     <div style="text-align: center; padding: 3rem; color: var(--moss-light);">
-      <h3>📋 Onglet 2</h3>
-      <p>Contenu à venir...</p>
+      <h3>📸 Album</h3>
+      <p>Photos de famille à venir...</p>
     </div>
   </div>
 </main>
