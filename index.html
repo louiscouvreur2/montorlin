@@ -878,10 +878,12 @@
 
     // RESERVATION CRUD - Firebase Realtime Database
     async function loadReservations() {
+      console.log("[DEBUG] loadReservations called");
       setSyncStatus('syncing', 'Chargement...');
       try {
         const reservationsQuery = query(reservationsRef, orderByChild('timestamp'), limitToLast(100));
         onValue(reservationsQuery, (snapshot) => {
+          console.log("[DEBUG] onValue callback triggered, snapshot:", snapshot.val());
           const data = snapshot.val();
           if (data) {
             reservations = Object.entries(data).map(([id, val]) => normalizeReservation(id, val))
@@ -889,6 +891,7 @@
           } else {
             reservations = [];
           }
+          console.log("[DEBUG] Reservations loaded:", reservations);
           renderCalendar();
           renderReservationsList();
           renderColorLegend();
@@ -1004,9 +1007,14 @@
     }
 
     function showApp(prenom) {
+      console.log("[DEBUG] showApp called with:", prenom);
       const loginView = document.getElementById('loginView');
       const appView = document.getElementById('appView');
       const currentUserEl = document.getElementById('currentUser');
+      
+      console.log("[DEBUG] loginView:", loginView);
+      console.log("[DEBUG] appView:", appView);
+      console.log("[DEBUG] currentUserEl:", currentUserEl);
       
       if (loginView) loginView.style.display = 'none';
       if (appView) appView.style.display = 'block';
@@ -1107,8 +1115,14 @@
               last_seen: Date.now(),
               online: true
             });
+            console.log("[DEBUG] Firebase set succeeded");
             setSyncStatus('ok');
-          } catch (e) { console.error('[DEBUG] User set failed:', e); }
+          } catch (e) { 
+            console.error('[DEBUG] User set failed:', e);
+            showError('Erreur Firebase: ' + e.message);
+            resetButton();
+            return;
+          }
 
           localStorage.setItem('montorlin-user', JSON.stringify({ prenom: prenom, loginTime: Date.now() }));
           
