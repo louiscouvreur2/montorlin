@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>mont</title>
+  <title>Montorlin</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -502,7 +502,7 @@
       <button type="submit" class="btn" id="submitBtn"><span>Entrer</span></button>
     </form>
 
-    <p class="footer-note">Mot de passe partagé par toute la famille · Synchronisé via Supabase</p>
+    <p class="footer-note">Mot de passe partagé par toute la famille · Synchronisé via Firebase</p>
   </main>
 
   <!-- APP VIEW (hidden initially) -->
@@ -590,14 +590,27 @@
     </div>
   </div>
 
-  <!-- Supabase SDK (CDN) -->
+  <!-- Firebase Realtime Database SDK (CDN) -->
   <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getDatabase, ref, push, remove, set, onValue, query, orderByChild, limitToLast, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
-    // CONSTANTS ONLY at module level
-    const SUPABASE_URL = 'https://acpriztsaogtmrsjvasz.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_Y4mVzZhMLQH-VhSHsaXetw_Epqx5rg7';
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Firebase config (Realtime Database) - using the working site-montorlin project
+    const firebaseConfig = {
+      apiKey: "AIzaSyDUMMY_KEY_PLACEHOLDER", // Will be replaced by Firebase SDK
+      authDomain: "site-montorlin.firebaseapp.com",
+      databaseURL: "https://site-montorlin-default-rtdb.firebaseio.com",
+      projectId: "site-montorlin",
+      storageBucket: "site-montorlin.firebasestorage.app",
+      messagingSenderId: "109488883918",
+      appId: "1:109488883918:web:d8c4b9fcc379aea9e7e89f"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const reservationsRef = ref(db, 'reservations');
+
     const FAMILY_PASSWORD = "refuge2026";
 
     const RESERVATION_COLORS = [
@@ -644,6 +657,20 @@
       let hash = 0;
       for (let i = 0; i < prenom.length; i++) hash = prenom.charCodeAt(i) + ((hash << 5) - hash);
       return colors[Math.abs(hash) % colors.length];
+    }
+
+    // Normalize reservation data - handles both old and new formats
+    function normalizeReservation(id, val) {
+      return {
+        id,
+        title: val.title || val.name || '',
+        start_date: val.start_date || val.start || val.startDate || '',
+        end_date: val.end_date || val.end || val.endDate || '',
+        color: val.color || getColorForUser(val.prenom || val.author || 'Inconnu'),
+        notes: val.notes || '',
+        prenom: val.prenom || val.author || val.user || 'Inconnu',
+        timestamp: val.timestamp || val.createdAt || val.time || Date.now()
+      };
     }
 
     // CALENDAR FUNCTIONS
@@ -849,22 +876,27 @@
       }, 300);
     }
 
-    // RESERVATION CRUD
+    // RESERVATION CRUD - Firebase Realtime Database
     async function loadReservations() {
       setSyncStatus('syncing', 'Chargement...');
       try {
-        const { data, error } = await supabase
-          .from('reservations')
-          .select('*')
-          .order('start_date', { ascending: true });
-        
-        if (error) throw error;
-        
-        reservations = data || [];
-        renderCalendar();
-        renderReservationsList();
-        renderColorLegend();
-        setSyncStatus('ok', 'Synchronisé');
+        const reservationsQuery = query(reservationsRef, orderByChild('timestamp'), limitToLast(100));
+        onValue(reservationsQuery, (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            reservations = Object.entries(data).map(([id, val]) => normalizeReservation(id, val))
+              .sort((a, b) => b.timestamp - a.timestamp);
+          } else {
+            reservations = [];
+          }
+          renderCalendar();
+          renderReservationsList();
+          renderColorLegend();
+          setSyncStatus('ok', 'Synchronisé');
+        }, (error) => {
+          console.error('Firebase error:', error);
+          setSyncStatus('error', 'Erreur de connexion');
+        });
       } catch (error) {
         console.error('Load reservations error:', error);
         setSyncStatus('error', 'Erreur chargement');
@@ -906,27 +938,20 @@
         color,
         notes,
         prenom: currentUser,
-        updated_at: new Date().toISOString()
+        timestamp: Date.now()
       };
 
       try {
         setSyncStatus('syncing', isEdit ? 'Mise à jour...' : 'Création...');
         
         if (isEdit) {
-          const { error } = await supabase
-            .from('reservations')
-            .update(reservationData)
-            .eq('id', document.getElementById('reservationId')?.value);
-          if (error) throw error;
+          const resId = document.getElementById('reservationId')?.value;
+          await set(ref(db, 'reservations/' + resId), reservationData);
         } else {
-          const { error } = await supabase
-            .from('reservations')
-            .insert(reservationData);
-          if (error) throw error;
+          await push(reservationsRef, reservationData);
         }
         
         closeModal();
-        await loadReservations();
         setSyncStatus('ok', 'Synchronisé');
       } catch (error) {
         console.error('Save reservation error:', error);
@@ -940,14 +965,8 @@
       
       try {
         setSyncStatus('syncing', 'Suppression...');
-        const { error } = await supabase
-          .from('reservations')
-          .delete()
-          .eq('id', id);
-        if (error) throw error;
-        
+        await remove(ref(db, 'reservations/' + id));
         closeModal();
-        await loadReservations();
         setSyncStatus('ok', 'Synchronisé');
       } catch (error) {
         console.error('Delete error:', error);
@@ -1003,13 +1022,13 @@
 
     async function loadFamilyMembers() {
       try {
-        const { data, error } = await supabase
-          .from('users')
-          .select('prenom')
-          .order('prenom');
-        if (!error && data) {
-          familyMembers = data.map(u => u.prenom);
-        }
+        const usersRef = ref(db, 'users');
+        onValue(usersRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            familyMembers = Object.values(data).map(u => u.prenom);
+          }
+        });
       } catch (e) { console.warn('Could not load family members:', e); }
     }
 
@@ -1078,17 +1097,20 @@
             return;
           }
 
-          // Save to Supabase
+          // Save to Firebase
           try {
             setSyncStatus('syncing', 'Connexion...');
-            console.log("[DEBUG] Calling supabase upsert...");
-            await supabase
-              .from('users')
-              .upsert({ prenom: document.getElementById('prenom')?.value?.trim(), last_seen: new Date().toISOString(), online: true }, { onConflict: 'prenom' });
+            console.log("[DEBUG] Calling firebase set...");
+            const usersRef = ref(db, 'users');
+            await set(ref(usersRef, prenom), {
+              prenom: prenom,
+              last_seen: Date.now(),
+              online: true
+            });
             setSyncStatus('ok');
-          } catch (e) { console.error('[DEBUG] User upsert failed:', e); }
+          } catch (e) { console.error('[DEBUG] User set failed:', e); }
 
-          localStorage.setItem('montorlin-user', JSON.stringify({ prenom: document.getElementById('prenom')?.value?.trim(), loginTime: Date.now() }));
+          localStorage.setItem('montorlin-user', JSON.stringify({ prenom: prenom, loginTime: Date.now() }));
           
           const submitBtn2 = document.getElementById('submitBtn');
           if (submitBtn2) {
@@ -1098,7 +1120,7 @@
           }
           
           console.log("[DEBUG] Calling showApp...");
-          setTimeout(() => showApp(document.getElementById('prenom')?.value?.trim()), 800);
+          setTimeout(() => showApp(prenom), 800);
         });
       }
 
