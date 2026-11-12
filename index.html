@@ -460,9 +460,50 @@
       .form-row { grid-template-columns: 1fr; }
       .reservation-item { flex-direction: column; align-items: flex-start; }
       .reservation-item-actions { width: 100%; justify-content: flex-end; }
+      .tab-nav { flex-direction: column; }
+      .tab-btn { text-align: center; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+
+    /* TAB NAVIGATION STYLES */
+    .tab-nav {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(74, 107, 58, 0.2);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      background: var(--forest-light);
+      border: 1px solid rgba(74, 107, 58, 0.3);
+      border-radius: 10px;
+      color: var(--moss-light);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .tab-btn:hover {
+      background: var(--forest);
+      border-color: var(--gold);
+      color: var(--cream);
+    }
+    .tab-btn.active {
+      background: linear-gradient(90deg, var(--moss) 0%, var(--moss-light) 100%);
+      border-color: var(--moss-light);
+      color: var(--forest-dark);
+    }
+    .tab-content {
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
@@ -524,7 +565,13 @@
       </div>
     </header>
 
-    <div class="calendar-container">
+    <!-- TAB NAVIGATION -->
+    <nav class="tab-nav" id="tabNav">
+      <button class="tab-btn active" data-tab="reservations" id="tabReservations">📅 Réservations</button>
+      <button class="tab-btn" data-tab="tab2" id="tabTab2">📋 Onglet 2</button>
+    </nav>
+
+    <div class="calendar-container" id="tabContentReservations">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
         <h2 class="calendar-header-title" style="font-size: 1.3rem; color: var(--cream);"></h2>
         <div style="display: flex; gap: 0.5rem;">
@@ -542,7 +589,16 @@
     </div>
 
     <div class="color-legend" id="colorLegend"></div>
-  </main>
+  </div>
+
+  <!-- TAB 2 CONTENT -->
+  <div class="tab-content" id="tabContentTab2" style="display: none;">
+    <div style="text-align: center; padding: 3rem; color: var(--moss-light);">
+      <h3>📋 Onglet 2</h3>
+      <p>Contenu à venir...</p>
+    </div>
+  </div>
+</main>
 
   <!-- MODAL FOR RESERVATION -->
   <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -1181,6 +1237,23 @@
         if (e.key === 'ArrowLeft') { updateMonth(-1); }
         else if (e.key === 'ArrowRight') { updateMonth(1); }
         else if (e.key === 'Escape') { closeModal(); }
+      });
+
+      // Tab navigation
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tab = btn.dataset.tab;
+          // Update active button
+          tabBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          // Show/hide tab content
+          document.querySelectorAll('.tab-content, #tabContentReservations').forEach(content => {
+            content.style.display = 'none';
+          });
+          const targetContent = document.getElementById('tabContent' + tab.charAt(0).toUpperCase() + tab.slice(1));
+          if (targetContent) targetContent.style.display = 'block';
+        });
       });
     }
 
