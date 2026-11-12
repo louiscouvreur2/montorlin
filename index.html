@@ -572,41 +572,44 @@
       <button class="tab-btn" data-tab="album" id="tabAlbum">📸 Album</button>
     </nav>
 
-    <div class="calendar-container" id="tabContentAccueil" style="display: none;">
+    <!-- TAB ACCUEIL -->
+    <div class="tab-content" id="tabContentAccueil">
       <div style="text-align: center; padding: 3rem; color: var(--moss-light);">
         <h3>🏠 Accueil</h3>
         <p>Bienvenue à Montorlin !</p>
       </div>
     </div>
 
-    <div class="calendar-container" id="tabContentReservations">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h2 class="calendar-header-title" style="font-size: 1.3rem; color: var(--cream);"></h2>
-        <div style="display: flex; gap: 0.5rem;">
-          <button class="btn btn-secondary" id="prevMonth" style="padding: 0.5rem 1rem;"><span>◀</span></button>
-          <button class="btn btn-secondary" id="nextMonth" style="padding: 0.5rem 1rem;"><span>▶</span></button>
+    <!-- TAB RÉSERVATIONS -->
+    <div class="tab-content" id="tabContentReservations" style="display: none;">
+      <div class="calendar-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h2 class="calendar-header-title" style="font-size: 1.3rem; color: var(--cream);"></h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" id="prevMonth" style="padding: 0.5rem 1rem;"><span>◀</span></button>
+            <button class="btn btn-secondary" id="nextMonth" style="padding: 0.5rem 1rem;"><span>▶</span></button>
+          </div>
         </div>
+        <div class="calendar-header" id="calendarHeader"></div>
+        <div class="calendar-grid" id="calendarGrid"></div>
       </div>
-      <div class="calendar-header" id="calendarHeader"></div>
-      <div class="calendar-grid" id="calendarGrid"></div>
+
+      <div class="reservations-panel">
+        <h3>Réservations à venir</h3>
+        <div class="reservations-list-full" id="reservationsList"></div>
+      </div>
+
+      <div class="color-legend" id="colorLegend"></div>
     </div>
 
-    <div class="reservations-panel">
-      <h3>Réservations à venir</h3>
-      <div class="reservations-list-full" id="reservationsList"></div>
+    <!-- TAB ALBUM -->
+    <div class="tab-content" id="tabContentAlbum" style="display: none;">
+      <div style="text-align: center; padding: 3rem; color: var(--moss-light);">
+        <h3>📸 Album</h3>
+        <p>Photos de famille à venir...</p>
+      </div>
     </div>
-
-    <div class="color-legend" id="colorLegend"></div>
-  </div>
-
-  <!-- TAB ALBUM CONTENT -->
-  <div class="tab-content" id="tabContentAlbum" style="display: none;">
-    <div style="text-align: center; padding: 3rem; color: var(--moss-light);">
-      <h3>📸 Album</h3>
-      <p>Photos de famille à venir...</p>
-    </div>
-  </div>
-</main>
+  </main>
 
   <!-- MODAL FOR RESERVATION -->
   <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
