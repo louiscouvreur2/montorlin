@@ -1383,6 +1383,48 @@
       }, 300);
     }
 
+    // Custom confirmation modal (replaces native confirm)
+    function showConfirmModal(title, message, onConfirm) {
+      const existing = document.getElementById('confirmModalOverlay');
+      if (existing) existing.remove();
+      
+      const overlay = document.createElement('div');
+      overlay.id = 'confirmModalOverlay';
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal">
+          <header class="modal-header">
+            <h2 class="modal-title">${title}</h2>
+            <button class="modal-close" aria-label="Fermer">✕</button>
+          </header>
+          <div class="photo-modal-body">
+            <p style="color: var(--moss-light); margin-bottom: 1.5rem;">${message}</p>
+            <div class="reservation-actions">
+              <button type="button" class="btn btn-secondary" id="confirmCancel"><span>Annuler</span></button>
+              <button type="button" class="btn" id="confirmOk"><span>Supprimer</span></button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      
+      const closeModal = () => {
+        overlay.classList.remove('open');
+        setTimeout(() => overlay.remove(), 300);
+      };
+      
+      overlay.querySelector('.modal-close').addEventListener('click', closeModal);
+      overlay.querySelector('#confirmCancel').addEventListener('click', closeModal);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+      overlay.querySelector('#confirmOk').addEventListener('click', () => {
+        closeModal();
+        if (onConfirm) onConfirm();
+      });
+      
+      // Trigger open
+      requestAnimationFrame(() => overlay.classList.add('open'));
+    }
+
     // RESERVATION CRUD - Firebase Realtime Database
     async function loadReservations() {
       console.log("[DEBUG] loadReservations called");
@@ -1459,30 +1501,34 @@
           await set(ref(db, 'reservations/' + resId), reservationData);
         } else {
           await push(reservationsRef, reservationData);
-        }
         
-        closeModal();
-        setSyncStatus('ok', 'Synchronisé');
-      } catch (error) {
-        console.error('Save reservation error:', error);
-        showError('Erreur lors de la sauvegarde: ' + error.message);
-        setSyncStatus('error', 'Erreur');
-      }
-    }
+                  closeModal();
+                  setSyncStatus('ok', 'Synchronisé');
+                } catch (error) {
+                  console.error('Save reservation error:', error);
+                  showError('Erreur lors de la sauvegarde: ' + error.message);
+                  setSyncStatus('error', 'Erreur');
+                }
+              }
 
-    async function deleteReservation(id) {
-      if (!confirm('Supprimer cette réservation ?')) return;
-      
-      try {
-        setSyncStatus('syncing', 'Suppression...');
-        await remove(ref(db, 'reservations/' + id));
-        closeModal();
-        setSyncStatus('ok', 'Synchronisé');
-      } catch (error) {
-        console.error('Delete error:', error);
-        showError('Erreur suppression: ' + error.message);
-        setSyncStatus('error', 'Erreur');
-      }
+              async function deleteReservation(id) {
+                showConfirmModal(
+                  'Supprimer cette réservation ?',
+                  'Cette action est irréversible.',
+                  async () => {
+                    try {
+                      setSyncStatus('syncing', 'Suppression...');
+                      await remove(ref(db, 'reservations/' + id));
+                      closeModal();
+                      setSyncStatus('ok', 'Synchronisé');
+                    } catch (error) {
+                      console.error('Delete error:', error);
+                      showError('Erreur suppression: ' + error.message);
+                      setSyncStatus('error', 'Erreur');
+                    }
+                  }
+                );
+              }
     }
 
     function showError(message) {
@@ -1772,18 +1818,24 @@
     }
 
     async function deletePhoto(photoId) {
-      if (!confirm('Supprimer cette photo ?')) return;
       if (!currentAlbumId) return;
       
-      try {
-        setSyncStatus('syncing', 'Suppression...');
-        await remove(ref(db, 'albums/' + currentAlbumId + '/photos/' + photoId));
-        setSyncStatus('ok', 'Photo supprimée');
-      } catch (error) {
-        console.error('Delete photo error:', error);
-        showError('Erreur suppression: ' + error.message);
-        setSyncStatus('error', 'Erreur');
-      }
+      // Show custom confirmation modal instead of native confirm
+      showConfirmModal(
+        'Supprimer cette photo ?',
+        'Cette action est irréversible.',
+        async () => {
+          try {
+            setSyncStatus('syncing', 'Suppression...');
+            await remove(ref(db, 'albums/' + currentAlbumId + '/photos/' + photoId));
+            setSyncStatus('ok', 'Photo supprimée');
+          } catch (error) {
+            console.error('Delete photo error:', error);
+            showError('Erreur suppression: ' + error.message);
+            setSyncStatus('error', 'Erreur');
+          }
+        }
+      );
     }
 
     // Photo Modal
@@ -1908,30 +1960,34 @@
     }
 
     async function deleteAlbum(albumId) {
-      if (!confirm('Supprimer cet album et toutes ses photos ?')) return;
-      
-      try {
-        setSyncStatus('syncing', 'Suppression album...');
-        await remove(ref(db, 'albums/' + albumId));
-        // If we deleted the current album, select another
-        if (currentAlbumId === albumId) {
-          currentAlbumId = null;
-          const remainingAlbum = albums.find(a => a.id !== albumId);
-          if (remainingAlbum) {
-            selectAlbum(remainingAlbum.id);
-          } else {
-            renderAlbumTabs();
-            renderAlbumGrid();
+      showConfirmModal(
+        'Supprimer cet album et toutes ses photos ?',
+        'Cette action est irréversible.',
+        async () => {
+          try {
+            setSyncStatus('syncing', 'Suppression album...');
+            await remove(ref(db, 'albums/' + albumId));
+            // If we deleted the current album, select another
+            if (currentAlbumId === albumId) {
+              currentAlbumId = null;
+              const remainingAlbum = albums.find(a => a.id !== albumId);
+              if (remainingAlbum) {
+                selectAlbum(remainingAlbum.id);
+              } else {
+                renderAlbumTabs();
+                renderAlbumGrid();
+              }
+            } else {
+              renderAlbumTabs();
+            }
+            setSyncStatus('ok', 'Album supprimé');
+          } catch (error) {
+            console.error('Delete album error:', error);
+            showError('Erreur suppression: ' + error.message);
+            setSyncStatus('error', 'Erreur');
           }
-        } else {
-          renderAlbumTabs();
         }
-        setSyncStatus('ok', 'Album supprimé');
-      } catch (error) {
-        console.error('Delete album error:', error);
-        showError('Erreur suppression: ' + error.message);
-        setSyncStatus('error', 'Erreur');
-      }
+      );
     }
 
     // Upload zone drag & drop
