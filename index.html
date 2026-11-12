@@ -1111,8 +1111,7 @@
           try {
             setSyncStatus('syncing', 'Connexion...');
             console.log("[DEBUG] Calling firebase set...");
-            const usersRef = ref(db, 'users');
-            await set(ref(usersRef, prenom), {
+            await set(ref(db, 'users/' + prenom), {
               prenom: prenom,
               last_seen: Date.now(),
               online: true
