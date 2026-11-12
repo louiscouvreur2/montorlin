@@ -2090,13 +2090,16 @@
       // Calendar header
       renderCalendarHeader();
       
-      // Check existing session
+      // Check existing session - only pre-fill username, still require password
       const savedUser = localStorage.getItem('montorlin-user');
       if (savedUser) {
         try {
           const user = JSON.parse(savedUser);
-          showApp(user.prenom);
-          return;
+          // Pre-fill username but still require password
+          const prenomInput = document.getElementById('prenom');
+          if (prenomInput && user.prenom) {
+            prenomInput.value = user.prenom;
+          }
         } catch {
           localStorage.removeItem('montorlin-user');
         }
