@@ -1494,24 +1494,25 @@
       };
 
       try {
-        setSyncStatus('syncing', isEdit ? 'Mise à jour...' : 'Création...');
+              setSyncStatus('syncing', isEdit ? 'Mise à jour...' : 'Création...');
         
-        if (isEdit) {
-          const resId = document.getElementById('reservationId')?.value;
-          await set(ref(db, 'reservations/' + resId), reservationData);
-        } else {
-          await push(reservationsRef, reservationData);
-        
-                  closeModal();
-                  setSyncStatus('ok', 'Synchronisé');
-                } catch (error) {
-                  console.error('Save reservation error:', error);
-                  showError('Erreur lors de la sauvegarde: ' + error.message);
-                  setSyncStatus('error', 'Erreur');
-                }
+              if (isEdit) {
+                const resId = document.getElementById('reservationId')?.value;
+                await set(ref(db, 'reservations/' + resId), reservationData);
+              } else {
+                await push(reservationsRef, reservationData);
               }
+        
+              closeModal();
+              setSyncStatus('ok', 'Synchronisé');
+            } catch (error) {
+              console.error('Save reservation error:', error);
+              showError('Erreur lors de la sauvegarde: ' + error.message);
+              setSyncStatus('error', 'Erreur');
+            }
+          }
 
-              async function deleteReservation(id) {
+          async function deleteReservation(id) {
                 showConfirmModal(
                   'Supprimer cette réservation ?',
                   'Cette action est irréversible.',
