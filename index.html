@@ -966,7 +966,7 @@
           <line x1="12" y1="3" x2="12" y2="15"></line>
         </svg>
         <p>Glissez-déposez ou cliquez pour ajouter des photos</p>
-        <small>JPEG, PNG, WebP · Max 5 Mo par photo (base64 dans Firebase)</small>
+        <small>JPEG, PNG, WebP · Max 8 Mo par photo (base64 dans Firebase Realtime DB · limite ~10 Mo écriture)</small>
       </div>
 
       <div class="album-grid" id="albumGrid" role="grid" aria-label="Photos de l'album">
@@ -1674,7 +1674,7 @@
         return;
       }
       
-      const maxSize = 5 * 1024 * 1024; // 5 MB
+      const maxSize = 8 * 1024 * 1024; // 8 MB (Firebase Realtime DB limit ~10MB write, base64 adds ~33%)
       const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
       
       Array.from(files).forEach(async (file) => {
@@ -1684,7 +1684,7 @@
         }
         if (file.size > maxSize) {
           const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-          showError(`Fichier trop volumineux: ${file.name} (${sizeMB} Mo > 5 Mo max)`);
+          showError(`Fichier trop volumineux: ${file.name} (${sizeMB} Mo > 8 Mo max). Pour des fichiers plus gros, il faudrait Firebase Storage.`);
           return;
         }
         
