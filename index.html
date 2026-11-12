@@ -592,6 +592,7 @@
 
   <!-- Firebase Realtime Database SDK (CDN) -->
   <script type="module">
+    console.log("[DEBUG] Module script STARTED - Firebase initialization");
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import { getDatabase, ref, push, remove, set, onValue, query, orderByChild, limitToLast, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
@@ -610,6 +611,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const reservationsRef = ref(db, 'reservations');
+    console.log("[DEBUG] Firebase initialized, db:", db, "reservationsRef:", reservationsRef);
 
     const FAMILY_PASSWORD = "refuge2026";
 
