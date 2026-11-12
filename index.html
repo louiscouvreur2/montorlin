@@ -1884,20 +1884,6 @@
       }
     }
 
-    await push(ref(db, 'albums'), {
-          name,
-          createdAt: Date.now(),
-          createdBy: currentUser
-        });
-        input.value = '';
-        setSyncStatus('ok', 'Album créé');
-      } catch (error) {
-        console.error('Create album error:', error);
-        showError('Erreur création: ' + error.message);
-        setSyncStatus('error', 'Erreur');
-      }
-    }
-
     async function editAlbum(albumId) {
       const album = albums.find(a => a.id === albumId);
       if (!album) return;
