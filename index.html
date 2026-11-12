@@ -2077,6 +2077,15 @@
       else if (e.target.id === 'nextMonth') updateMonth(1);
     });
 
+    // Expose album functions to global scope for onclick handlers
+    window.openPhotoModal = openPhotoModal;
+    window.deletePhoto = deletePhoto;
+    window.savePhotoMeta = savePhotoMeta;
+    window.closePhotoModal = closePhotoModal;
+    window.createAlbum = createAlbum;
+    window.selectAlbum = selectAlbum;
+    window.handleFileUpload = handleFileUpload;
+
     // Run init when DOM is ready
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
