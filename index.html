@@ -1009,7 +1009,7 @@
       <div class="album-header">
         <h3>📸 Album</h3>
         <div class="album-create-form">
-          <input type="text" id="newAlbumName" placeholder="Nom du nouvel album..." maxlength="50">
+          <input type="text" id="newAlbumName" placeholder="Nom de l'album" maxlength="50">
           <button class="btn btn-secondary" id="createAlbumBtn"><span>Créer</span></button>
         </div>
       </div>
@@ -1023,8 +1023,8 @@
           <polyline points="17 8 12 3 7 8"></polyline>
           <line x1="12" y1="3" x2="12" y2="15"></line>
         </svg>
-        <p>Glissez-déposez ou cliquez pour ajouter des photos</p>
-        <small>JPEG, PNG, WebP · Max 8 Mo par photo (base64 dans Firebase Realtime DB · limite ~10 Mo écriture)</small>
+        <p>Ajouter des photos</p>
+        <small>Max 8 Mo</small>
       </div>
 
       <div class="album-grid" id="albumGrid" role="grid" aria-label="Photos de l'album">
@@ -1034,8 +1034,8 @@
             <circle cx="8.5" cy="8.5" r="1.5"></circle>
             <polyline points="21 15 16 10 5 21"></polyline>
           </svg>
-          <p>Aucune photo pour l'instant</p>
-          <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.6;">Créez un album et ajoutez des photos !</p>
+          <p>Aucune photo</p>
+          <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.6;">Créez un album et ajoutez des photos</p>
         </div>
       </div>
     </div>
@@ -1052,7 +1052,7 @@
         <input type="hidden" id="reservationId">
         <div class="form-group">
           <label for="resTitle">Titre</label>
-          <input type="text" id="resTitle" placeholder="Ex: Week-end ski, Anniversaire Léa..." required maxlength="100">
+          <input type="text" id="resTitle" placeholder="Titre" required maxlength="100">
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -1077,7 +1077,7 @@
         </div>
         <div class="form-group">
           <label for="resNotes">Notes</label>
-          <textarea id="resNotes" placeholder="Détails, nombre de personnes, matériel..."></textarea>
+          <textarea id="resNotes" placeholder="Notes (optionnel)"></textarea>
         </div>
         <div class="reservation-actions">
           <button type="button" class="btn btn-danger" id="deleteReservationBtn" style="display: none;"><span>Supprimer</span></button>
@@ -1099,11 +1099,11 @@
         <form class="photo-modal-form" id="photoModalForm">
           <div class="form-group">
             <label for="photoModalTitleInput">Titre</label>
-            <input type="text" id="photoModalTitleInput" placeholder="Titre de la photo" maxlength="100">
+            <input type="text" id="photoModalTitleInput" placeholder="Titre" maxlength="100">
           </div>
           <div class="form-group">
             <label for="photoModalCommentInput">Commentaire</label>
-            <textarea id="photoModalCommentInput" placeholder="Commentaire, description..."></textarea>
+            <textarea id="photoModalCommentInput" placeholder="Commentaire (optionnel)"></textarea>
           </div>
           <div class="form-group">
             <label>Albums</label>
