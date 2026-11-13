@@ -656,6 +656,40 @@
             }
             .album-content { display: none; }
             .album-content.active { display: block; animation: fadeIn 0.2s ease; }
+            .album-checkboxes {
+              display: flex;
+              flex-direction: column;
+              gap: 0.5rem;
+              max-height: 200px;
+              overflow-y: auto;
+            }
+            .album-checkbox {
+              display: flex;
+              align-items: center;
+              gap: 0.75rem;
+              padding: 0.75rem;
+              background: rgba(13, 26, 13, 0.6);
+              border: 1px solid rgba(74, 107, 58, 0.3);
+              border-radius: 8px;
+              cursor: pointer;
+              transition: all 0.2s ease;
+            }
+            .album-checkbox:hover {
+              border-color: var(--gold);
+              background: rgba(212, 168, 67, 0.1);
+            }
+            .album-checkbox input[type="checkbox"] {
+              width: 20px;
+              height: 20px;
+              accent-color: var(--gold);
+              cursor: pointer;
+            }
+            .album-checkbox-label {
+              color: var(--cream);
+              font-size: 0.9rem;
+              flex: 1;
+              cursor: pointer;
+            }
         .upload-zone {
           border: 2px dashed rgba(74, 107, 58, 0.4);
           border-radius: 16px;
@@ -1080,6 +1114,10 @@
           <div class="form-group">
             <label for="photoModalCommentInput">Commentaire</label>
             <textarea id="photoModalCommentInput" placeholder="Commentaire, description..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Albums</label>
+            <div id="photoModalAlbums" class="album-checkboxes"></div>
           </div>
           <div class="reservation-actions">
             <button type="button" class="btn btn-danger" id="photoModalDeleteBtn" style="display: none;"><span>Supprimer</span></button>
@@ -1960,6 +1998,7 @@
       const titleInput = document.getElementById('photoModalTitleInput');
       const commentInput = document.getElementById('photoModalCommentInput');
       const deleteBtn = document.getElementById('photoModalDeleteBtn');
+      const albumsContainer = document.getElementById('photoModalAlbums');
       
       if (titleEl) titleEl.textContent = photo.title || 'Photo';
       if (imgEl) {
@@ -1973,6 +2012,16 @@
           closePhotoModal();
           deletePhoto(photoId);
         };
+      }
+      
+      // Render album checkboxes
+      if (albumsContainer) {
+        albumsContainer.innerHTML = albums.map(album => `
+          <label class="album-checkbox">
+            <input type="checkbox" value="${album.id}" ${photo.albumIds && photo.albumIds.includes(album.id) ? 'checked' : ''}>
+            <span class="album-checkbox-label">${album.name}</span>
+          </label>
+        `).join('');
       }
       
       // Store current photo ID for save
@@ -2002,12 +2051,22 @@
       
       const titleInput = document.getElementById('photoModalTitleInput');
       const commentInput = document.getElementById('photoModalCommentInput');
+      const albumsContainer = document.getElementById('photoModalAlbums');
+      
+      // Get selected album IDs from checkboxes
+      const selectedAlbumIds = [];
+      if (albumsContainer) {
+        albumsContainer.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+          selectedAlbumIds.push(cb.value);
+        });
+      }
       
       try {
         setSyncStatus('syncing', 'Sauvegarde...');
         await set(ref(db, 'photos/' + photoId), {
           title: titleInput?.value?.trim() || '',
           comment: commentInput?.value?.trim() || '',
+          albumIds: selectedAlbumIds,
           updatedAt: Date.now(),
           updatedBy: currentUser
         });
