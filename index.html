@@ -1708,6 +1708,33 @@
       loadAllPhotos();
     }
 
+    async function loadAllPhotos() {
+      console.log('[DEBUG] loadAllPhotos called');
+      try {
+        const photosRef = ref(db, 'photos');
+        const photosQuery = query(photosRef, orderByChild('createdAt'), limitToLast(200));
+        onValue(photosQuery, (snapshot) => {
+          console.log('[DEBUG] Photos onValue:', snapshot.val());
+          const data = snapshot.val();
+          if (data) {
+            allPhotos = Object.entries(data).map(([id, val]) => normalizePhoto(id, val))
+              .reduce((acc, photo) => { acc[photo.id] = photo; return acc; }, {});
+          } else {
+            allPhotos = {};
+          }
+          console.log('[DEBUG] Photos loaded:', Object.keys(allPhotos).length);
+          // Re-render current album if an album is selected
+          if (currentAlbumId) {
+            renderAlbumGrid();
+          }
+        }, (error) => {
+          console.error('Firebase photos error:', error);
+        });
+      } catch (error) {
+        console.error('Load photos error:', error);
+      }
+    }
+
     function renderAlbumTabs() {
       const tabsContainer = document.getElementById('albumTabs');
       if (!tabsContainer) return;
