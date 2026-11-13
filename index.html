@@ -1130,8 +1130,9 @@
     let reservations = [];
     let familyMembers = [];
 
-    // Album State
+    // Album State - NEW: photos stored globally with albumIds array
     let albums = [];
+    let allPhotos = {};  // All photos indexed by ID, each has albumIds: []
     let currentAlbumId = null;
     let currentAlbumName = null;
 
@@ -1652,26 +1653,26 @@
 
     // ALBUM FUNCTIONS
     function normalizeAlbum(id, val) {
-      return {
-        id,
-        name: val.name || val.title || 'Sans nom',
-        photos: val.photos || {},
-        createdAt: val.createdAt || val.timestamp || Date.now(),
-        createdBy: val.createdBy || currentUser || 'Inconnu'
-      };
-    }
+          return {
+            id,
+            name: val.name || val.title || 'Sans nom',
+            createdAt: val.createdAt || val.timestamp || Date.now(),
+            createdBy: val.createdBy || currentUser || 'Inconnu'
+          };
+        }
 
-    function normalizePhoto(id, val) {
-      return {
-        id,
-        title: val.title || val.name || '',
-        comment: val.comment || val.description || '',
-        dataUrl: val.dataUrl || val.url || '',
-        mimeType: val.mimeType || 'image/jpeg',
-        createdAt: val.createdAt || val.timestamp || Date.now(),
-        createdBy: val.createdBy || val.author || currentUser || 'Inconnu'
-      };
-    }
+        function normalizePhoto(id, val) {
+          return {
+            id,
+            title: val.title || val.name || '',
+            comment: val.comment || val.description || '',
+            dataUrl: val.dataUrl || val.url || '',
+            mimeType: val.mimeType || 'image/jpeg',
+            albumIds: val.albumIds || [],  // NEW: array of album IDs
+            createdAt: val.createdAt || val.time || Date.now(),
+            createdBy: val.createdBy || val.author || currentUser || 'Inconnu'
+          };
+        }
 
     async function loadAlbums() {
       console.log('[DEBUG] loadAlbums called');
@@ -1702,10 +1703,9 @@
           console.error('Firebase albums error:', error);
           setSyncStatus('error', 'Erreur albums');
         });
-      } catch (error) {
-        console.error('Load albums error:', error);
-        setSyncStatus('error', 'Erreur chargement albums');
-      }
+      
+      // Also load all photos globally
+      loadAllPhotos();
     }
 
     function renderAlbumTabs() {
@@ -1779,8 +1779,11 @@
         return;
       }
       
-      const photos = album.photos ? Object.entries(album.photos).map(([id, val]) => normalizePhoto(id, val))
-        .sort((a, b) => b.createdAt - a.createdAt) : [];
+      // NEW: Filter photos by albumIds containing currentAlbumId
+      const photos = Object.entries(allPhotos)
+        .filter(([id, photo]) => photo.albumIds && photo.albumIds.includes(currentAlbumId))
+        .map(([id, val]) => normalizePhoto(id, val))
+        .sort((a, b) => b.createdAt - a.createdAt);
       
       if (photos.length === 0) {
         gridEl.innerHTML = `
@@ -1843,19 +1846,22 @@
         
         try {
           const dataUrl = await fileToDataUrl(file);
+          const photoId = push(ref(db, 'photos')).key;  // Generate ID first
           const photoData = {
             title: file.name.replace(/\.[^/.]+$/, ''),
             comment: '',
             dataUrl,
             mimeType: file.type,
+            albumIds: [currentAlbumId],  // NEW: array with current album
             createdAt: Date.now(),
             createdBy: currentUser
           };
           
-          const albumPhotosRef = ref(db, 'albums/' + currentAlbumId + '/photos');
-          await push(albumPhotosRef, photoData);
+          // Save photo globally under /photos/{photoId}
+          await set(ref(db, 'photos/' + photoId), photoData);
           
           setSyncStatus('ok', 'Photo ajoutée');
+          renderAlbumGrid();  // Refresh the grid
         } catch (error) {
           console.error('Upload error:', error);
           showError('Erreur upload: ' + error.message);
@@ -1874,17 +1880,34 @@
     }
 
     async function deletePhoto(photoId) {
-      if (!currentAlbumId) return;
-      
       // Show custom confirmation modal instead of native confirm
       showConfirmModal(
         'Supprimer cette photo ?',
-        'Cette action est irréversible.',
+        'Cette action est irréversible. La photo sera supprimée de tous les albums.',
         async () => {
           try {
             setSyncStatus('syncing', 'Suppression...');
-            await remove(ref(db, 'albums/' + currentAlbumId + '/photos/' + photoId));
+            
+            // Get the photo to check its albumIds
+            const photo = allPhotos[photoId];
+            if (!photo) {
+              showError('Photo introuvable');
+              return;
+            }
+            
+            // If photo is only in one album, delete it completely
+            // Otherwise, remove the current album from its albumIds
+            if (photo.albumIds && photo.albumIds.length <= 1) {
+              // Delete completely
+              await remove(ref(db, 'photos/' + photoId));
+            } else {
+              // Remove only the current album from albumIds
+              const newAlbumIds = photo.albumIds.filter(id => id !== currentAlbumId);
+              await set(ref(db, 'photos/' + photoId + '/albumIds'), newAlbumIds);
+            }
+            
             setSyncStatus('ok', 'Photo supprimée');
+            renderAlbumGrid();
           } catch (error) {
             console.error('Delete photo error:', error);
             showError('Erreur suppression: ' + error.message);
@@ -1896,10 +1919,8 @@
 
     // Photo Modal
     function openPhotoModal(photoId) {
-      const album = albums.find(a => a.id === currentAlbumId);
-      if (!album) return;
-      
-      const photo = album.photos ? Object.entries(album.photos || {}).map(([id, val]) => normalizePhoto(id, val)).find(p => p.id === photoId) : null;
+      // Get photo from global allPhotos object
+      const photo = allPhotos[photoId];
       if (!photo) return;
       
       const overlay = document.getElementById('photoModalOverlay');
@@ -1946,14 +1967,14 @@
       e.preventDefault();
       const form = e.target;
       const photoId = form.dataset.photoId;
-      if (!photoId || !currentAlbumId) return;
+      if (!photoId) return;
       
       const titleInput = document.getElementById('photoModalTitleInput');
       const commentInput = document.getElementById('photoModalCommentInput');
       
       try {
         setSyncStatus('syncing', 'Sauvegarde...');
-        await set(ref(db, 'albums/' + currentAlbumId + '/photos/' + photoId), {
+        await set(ref(db, 'photos/' + photoId), {
           title: titleInput?.value?.trim() || '',
           comment: commentInput?.value?.trim() || '',
           updatedAt: Date.now(),
