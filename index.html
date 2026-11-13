@@ -2061,15 +2061,25 @@
         });
       }
       
+      // Get existing photo to preserve all fields
+      const existingPhoto = allPhotos[photoId];
+      if (!existingPhoto) {
+        showError('Photo introuvable');
+        return;
+      }
+      
       try {
         setSyncStatus('syncing', 'Sauvegarde...');
-        await set(ref(db, 'photos/' + photoId), {
-          title: titleInput?.value?.trim() || '',
-          comment: commentInput?.value?.trim() || '',
+        // Merge existing photo with updates, preserving all fields
+        const updatedPhoto = {
+          ...existingPhoto,
+          title: titleInput?.value?.trim() || existingPhoto.title || '',
+          comment: commentInput?.value?.trim() || existingPhoto.comment || '',
           albumIds: selectedAlbumIds,
           updatedAt: Date.now(),
           updatedBy: currentUser
-        });
+        };
+        await set(ref(db, 'photos/' + photoId), updatedPhoto);
         closePhotoModal();
         setSyncStatus('ok', 'Sauvegardé');
       } catch (error) {
