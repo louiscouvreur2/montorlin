@@ -578,54 +578,65 @@
               display: flex;
               justify-content: space-between;
               align-items: center;
-              margin-bottom: 1rem;
+              margin-bottom: 1.25rem;
               flex-wrap: wrap;
-              gap: 0.5rem;
+              gap: 0.75rem;
+              padding-bottom: 0.75rem;
+              border-bottom: 1px solid rgba(74, 107, 58, 0.15);
             }
-            .album-header h3 { margin: 0; font-size: 1.1rem; }
+            .album-header h3 { margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--cream-100); }
             .album-tabs {
               display: flex;
-              gap: 0.375rem;
+              gap: 0.5rem;
               overflow-x: auto;
-              padding-bottom: 0.5rem;
+              padding-bottom: 0.75rem;
               scroll-snap-type: x mandatory;
               -webkit-overflow-scrolling: touch;
+              margin-bottom: 1rem;
             }
-            .album-tab-wrapper {
-              display: inline-flex;
-              align-items: center;
-              gap: 0.25rem;
-              flex: 0 0 auto;
-              scroll-snap-align: start;
-            }
+            .album-tab-wrapper { display: inline-flex; align-items: center; gap: 0.375rem; flex: 0 0 auto; scroll-snap-align: start; }
             .album-tab-btn {
               scroll-snap-align: start;
-              padding: 0.5rem 0.875rem;
-              background: var(--forest-light);
-              border: 1px solid rgba(74, 107, 58, 0.3);
+              padding: 0.625rem 1.125rem;
+              background: rgba(16, 32, 16, 0.8);
+              border: 2px solid rgba(74, 107, 58, 0.3);
               border-radius: 999px;
-              color: var(--moss-light);
+              color: var(--cream-300);
               font-family: inherit;
-              font-size: 0.75rem;
-              font-weight: 500;
+              font-size: 0.8125rem;
+              font-weight: 600;
               cursor: pointer;
-              transition: all 0.2s ease;
+              transition: all 0.25s ease;
               white-space: nowrap;
               min-height: var(--touch-target);
               display: inline-flex;
               align-items: center;
-              gap: 0.375rem;
+              gap: 0.5rem;
+              position: relative;
+              overflow: hidden;
+            }
+            .album-tab-btn::before {
+              content: '';
+              position: absolute;
+              inset: 0;
+              background: linear-gradient(135deg, rgba(212, 168, 67, 0.2) 0%, transparent 60%);
+              opacity: 0;
+              transition: opacity 0.25s ease;
             }
             .album-tab-btn:hover {
-              background: var(--forest);
-              border-color: var(--gold);
-              color: var(--cream);
+              background: rgba(74, 107, 58, 0.4);
+              border-color: var(--gold-400);
+              color: var(--cream-100);
+              transform: translateY(-1px);
             }
+            .album-tab-btn:hover::before { opacity: 1; }
             .album-tab-btn.active {
-              background: linear-gradient(90deg, var(--moss) 0%, var(--moss-light) 100%);
-              border-color: var(--moss-light);
-              color: var(--forest-dark);
+              background: linear-gradient(135deg, var(--moss-500) 0%, var(--moss-400) 100%);
+              border-color: var(--moss-300);
+              color: var(--forest-900);
+              box-shadow: 0 4px 20px rgba(74, 107, 58, 0.5), inset 0 1px 0 rgba(255,255,255,0.1);
             }
+            .album-tab-btn.active::before { opacity: 1; background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%); }
             .album-tab-actions {
               display: flex;
               gap: 0.125rem;
@@ -691,24 +702,39 @@
               cursor: pointer;
             }
         .upload-zone {
-          border: 2px dashed rgba(74, 107, 58, 0.4);
+          border: 3px dashed var(--gold-400);
           border-radius: 16px;
-          padding: 2rem 1rem;
+          padding: 2.5rem 1.5rem;
           text-align: center;
-          color: var(--moss-light);
-          transition: all 0.2s ease;
+          color: var(--cream-200);
+          background: linear-gradient(135deg, rgba(212, 168, 67, 0.08) 0%, rgba(16, 32, 16, 0.6) 100%);
+          transition: all 0.3s ease;
           cursor: pointer;
-          margin-bottom: 1rem;
+          margin-bottom: 1.25rem;
+          position: relative;
+          overflow: hidden;
+        }
+        .upload-zone::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(212, 168, 67, 0.15) 0%, transparent 60%);
+          opacity: 0;
+          transition: opacity 0.3s ease;
         }
         .upload-zone:hover, .upload-zone.drag-over {
-          border-color: var(--gold);
-          background: rgba(212, 168, 67, 0.05);
-          color: var(--gold);
+          border-color: var(--gold-300);
+          background: linear-gradient(135deg, rgba(212, 168, 67, 0.15) 0%, rgba(16, 32, 16, 0.7) 100%);
+          color: var(--gold-200);
+          transform: scale(1.01);
+          box-shadow: 0 8px 32px rgba(212, 168, 67, 0.2);
         }
+        .upload-zone:hover::before, .upload-zone.drag-over::before { opacity: 1; }
         .upload-zone input { display: none; }
-        .upload-zone svg { width: 48px; height: 48px; margin-bottom: 0.75rem; opacity: 0.6; }
-        .upload-zone p { margin: 0; font-size: 0.85rem; }
-        .upload-zone small { opacity: 0.6; font-size: 0.7rem; }
+        .upload-zone svg { width: 56px; height: 56px; margin-bottom: 1rem; opacity: 1; filter: drop-shadow(0 2px 8px rgba(212, 168, 67, 0.4)); transition: all 0.3s ease; }
+        .upload-zone:hover svg { transform: translateY(-3px) scale(1.05); }
+        .upload-zone p { margin: 0 0 0.75rem; font-size: 1rem; font-weight: 600; color: var(--cream-100); }
+        .upload-zone small { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.375rem 0.75rem; background: rgba(212, 168, 67, 0.15); border: 1px solid rgba(212, 168, 67, 0.3); border-radius: 999px; font-size: 0.6875rem; font-weight: 600; color: var(--gold-300); opacity: 1; }
         .album-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -717,24 +743,42 @@
         .album-empty {
           grid-column: 1 / -1;
           text-align: center;
-          padding: 3rem 1rem;
-          color: var(--moss-light);
+          padding: 4rem 1.5rem;
+          color: var(--cream-300);
+          background: rgba(16, 32, 16, 0.4);
+          border: 2px dashed rgba(74, 107, 58, 0.3);
+          border-radius: 16px;
+          margin-top: 1rem;
         }
-        .album-empty svg { width: 64px; height: 64px; opacity: 0.4; margin-bottom: 1rem; }
+        .album-empty svg { width: 80px; height: 80px; opacity: 0.6; margin-bottom: 1.25rem; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2)); }
+        .album-empty p:first-of-type { font-size: 1.125rem; font-weight: 600; color: var(--cream-100); margin-bottom: 0.5rem; }
+        .album-empty p:last-of-type { font-size: 0.8125rem; color: var(--moss-200); opacity: 1; }
         .photo-card {
-          background: rgba(13, 26, 13, 0.6);
-          border: 1px solid rgba(74, 107, 58, 0.3);
-          border-radius: 12px;
+          background: rgba(16, 32, 16, 0.7);
+          border: 2px solid rgba(74, 107, 58, 0.25);
+          border-radius: 16px;
           overflow: hidden;
           display: flex;
           flex-direction: column;
-          transition: all 0.2s ease;
+          transition: all 0.3s ease;
+          position: relative;
+        }
+        .photo-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(212, 168, 67, 0.05) 0%, transparent 60%);
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          pointer-events: none;
         }
         .photo-card:hover {
-          border-color: var(--gold);
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+          border-color: var(--gold-400);
+          transform: translateY(-4px) scale(1.02);
+          box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 0 1px var(--gold-400);
+          z-index: 10;
         }
+        .photo-card:hover::before { opacity: 1; }
         .photo-thumb {
           aspect-ratio: 1;
           width: 100%;
