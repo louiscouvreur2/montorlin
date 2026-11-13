@@ -166,7 +166,7 @@
     h2 { font-size: 1.3rem; font-weight: 400; color: var(--cream); margin-bottom: 0.75rem; }
     h3 { font-size: 1.1rem; font-weight: 500; color: var(--cream); margin-bottom: 0.5rem; }
     .form-group { margin-bottom: 1.25rem; }
-    label { display: block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-light); margin-bottom: 0.4rem; opacity: 0.9; }
+    label { display: block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-light); margin-bottom: 0.4rem; opacity: 1; }
     input, select, textarea {
       width: 100%;
       padding: 0.875rem 1rem;
@@ -186,7 +186,7 @@
       box-shadow: 0 0 0 4px rgba(212, 168, 67, 0.15), 0 0 20px rgba(212, 168, 67, 0.1);
       background: rgba(13, 26, 13, 0.95);
     }
-    input:not(:placeholder-shown), select:not([value=""]) { border-color: var(--moss-light); }
+    input:not(:placeholder-shown), select:not([value=""]) { border-color: var(--cream); }
     .btn {
       padding: 0.875rem 1.5rem;
       border: none;
@@ -247,7 +247,7 @@
       text-align: center;
       margin-top: 1.5rem;
       font-size: 0.75rem;
-      color: var(--moss);
+      color: var(--cream-dark);
       opacity: 0.6;
     }
     .footer-note a { color: var(--gold-light); text-decoration: none; }
@@ -335,7 +335,7 @@
       background: var(--forest-light);
       border: 1px solid rgba(74, 107, 58, 0.3);
       border-radius: 999px;
-      color: var(--moss-light);
+      color: var(--cream);
       font-family: inherit;
       font-size: 0.8rem;
       font-weight: 500;
@@ -456,7 +456,7 @@
       margin-bottom: 0.25rem;
       line-height: 1.2;
     }
-    .calendar-day.other-month .day-number { color: var(--moss); }
+    .calendar-day.other-month .day-number { color: var(--cream-dark); }
     .reservations-list { display: flex; flex-direction: column; gap: 3px; }
     .reservation-chip {
       padding: 3px 6px;
@@ -476,10 +476,10 @@
     .reservation-chip:hover { transform: scale(1.02); z-index: 10; border-color: rgba(255,255,255,0.3); }
     .more-reservations {
       font-size: 0.55rem;
-      color: var(--moss-light);
+      color: var(--cream-dark);
       text-align: center;
       padding: 2px;
-      opacity: 0.7;
+      opacity: 0.8;
     }
 
     /* Modal */
@@ -515,8 +515,8 @@
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
     .modal-title { font-size: 1.3rem; color: var(--cream); margin: 0; }
     .modal-close {
-      background: none; border: none; color: var(--moss-light); font-size: 1.5rem; cursor: pointer; padding: 0.5rem;
-      opacity: 0.7; transition: opacity 0.2s; min-width: var(--touch-target); min-height: var(--touch-target);
+      background: none; border: none; color: var(--cream); font-size: 1.5rem; cursor: pointer; padding: 0.5rem;
+      opacity: 1; transition: opacity 0.2s; min-width: var(--touch-target); min-height: var(--touch-target);
       display: flex; align-items: center; justify-content: center;
     }
     .modal-close:hover { opacity: 1; color: var(--cream); }
@@ -539,7 +539,7 @@
       flex-wrap: wrap;
     }
     .reservation-detail-title { font-size: 1.1rem; color: var(--cream); font-weight: 500; margin: 0; }
-    .reservation-detail-meta { display: flex; flex-direction: column; gap: 0.375rem; font-size: 0.8rem; color: var(--moss-light); }
+    .reservation-detail-meta { display: flex; flex-direction: column; gap: 0.375rem; font-size: 0.8rem; color: var(--cream); }
     .reservation-detail-dates { display: flex; gap: 1rem; font-size: 0.75rem; }
     .reservation-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
     .reservation-actions .btn { flex: 1; }
@@ -565,12 +565,12 @@
     }
     .reservation-item-info { flex: 1; min-width: 180px; }
     .reservation-item-title { font-weight: 600; color: var(--cream); margin-bottom: 0.2rem; font-size: 0.95rem; }
-    .reservation-item-meta { display: flex; gap: 1rem; font-size: 0.7rem; color: var(--moss-light); flex-wrap: wrap; }
+    .reservation-item-meta { display: flex; gap: 1rem; font-size: 0.7rem; color: var(--cream); flex-wrap: wrap; }
     .reservation-item-actions { display: flex; gap: 0.375rem; }
     .reservation-item-actions .btn { padding: 0.5rem 0.875rem; font-size: 0.75rem; }
 
     .color-legend { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(74, 107, 58, 0.2); }
-        .color-legend-item { display: flex; align-items: center; gap: 0.375rem; font-size: 0.7rem; color: var(--moss-light); }
+        .color-legend-item { display: flex; align-items: center; gap: 0.375rem; font-size: 0.7rem; color: var(--cream); }
         .color-legend-dot { width: 10px; height: 10px; border-radius: 3px; }
 
         /* ALBUM STYLES */
@@ -604,7 +604,7 @@
               background: var(--forest-light);
               border: 1px solid rgba(74, 107, 58, 0.3);
               border-radius: 999px;
-              color: var(--moss-light);
+              color: var(--cream);
               font-family: inherit;
               font-size: 0.75rem;
               font-weight: 500;
@@ -636,7 +636,7 @@
               border-radius: 50%;
               background: var(--forest);
               border: 1px solid rgba(74, 107, 58, 0.3);
-              color: var(--moss-light);
+              color: var(--cream);
               display: flex;
               align-items: center;
               justify-content: center;
@@ -695,7 +695,7 @@
           border-radius: 16px;
           padding: 2rem 1rem;
           text-align: center;
-          color: var(--moss-light);
+          color: var(--cream);
           transition: all 0.2s ease;
           cursor: pointer;
           margin-bottom: 1rem;
@@ -718,7 +718,7 @@
           grid-column: 1 / -1;
           text-align: center;
           padding: 3rem 1rem;
-          color: var(--moss-light);
+          color: var(--cream);
         }
         .album-empty svg { width: 64px; height: 64px; opacity: 0.4; margin-bottom: 1rem; }
         .photo-card {
@@ -758,7 +758,7 @@
         }
         .photo-meta {
           font-size: 0.6rem;
-          color: var(--moss-light);
+          color: var(--cream-dark);
           display: flex;
           gap: 0.5rem;
           flex-wrap: wrap;
@@ -776,7 +776,7 @@
           border-radius: 8px;
           background: var(--forest-light);
           border: 1px solid rgba(74, 107, 58, 0.3);
-          color: var(--moss-light);
+          color: var(--cream);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -833,8 +833,8 @@
         }
         .photo-modal-title { font-size: 1.1rem; color: var(--cream); margin: 0; }
         .photo-modal-close {
-          background: none; border: none; color: var(--moss-light); font-size: 1.5rem; cursor: pointer; padding: 0.5rem;
-          opacity: 0.7; transition: opacity 0.2s; min-width: var(--touch-target); min-height: var(--touch-target);
+          background: none; border: none; color: var(--cream); font-size: 1.5rem; cursor: pointer; padding: 0.5rem;
+          opacity: 1; transition: opacity 0.2s; min-width: var(--touch-target); min-height: var(--touch-target);
           display: flex; align-items: center; justify-content: center;
         }
         .photo-modal-close:hover { opacity: 1; color: var(--cream); }
@@ -1311,7 +1311,7 @@
       if (!listEl) return;
 
       if (upcoming.length === 0) {
-        if (listEl) listEl.innerHTML = '<p style="text-align: center; color: var(--moss-light); padding: 2rem;">Aucune réservation à venir. Cliquez sur un jour pour en créer une.</p>';
+        if (listEl) listEl.innerHTML = '<p style="text-align: center; color: var(--cream); padding: 2rem;">Aucune réservation à venir. Cliquez sur un jour pour en créer une.</p>';
         return;
       }
 
@@ -1427,7 +1427,7 @@
             <button class="modal-close" aria-label="Fermer">✕</button>
           </header>
           <div class="photo-modal-body">
-            <p style="color: var(--moss-light); margin-bottom: 1.5rem;">${message}</p>
+            <p style="color: var(--cream); margin-bottom: 1.5rem;">${message}</p>
             <div class="reservation-actions">
               <button type="button" class="btn btn-secondary" id="confirmCancel"><span>Annuler</span></button>
               <button type="button" class="btn" id="confirmOk"><span>Supprimer</span></button>
@@ -1772,7 +1772,7 @@
       if (!tabsContainer) return;
       
       if (albums.length === 0) {
-        tabsContainer.innerHTML = '<span style="color: var(--moss-light); font-size: 0.75rem; padding: 0.5rem;">Aucun album. Créez-en un !</span>';
+        tabsContainer.innerHTML = '<span style="color: var(--cream); font-size: 0.75rem; padding: 0.5rem;">Aucun album. Créez-en un !</span>';
         return;
       }
       
