@@ -1882,57 +1882,13 @@
 
     // Photo file handling
     function handleFileUpload(files) {
-          if (!currentAlbumId && albums.length === 0) {
+          if (albums.length === 0) {
             showError('Créez un album d\'abord');
             return;
           }
       
-          // If there are albums but no current album selected, show album selection modal
-          if (!currentAlbumId && albums.length > 0) {
-            showAlbumSelectionForUpload(files);
-            return;
-          }
-      
-          const maxSize = 8 * 1024 * 1024; // 8 MB (Firebase Realtime DB limit ~10MB write, base64 adds ~33%)
-          const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-      
-          Array.from(files).forEach(async (file) => {
-            if (!validTypes.includes(file.type)) {
-              showError(`Format non supporté: ${file.name} (JPEG, PNG, WebP uniquement)`);
-              return;
-            }
-            if (file.size > maxSize) {
-              const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-              showError(`Fichier trop volumineux: ${file.name} (${sizeMB} Mo > 8 Mo max). Pour des fichiers plus gros, il faudrait Firebase Storage.`);
-              return;
-            }
-        
-            setSyncStatus('syncing', `Upload ${file.name}...`);
-        
-            try {
-              const dataUrl = await fileToDataUrl(file);
-              const photoId = push(ref(db, 'photos')).key;  // Generate ID first
-              const photoData = {
-                title: file.name.replace(/\.[^/.]+$/, ''),
-                comment: '',
-                dataUrl,
-                mimeType: file.type,
-                albumIds: [currentAlbumId],  // NEW: array with current album
-                createdAt: Date.now(),
-                createdBy: currentUser
-              };
-          
-              // Save photo globally under /photos/{photoId}
-              await set(ref(db, 'photos/' + photoId), photoData);
-          
-              setSyncStatus('ok', 'Photo ajoutée');
-              renderAlbumGrid();
-            } catch (error) {
-              console.error('Upload error:', error);
-              showError('Erreur upload: ' + error.message);
-              setSyncStatus('error', 'Erreur upload');
-            }
-          });
+          // Always show album selection modal when uploading
+          showAlbumSelectionForUpload(files);
         }
 
         // Show album selection modal for upload
