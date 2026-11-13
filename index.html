@@ -1949,41 +1949,98 @@
     }
 
     async function deletePhoto(photoId) {
-      // Show custom confirmation modal instead of native confirm
-      showConfirmModal(
-        'Supprimer cette photo ?',
-        'Cette action est irréversible. La photo sera supprimée de tous les albums.',
-        async () => {
-          try {
-            setSyncStatus('syncing', 'Suppression...');
-            
-            // Get the photo to check its albumIds
-            const photo = allPhotos[photoId];
-            if (!photo) {
-              showError('Photo introuvable');
-              return;
-            }
-            
-            // If photo is only in one album, delete it completely
-            // Otherwise, remove the current album from its albumIds
-            if (photo.albumIds && photo.albumIds.length <= 1) {
-              // Delete completely
-              await remove(ref(db, 'photos/' + photoId));
-            } else {
-              // Remove only the current album from albumIds
-              const newAlbumIds = photo.albumIds.filter(id => id !== currentAlbumId);
-              await set(ref(db, 'photos/' + photoId + '/albumIds'), newAlbumIds);
-            }
-            
-            setSyncStatus('ok', 'Photo supprimée');
-            renderAlbumGrid();
-          } catch (error) {
-            console.error('Delete photo error:', error);
-            showError('Erreur suppression: ' + error.message);
-            setSyncStatus('error', 'Erreur');
-          }
+      // Show custom confirmation modal with options
+      const photo = allPhotos[photoId];
+      if (!photo) {
+        showError('Photo introuvable');
+        return;
+      }
+      
+      const inMultipleAlbums = photo.albumIds && photo.albumIds.length > 1;
+      
+      if (inMultipleAlbums) {
+        // Photo in multiple albums - ask what to do
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.innerHTML = `
+          <div class="modal">
+            <header class="modal-header">
+              <h2 class="modal-title">Supprimer la photo</h2>
+              <button class="modal-close" aria-label="Fermer">✕</button>
+            </header>
+            <div class="photo-modal-body">
+              <p style="color: var(--cream); margin-bottom: 1.5rem;">Cette photo est dans <strong>${photo.albumIds.length} albums</strong>. Que souhaitez-vous faire ?</p>
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <button class="btn btn-danger" id="deleteAllBtn">
+                  <span>🗑️ Supprimer de TOUS les albums</span>
+                </button>
+                <button class="btn btn-secondary" id="deleteCurrentBtn">
+                  <span>➖ Retirer de l'album actuel seulement</span>
+                </button>
+                <button class="btn" id="deleteCancelBtn">
+                  <span>Annuler</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(overlay);
+        
+        const closeDeleteModal = () => {
+          overlay.classList.remove('open');
+          setTimeout(() => overlay.remove(), 300);
+        };
+        
+        overlay.querySelector('#deleteAllBtn').addEventListener('click', async () => {
+          closeDeleteModal();
+          await doDeletePhoto(photoId, true);
+        });
+        overlay.querySelector('#deleteCurrentBtn').addEventListener('click', async () => {
+          closeDeleteModal();
+          await doDeletePhoto(photoId, false);
+        });
+        overlay.querySelector('#deleteCancelBtn').addEventListener('click', closeDeleteModal);
+        overlay.querySelector('.modal-close').addEventListener('click', closeDeleteModal);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDeleteModal(); });
+        
+        requestAnimationFrame(() => overlay.classList.add('open'));
+      } else {
+        // Single album - confirm deletion
+        showConfirmModal(
+          'Supprimer cette photo ?',
+          'Cette action est irréversible.',
+          async () => await doDeletePhoto(photoId, true)
+        );
+      }
+    }
+    
+    async function doDeletePhoto(photoId, deleteFromAll) {
+      try {
+        setSyncStatus('syncing', 'Suppression...');
+        
+        const photo = allPhotos[photoId];
+        if (!photo) {
+          showError('Photo introuvable');
+          return;
         }
-      );
+        
+        if (deleteFromAll || !photo.albumIds || photo.albumIds.length <= 1) {
+          // Delete completely
+          await remove(ref(db, 'photos/' + photoId));
+        } else {
+          // Remove only current album from albumIds
+          const newAlbumIds = photo.albumIds.filter(id => id !== currentAlbumId);
+          await set(ref(db, 'photos/' + photoId + '/albumIds'), newAlbumIds);
+        }
+        
+        setSyncStatus('ok', 'Photo supprimée');
+        closePhotoModal();
+        renderAlbumGrid();
+      } catch (error) {
+        console.error('Delete photo error:', error);
+        showError('Erreur suppression: ' + error.message);
+        setSyncStatus('error', 'Erreur');
+      }
     }
 
     // Photo Modal
@@ -2081,6 +2138,8 @@
         };
         await set(ref(db, 'photos/' + photoId), updatedPhoto);
         closePhotoModal();
+        // Return to albums view
+        selectAlbum(currentAlbumId || (albums[0]?.id));
         setSyncStatus('ok', 'Sauvegardé');
       } catch (error) {
         console.error('Save photo meta error:', error);
