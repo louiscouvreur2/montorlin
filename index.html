@@ -1893,102 +1893,104 @@
 
         // Show album selection modal for upload
         function showAlbumSelectionForUpload(files) {
-          const overlay = document.createElement('div');
-          overlay.className = 'modal-overlay';
-          overlay.innerHTML = `
-            <div class="modal">
-              <header class="modal-header">
-                <h2 class="modal-title">Choisir les albums</h2>
-                <button class="modal-close" aria-label="Fermer">✕</button>
-              </header>
-              <div class="photo-modal-body">
-                <p style="color: var(--cream); margin-bottom: 1.5rem;">Sélectionnez les albums pour <strong>${files.length} photo${files.length > 1 ? 's' : ''}</strong> :</p>
-                <div id="uploadAlbumCheckboxes" class="album-checkboxes" style="max-height: 300px; overflow-y: auto;"></div>
-                <div class="reservation-actions" style="margin-top: 1.5rem;">
-                  <button type="button" class="btn btn-secondary" id="uploadAlbumCancel"><span>Annuler</span></button>
-                  <button type="button" class="btn" id="uploadAlbumConfirm"><span>Ajouter aux albums sélectionnés</span></button>
+              // Convert FileList to Array immediately to avoid closure issues
+              const filesArray = Array.from(files);
+              const overlay = document.createElement('div');
+              overlay.className = 'modal-overlay';
+              overlay.innerHTML = `
+                <div class="modal">
+                  <header class="modal-header">
+                    <h2 class="modal-title">Choisir les albums</h2>
+                    <button class="modal-close" aria-label="Fermer">✕</button>
+                  </header>
+                  <div class="photo-modal-body">
+                    <p style="color: var(--cream); margin-bottom: 1.5rem;">Sélectionnez les albums pour <strong>${filesArray.length} photo${filesArray.length > 1 ? 's' : ''}</strong> :</p>
+                    <div id="uploadAlbumCheckboxes" class="album-checkboxes" style="max-height: 300px; overflow-y: auto;"></div>
+                    <div class="reservation-actions" style="margin-top: 1.5rem;">
+                      <button type="button" class="btn btn-secondary" id="uploadAlbumCancel"><span>Annuler</span></button>
+                      <button type="button" class="btn" id="uploadAlbumConfirm"><span>Ajouter aux albums sélectionnés</span></button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          `;
-          document.body.appendChild(overlay);
+              `;
+              document.body.appendChild(overlay);
       
-          // Render album checkboxes
-          const checkboxesContainer = overlay.querySelector('#uploadAlbumCheckboxes');
-          checkboxesContainer.innerHTML = albums.map(album => `
-            <label class="album-checkbox">
-              <input type="checkbox" value="${album.id}" checked>
-              <span class="album-checkbox-label">${album.name}</span>
-            </label>
-          `).join('');
+              // Render album checkboxes
+              const checkboxesContainer = overlay.querySelector('#uploadAlbumCheckboxes');
+              checkboxesContainer.innerHTML = albums.map(album => `
+                <label class="album-checkbox">
+                  <input type="checkbox" value="${album.id}" checked>
+                  <span class="album-checkbox-label">${album.name}</span>
+                </label>
+              `).join('');
       
-          const closeModal = () => {
-            overlay.classList.remove('open');
-            setTimeout(() => overlay.remove(), 300);
-          };
+              const closeModal = () => {
+                overlay.classList.remove('open');
+                setTimeout(() => overlay.remove(), 300);
+              };
       
-          overlay.querySelector('.modal-close').addEventListener('click', closeModal);
-          overlay.querySelector('#uploadAlbumCancel').addEventListener('click', closeModal);
-          overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+              overlay.querySelector('.modal-close').addEventListener('click', closeModal);
+              overlay.querySelector('#uploadAlbumCancel').addEventListener('click', closeModal);
+              overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
       
-          overlay.querySelector('#uploadAlbumConfirm').addEventListener('click', async () => {
-            const selectedAlbumIds = [];
-            overlay.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
-              selectedAlbumIds.push(cb.value);
-            });
-        
-            if (selectedAlbumIds.length === 0) {
-              showError('Sélectionnez au moins un album');
-              return;
-            }
-        
-            closeModal();
-        
-            // Upload to each selected album
-            const maxSize = 8 * 1024 * 1024;
-            const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-        
-            for (const file of files) {
-              if (!validTypes.includes(file.type)) {
-                showError(`Format non supporté: ${file.name} (JPEG, PNG, WebP uniquement)`);
-                continue;
-              }
-              if (file.size > maxSize) {
-                const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-                showError(`Fichier trop volumineux: ${file.name} (${sizeMB} Mo > 8 Mo max)`);
-                continue;
-              }
+              overlay.querySelector('#uploadAlbumConfirm').addEventListener('click', async () => {
+                const selectedAlbumIds = [];
+                overlay.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+                  selectedAlbumIds.push(cb.value);
+                });
+      
+                if (selectedAlbumIds.length === 0) {
+                  showError('Sélectionnez au moins un album');
+                  return;
+                }
+      
+                closeModal();
+      
+                // Upload to each selected album
+                const maxSize = 8 * 1024 * 1024;
+                const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      
+                for (const file of filesArray) {
+                  if (!validTypes.includes(file.type)) {
+                    showError(`Format non supporté: ${file.name} (JPEG, PNG, WebP uniquement)`);
+                    continue;
+                  }
+                  if (file.size > maxSize) {
+                    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+                    showError(`Fichier trop volumineux: ${file.name} (${sizeMB} Mo > 8 Mo max)`);
+                    continue;
+                  }
           
-              setSyncStatus('syncing', `Upload ${file.name}...`);
+                  setSyncStatus('syncing', `Upload ${file.name}...`);
           
-              try {
-                const dataUrl = await fileToDataUrl(file);
-                const photoId = push(ref(db, 'photos')).key;
-                const photoData = {
-                  title: file.name.replace(/\.[^/.]+$/, ''),
-                  comment: '',
-                  dataUrl,
-                  mimeType: file.type,
-                  albumIds: selectedAlbumIds,
-                  createdAt: Date.now(),
-                  createdBy: currentUser
-                };
+                  try {
+                    const dataUrl = await fileToDataUrl(file);
+                    const photoId = push(ref(db, 'photos')).key;
+                    const photoData = {
+                      title: file.name.replace(/\.[^/.]+$/, ''),
+                      comment: '',
+                      dataUrl,
+                      mimeType: file.type,
+                      albumIds: selectedAlbumIds,
+                      createdAt: Date.now(),
+                      createdBy: currentUser
+                    };
             
-                await set(ref(db, 'photos/' + photoId), photoData);
-              } catch (error) {
-                console.error('Upload error:', error);
-                showError('Erreur upload: ' + error.message);
-                setSyncStatus('error', 'Erreur upload');
-                return;
-              }
-            }
+                    await set(ref(db, 'photos/' + photoId), photoData);
+                  } catch (error) {
+                    console.error('Upload error:', error);
+                    showError('Erreur upload: ' + error.message);
+                    setSyncStatus('error', 'Erreur upload');
+                    return;
+                  }
+                }
         
-            setSyncStatus('ok', 'Photos ajoutées');
-            renderAlbumGrid();
-          });
+                setSyncStatus('ok', 'Photos ajoutées');
+                renderAlbumGrid();
+              });
       
-          requestAnimationFrame(() => overlay.classList.add('open'));
-        }
+              requestAnimationFrame(() => overlay.classList.add('open'));
+            }
 
     function fileToDataUrl(file) {
       return new Promise((resolve, reject) => {
