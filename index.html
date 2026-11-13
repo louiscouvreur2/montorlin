@@ -1703,6 +1703,10 @@
           console.error('Firebase albums error:', error);
           setSyncStatus('error', 'Erreur albums');
         });
+      } catch (error) {
+        console.error('Load albums error:', error);
+        setSyncStatus('error', 'Erreur chargement albums');
+      }
       
       // Also load all photos globally
       loadAllPhotos();
