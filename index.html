@@ -1950,7 +1950,7 @@
       
                 for (const file of filesArray) {
                   if (!validTypes.includes(file.type)) {
-                    showError(`Format non supporté: ${file.name} (JPEG, PNG, WebP uniquement)`);
+                    showError(`Format non supporté: ${file.name}`);
                     continue;
                   }
                   if (file.size > maxSize) {
