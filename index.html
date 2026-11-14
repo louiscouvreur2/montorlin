@@ -1984,15 +1984,6 @@
               requestAnimationFrame(() => overlay.classList.add('open'));
             }
 
-    function fileToDataUrl(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
     // Compress image: resize to maxWidth/maxHeight, convert to WebP with quality
     function compressImage(file, maxDimension = 1920, quality = 0.8) {
       return new Promise((resolve, reject) => {
