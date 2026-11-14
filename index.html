@@ -794,6 +794,21 @@
           border-color: #ef4444;
           color: #ef4444;
         }
+        
+        /* Load more button */
+        .load-more-container {
+          margin-top: 0.5rem;
+        }
+        .load-more-btn {
+          width: 100%;
+          padding: 0.75rem 1rem;
+          font-size: 0.8rem;
+        }
+        .load-more-btn:hover {
+          background: var(--forest);
+          border-color: var(--gold);
+          color: var(--cream);
+        }
 
         /* PHOTO MODAL */
         .photo-modal-overlay {
@@ -1154,11 +1169,19 @@
     let reservations = [];
     let familyMembers = [];
 
-    // Album State - NEW: photos stored globally with albumIds array
-    let albums = [];
-    let allPhotos = {};  // All photos indexed by ID, each has albumIds: []
-    let currentAlbumId = null;
-    let currentAlbumName = null;
+    // Album State - photos stored globally with albumIds array
+        let albums = [];
+        let allPhotos = {};  // All photos indexed by ID, each has albumIds: []
+        let currentAlbumId = null;
+        let currentAlbumName = null;
+
+        // Pagination state for photos
+        let photosPagination = {
+          lastKey: null,
+          isLoading: false,
+          hasMore: true,
+          batchSize: 20
+        };
 
     // NO DOM element declarations at module level!
     // ALL DOM queries happen INSIDE functions
@@ -1699,69 +1722,121 @@
         }
 
     async function loadAlbums() {
-      console.log('[DEBUG] loadAlbums called');
-      setSyncStatus('syncing', 'Chargement albums...');
-      try {
-        const albumsRef = ref(db, 'albums');
-        const albumsQuery = query(albumsRef, orderByChild('createdAt'), limitToLast(50));
-        onValue(albumsQuery, (snapshot) => {
-          console.log('[DEBUG] Albums onValue:', snapshot.val());
-          const data = snapshot.val();
-          if (data) {
-            albums = Object.entries(data).map(([id, val]) => normalizeAlbum(id, val))
-              .sort((a, b) => b.createdAt - a.createdAt);
-          } else {
-            albums = [];
+          console.log('[DEBUG] loadAlbums called');
+          setSyncStatus('syncing', 'Chargement albums...');
+          try {
+            const albumsRef = ref(db, 'albums');
+            const albumsQuery = query(albumsRef, orderByChild('createdAt'), limitToLast(50));
+            onValue(albumsQuery, (snapshot) => {
+              console.log('[DEBUG] Albums onValue:', snapshot.val());
+              const data = snapshot.val();
+              if (data) {
+                albums = Object.entries(data).map(([id, val]) => normalizeAlbum(id, val))
+                  .sort((a, b) => b.createdAt - a.createdAt);
+              } else {
+                albums = [];
+              }
+              console.log('[DEBUG] Albums loaded:', albums);
+              renderAlbumTabs();
+              // Auto-select first album if none selected
+              if (albums.length > 0 && !currentAlbumId) {
+                selectAlbum(albums[0].id);
+              } else if (currentAlbumId) {
+                // Re-render current album in case photos changed
+                renderAlbumGrid();
+              }
+              setSyncStatus('ok', 'Synchronisé');
+            }, (error) => {
+              console.error('Firebase albums error:', error);
+              setSyncStatus('error', 'Erreur albums');
+            });
+          } catch (error) {
+            console.error('Load albums error:', error);
+            setSyncStatus('error', 'Erreur chargement albums');
           }
-          console.log('[DEBUG] Albums loaded:', albums);
-          renderAlbumTabs();
-          // Auto-select first album if none selected
-          if (albums.length > 0 && !currentAlbumId) {
-            selectAlbum(albums[0].id);
-          } else if (currentAlbumId) {
-            // Re-render current album in case photos changed
-            renderAlbumGrid();
-          }
-          setSyncStatus('ok', 'Synchronisé');
-        }, (error) => {
-          console.error('Firebase albums error:', error);
-          setSyncStatus('error', 'Erreur albums');
-        });
-      } catch (error) {
-        console.error('Load albums error:', error);
-        setSyncStatus('error', 'Erreur chargement albums');
-      }
-      
-      // Also load all photos globally
-      loadAllPhotos();
-    }
 
-    async function loadAllPhotos() {
-      console.log('[DEBUG] loadAllPhotos called');
-      try {
-        const photosRef = ref(db, 'photos');
-        const photosQuery = query(photosRef, orderByChild('createdAt'), limitToLast(200));
-        onValue(photosQuery, (snapshot) => {
-          console.log('[DEBUG] Photos onValue:', snapshot.val());
-          const data = snapshot.val();
-          if (data) {
-            allPhotos = Object.entries(data).map(([id, val]) => normalizePhoto(id, val))
-              .reduce((acc, photo) => { acc[photo.id] = photo; return acc; }, {});
-          } else {
+          // Also load all photos globally
+          loadAllPhotos();
+        }
+
+        // Load first batch of photos (paginated)
+        async function loadAllPhotos(reset = false) {
+          console.log('[DEBUG] loadAllPhotos called, reset:', reset);
+      
+          if (reset) {
+            photosPagination.lastKey = null;
+            photosPagination.hasMore = true;
             allPhotos = {};
           }
-          console.log('[DEBUG] Photos loaded:', Object.keys(allPhotos).length);
-          // Re-render current album if an album is selected
-          if (currentAlbumId) {
-            renderAlbumGrid();
+      
+          if (photosPagination.isLoading || !photosPagination.hasMore) {
+            return;
           }
-        }, (error) => {
-          console.error('Firebase photos error:', error);
-        });
-      } catch (error) {
-        console.error('Load photos error:', error);
-      }
-    }
+      
+          photosPagination.isLoading = true;
+      
+          try {
+            const photosRef = ref(db, 'photos');
+            let photosQuery;
+        
+            if (photosPagination.lastKey) {
+              photosQuery = query(
+                photosRef, 
+                orderByChild('createdAt'), 
+                limitToFirst(photosPagination.batchSize + 1),
+                startAfter(photosPagination.lastKey)
+              );
+            } else {
+              photosQuery = query(
+                photosRef, 
+                orderByChild('createdAt'), 
+                limitToLast(photosPagination.batchSize)
+              );
+            }
+        
+            const snapshot = await get(photosQuery);
+            console.log('[DEBUG] Photos get:', snapshot.val());
+        
+            if (snapshot.exists()) {
+              const data = snapshot.val();
+              const entries = Object.entries(data).map(([id, val]) => normalizePhoto(id, val))
+                .sort((a, b) => b.createdAt - a.createdAt);
+          
+              // If loading more (not first batch), we might have one extra item
+              if (photosPagination.lastKey && entries.length > photosPagination.batchSize) {
+                entries.pop(); // Remove the extra item used for pagination
+              }
+          
+              const isFirstBatch = !photosPagination.lastKey;
+          
+              entries.forEach(photo => {
+                allPhotos[photo.id] = photo;
+              });
+          
+              // Update pagination state
+              if (entries.length > 0) {
+                photosPagination.lastKey = entries[entries.length - 1].createdAt;
+              }
+          
+              photosPagination.hasMore = entries.length >= photosPagination.batchSize;
+          
+              console.log('[DEBUG] Photos loaded:', Object.keys(allPhotos).length, 'hasMore:', photosPagination.hasMore);
+          
+              // Re-render current album if an album is selected
+              if (currentAlbumId) {
+                renderAlbumGrid();
+              }
+            } else {
+              photosPagination.hasMore = false;
+            }
+        
+            photosPagination.isLoading = false;
+        
+          } catch (error) {
+            console.error('Load photos error:', error);
+            photosPagination.isLoading = false;
+          }
+        }
 
     function renderAlbumTabs() {
       const tabsContainer = document.getElementById('albumTabs');
@@ -1821,6 +1896,10 @@
         btn.setAttribute('aria-selected', isActive);
       });
       
+      // Reset pagination when switching albums
+      photosPagination.lastKey = null;
+      photosPagination.hasMore = true;
+      
       renderAlbumGrid();
     }
 
@@ -1874,9 +1953,25 @@
           </div>
         </div>
       `).join('');
+
+      // Load more button if there are more photos to load
+      if (photosPagination.hasMore) {
+        const loadMoreDiv = document.createElement('div');
+        loadMoreDiv.className = 'load-more-container';
+        loadMoreDiv.innerHTML = `
+          <button class="btn btn-secondary load-more-btn" onclick="loadMorePhotos()" style="width: 100%; margin-top: 1rem;">
+            <span>Charger plus de photos (${Object.keys(allPhotos).filter(id => allPhotos[id].albumIds?.includes(currentAlbumId)).length} affichées)</span>
+          </button>
+        `;
+        gridEl.appendChild(loadMoreDiv);
+      }
     }
 
-    // Photo file handling
+    // Load more photos for current album (pagination)
+    async function loadMorePhotos() {
+      console.log('[DEBUG] loadMorePhotos called');
+      await loadAllPhotos(false); // false = don't reset, load more
+    }
     function handleFileUpload(files) {
           if (albums.length === 0) {
             showError('Créez un album d\'abord');
