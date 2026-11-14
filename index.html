@@ -1022,7 +1022,6 @@
           <line x1="12" y1="3" x2="12" y2="15"></line>
         </svg>
         <p>Ajouter des photos</p>
-        <small>Max 8 Mo</small>
       </div>
 
       <div class="album-grid" id="albumGrid" role="grid" aria-label="Photos de l'album">
@@ -1033,7 +1032,6 @@
             <polyline points="21 15 16 10 5 21"></polyline>
           </svg>
           <p>Aucune photo</p>
-          <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.6;">Créez un album et ajoutez des photos</p>
         </div>
       </div>
     </div>
@@ -1943,45 +1941,39 @@
                 }
       
                 closeModal();
-      
-                // Upload to each selected album
-                const maxSize = 8 * 1024 * 1024;
-                const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
-      
-                for (const file of filesArray) {
-                  if (!validTypes.includes(file.type)) {
-                    showError(`Format non supporté: ${file.name} (JPEG, PNG, WebP uniquement)`);
-                    continue;
-                  }
-                  if (file.size > maxSize) {
-                    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-                    showError(`Fichier trop volumineux: ${file.name} (${sizeMB} Mo > 8 Mo max)`);
-                    continue;
-                  }
-          
-                  setSyncStatus('syncing', `Upload ${file.name}...`);
-          
-                  try {
-                    const dataUrl = await fileToDataUrl(file);
-                    const photoId = push(ref(db, 'photos')).key;
-                    const photoData = {
-                      title: file.name.replace(/\.[^/.]+$/, ''),
-                      comment: '',
-                      dataUrl,
-                      mimeType: file.type,
-                      albumIds: selectedAlbumIds,
-                      createdAt: Date.now(),
-                      createdBy: currentUser
-                    };
-            
-                    await set(ref(db, 'photos/' + photoId), photoData);
-                  } catch (error) {
-                    console.error('Upload error:', error);
-                    showError('Erreur upload: ' + error.message);
-                    setSyncStatus('error', 'Erreur upload');
-                    return;
-                  }
-                }
+
+                                // Upload to each selected album
+                                const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
+                                for (const file of filesArray) {
+                                  if (!validTypes.includes(file.type)) {
+                                    showError(`Format non supporté: ${file.name} (JPEG, PNG, WebP uniquement)`);
+                                    continue;
+                                  }
+
+                                  setSyncStatus('syncing', `Upload ${file.name}...`);
+
+                                  try {
+                                    const dataUrl = await fileToDataUrl(file);
+                                    const photoId = push(ref(db, 'photos')).key;
+                                    const photoData = {
+                                      title: file.name.replace(/\.[^/.]+$/, ''),
+                                      comment: '',
+                                      dataUrl,
+                                      mimeType: file.type,
+                                      albumIds: selectedAlbumIds,
+                                      createdAt: Date.now(),
+                                      createdBy: currentUser
+                                    };
+
+                                    await set(ref(db, 'photos/' + photoId), photoData);
+                                  } catch (error) {
+                                    console.error('Upload error:', error);
+                                    showError('Erreur upload: ' + error.message);
+                                    setSyncStatus('error', 'Erreur upload');
+                                    return;
+                                  }
+                                }
         
                 setSyncStatus('ok', 'Photos ajoutées');
                 renderAlbumGrid();
