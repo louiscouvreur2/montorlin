@@ -1133,7 +1133,7 @@
   <script type="module">
     console.log("[DEBUG] Module script STARTED - Firebase initialization");
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-    import { getDatabase, ref, push, remove, set, onValue, query, orderByChild, orderByKey, limitToLast, limitToFirst, startAfter, endAt, get } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+    import { getDatabase, ref, push, remove, set, onValue, query, orderByChild, orderByKey, limitToLast, limitToFirst, startAfter, endAt, endBefore, get } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
     // Firebase config (Realtime Database) - using the working site-montorlin project
     const firebaseConfig = {
@@ -1786,7 +1786,7 @@
                       photosQuery = query(
                         photosRef, 
                         orderByKey(), 
-                        endAt(photosPagination.lastKey), 
+                        endBefore(photosPagination.lastKey), 
                         limitToLast(photosPagination.batchSize)
                       );
                     } else {
