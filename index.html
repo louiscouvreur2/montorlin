@@ -1933,6 +1933,15 @@
             <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.6;">Ajoutez des photos via la zone d'upload</p>
           </div>
         `;
+        
+        // Add sentinel even for empty album to enable infinite scroll loading
+        if (photosPagination.hasMore) {
+          const sentinel = document.createElement('div');
+          sentinel.className = 'load-more-sentinel';
+          sentinel.style.height = '20px';
+          gridEl.appendChild(sentinel);
+          setupInfiniteScroll();
+        }
         return;
       }
       
