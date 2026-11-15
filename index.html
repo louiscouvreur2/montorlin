@@ -2624,6 +2624,9 @@
           const pi2 = document.getElementById('prenom');
           if (pi2) pi2.focus();
           
+          // Reset login button to initial state
+          resetButton();
+          
           // Ensure logout button loses focus
           if (logoutBtn) logoutBtn.blur();
         });
