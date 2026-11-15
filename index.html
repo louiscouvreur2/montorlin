@@ -2060,12 +2060,23 @@
                                     continue;
                                   }
 
+                                  console.log(`[UPLOAD] 📤 Début upload: ${file.name} (${file.size} bytes, ${file.type})`);
+                                  const uploadStart = Date.now();
+                                  
                                   setSyncStatus('syncing', `Compression ${file.name}...`);
 
                                   try {
                                     // Compress image before upload
+                                    console.log(`[UPLOAD] 🗜️ Début compression: ${file.name}`);
+                                    const compressStart = Date.now();
                                     const compressedBlob = await compressImage(file, 1920, 0.8);
+                                    console.log(`[UPLOAD] ✅ Compression terminée: ${file.name} en ${Date.now() - compressStart}ms (${Math.round(compressedBlob.size/1024)} KB)`);
+                                    
+                                    console.log(`[UPLOAD] 📦 Conversion base64: ${file.name}`);
+                                    const base64Start = Date.now();
                                     const dataUrl = await fileToDataUrl(compressedBlob);
+                                    console.log(`[UPLOAD] ✅ Base64 prêt: ${file.name} en ${Date.now() - base64Start}ms (${Math.round(dataUrl.length/1024)} KB chars)`);
+                                    
                                     const photoId = push(ref(db, 'photos')).key;
                                     const photoData = {
                                       title: file.name.replace(/\.[^/.]+$/, ''),
@@ -2077,9 +2088,14 @@
                                       createdBy: currentUser
                                     };
 
+                                    console.log(`[UPLOAD] ☁️ Envoi vers Firebase: ${file.name} (ID: ${photoId})`);
+                                    const firebaseStart = Date.now();
                                     await set(ref(db, 'photos/' + photoId), photoData);
+                                    console.log(`[UPLOAD] ✅ Firebase OK: ${file.name} en ${Date.now() - firebaseStart}ms`);
+                                    
+                                    console.log(`[UPLOAD] 🎉 Upload complet: ${file.name} - TOTAL: ${Date.now() - uploadStart}ms`);
                                   } catch (error) {
-                                    console.error('Upload error:', error);
+                                    console.error('[UPLOAD] ❌ Erreur:', error);
                                     showError('Erreur upload: ' + error.message);
                                     setSyncStatus('error', 'Erreur upload');
                                     return;
@@ -2095,27 +2111,42 @@
 
     // Compress image: resize to maxWidth/maxHeight, convert to WebP with quality
     function compressImage(file, maxDimension = 1920, quality = 0.8) {
+      console.log(`[COMPRESS] 🗜️ Début: ${file.name} (${file.size} bytes, ${file.type})`);
+      const start = Date.now();
       return new Promise((resolve, reject) => {
         const img = new Image();
         img.src = URL.createObjectURL(file);
         img.onload = () => {
           URL.revokeObjectURL(img.src);
+          console.log(`[COMPRESS] 🖼️ Image chargée: ${img.width}x${img.height} en ${Date.now() - start}ms`);
           const scale = Math.min(1, maxDimension / Math.max(img.width, img.height));
           const canvas = document.createElement('canvas');
           canvas.width = img.width * scale;
           canvas.height = img.height * scale;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          canvas.toBlob(blob => resolve(blob), 'image/webp', quality);
+          console.log(`[COMPRESS] 🎨 Canvas: ${canvas.width}x${canvas.height} (scale: ${scale})`);
+          canvas.toBlob(blob => {
+            console.log(`[COMPRESS] ✅ Blob WebP: ${Math.round(blob.size/1024)} KB en ${Date.now() - start}ms`);
+            resolve(blob);
+          }, 'image/webp', quality);
         };
-        img.onerror = reject;
+        img.onerror = (e) => {
+          console.error('[COMPRESS] ❌ Erreur chargement image:', e);
+          reject(e);
+        };
       });
     }
 
     function fileToDataUrl(file) {
+      console.log(`[BASE64] 📦 Début conversion: ${file.name} (${file.size} bytes)`);
+      const start = Date.now();
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
+        reader.onload = () => {
+          console.log(`[BASE64] ✅ Terminé: ${file.name} en ${Date.now() - start}ms (${Math.round(reader.result.length/1024)} KB chars)`);
+          resolve(reader.result);
+        };
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
