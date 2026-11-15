@@ -1726,7 +1726,7 @@
           setSyncStatus('syncing', 'Chargement albums...');
           try {
             const albumsRef = ref(db, 'albums');
-            const albumsQuery = query(albumsRef, orderByChild('createdAt'), limitToLast(50));
+            const albumsQuery = query(albumsRef, orderByKey(), limitToLast(50));
             onValue(albumsQuery, (snapshot) => {
               console.log('[DEBUG] Albums onValue:', snapshot.val());
               const data = snapshot.val();
@@ -1934,42 +1934,57 @@
       }
       
       gridEl.innerHTML = photos.map(photo => `
-        <div class="photo-card" data-photo-id="${photo.id}" role="gridcell" onclick="openPhotoModal('${photo.id}')">
-          <img class="photo-thumb" src="${photo.dataUrl}" alt="${photo.title || 'Photo'}" loading="lazy">
-          <div class="photo-info">
-            <div class="photo-title">${photo.title || (photo.createdAt ? new Date(photo.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'Sans titre')}</div>
-            <div class="photo-meta">
-              ${photo.createdBy ? `<span>${photo.createdBy}</span>` : ''}
-            </div>
-          </div>
-          <div class="photo-actions">
-            <button class="photo-action-btn delete" onclick="event.stopPropagation(); deletePhoto('${photo.id}')" title="Supprimer" aria-label="Supprimer la photo">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              </svg>
-            </button>
-          </div>
-        </div>
-      `).join('');
+              <div class="photo-card" data-photo-id="${photo.id}" role="gridcell" onclick="openPhotoModal('${photo.id}')">
+                <img class="photo-thumb" src="${photo.dataUrl}" alt="${photo.title || 'Photo'}" loading="lazy">
+                <div class="photo-info">
+                  <div class="photo-title">${photo.title || (photo.createdAt ? new Date(photo.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'Sans titre')}</div>
+                  <div class="photo-meta">
+                    ${photo.createdBy ? `<span>${photo.createdBy}</span>` : ''}
+                  </div>
+                </div>
+                <div class="photo-actions">
+                  <button class="photo-action-btn delete" onclick="event.stopPropagation(); deletePhoto('${photo.id}')" title="Supprimer" aria-label="Supprimer la photo">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            `).join('');
 
-      // Load more button if there are more photos to load
-      if (photosPagination.hasMore) {
-        const loadMoreDiv = document.createElement('div');
-        loadMoreDiv.className = 'load-more-container';
-        loadMoreDiv.innerHTML = `
-          <button class="btn btn-secondary load-more-btn" onclick="loadMorePhotos()" style="width: 100%; margin-top: 1rem;">
-            <span>Charger plus de photos (${Object.keys(allPhotos).filter(id => allPhotos[id].albumIds?.includes(currentAlbumId)).length} affichées)</span>
-          </button>
-        `;
-        gridEl.appendChild(loadMoreDiv);
-      }
-    }
+            // Infinite scroll sentinel for loading more photos
+            if (photosPagination.hasMore) {
+              const sentinel = document.createElement('div');
+              sentinel.className = 'load-more-sentinel';
+              sentinel.style.height = '20px';
+              gridEl.appendChild(sentinel);
+              // Setup infinite scroll observer after sentinel is added
+              setupInfiniteScroll();
+            }
+          }
 
     // Load more photos for current album (pagination)
     async function loadMorePhotos() {
       console.log('[DEBUG] loadMorePhotos called');
       await loadAllPhotos(false); // false = don't reset, load more
+    }
+
+    // Setup infinite scroll for photo grid
+    function setupInfiniteScroll() {
+      const sentinel = document.querySelector('.load-more-sentinel');
+      if (!sentinel) return;
+      
+      const observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && photosPagination.hasMore && !photosPagination.isLoading) {
+          loadMorePhotos();
+        }
+      }, {
+        rootMargin: '100px',
+        threshold: 0.1
+      });
+      
+      observer.observe(sentinel);
     }
     function handleFileUpload(files) {
           if (albums.length === 0) {
