@@ -1811,14 +1811,14 @@
                       }
          
                       entries.forEach(photo => {
-                        allPhotos[photo.id] = photo;
-                      });
-         
-                      // Update pagination state - use the OLDEST key (first in sorted results) for next page
-                      if (entries.length > 0) {
-                        // Results from orderByKey are ascending (oldest first), so first entry is oldest
-                        photosPagination.lastKey = entries[0].id;
-                      }
+                                              allPhotos[photo.id] = photo;
+                                            });
+
+                                            // Update pagination state - use the NEWEST key (last in orderByKey results) for next page
+                                            if (entries.length > 0) {
+                                              // Results from orderByKey are ascending (oldest first), so LAST entry is newest
+                                              photosPagination.lastKey = entries[entries.length - 1].id;
+                                            }
          
                       photosPagination.hasMore = entries.length >= photosPagination.batchSize;
        
