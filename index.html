@@ -1176,12 +1176,15 @@
         let currentAlbumName = null;
 
         // Pagination state for photos
-        let photosPagination = {
-          lastKey: null,
-          isLoading: false,
-          hasMore: true,
-          batchSize: 20
-        };
+            let photosPagination = {
+              lastKey: null,
+              isLoading: false,
+              hasMore: true,
+              batchSize: 20
+            };
+
+            // Infinite scroll observer reference
+            let infiniteScrollObserver = null;
 
     // NO DOM element declarations at module level!
     // ALL DOM queries happen INSIDE functions
@@ -1975,6 +1978,11 @@
       const sentinel = document.querySelector('.load-more-sentinel');
       if (!sentinel) return;
       
+      // Disconnect previous observer if exists
+      if (infiniteScrollObserver) {
+        infiniteScrollObserver.disconnect();
+      }
+      
       const observer = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && photosPagination.hasMore && !photosPagination.isLoading) {
           loadMorePhotos();
@@ -1985,6 +1993,7 @@
       });
       
       observer.observe(sentinel);
+      infiniteScrollObserver = observer;
     }
     function handleFileUpload(files) {
           if (albums.length === 0) {
