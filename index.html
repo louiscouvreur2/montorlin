@@ -1687,6 +1687,31 @@
       loadReservations();
       loadAlbums();
       renderCalendarHeader();
+      
+      // Ensure logout handler is attached (re-attach in case of re-render)
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.onclick = null; // Remove any existing handler
+        logoutBtn.addEventListener('click', () => {
+          localStorage.removeItem('montorlin-user');
+          currentUser = null;
+          reservations = [];
+          const loginView = document.getElementById('loginView');
+          const appView = document.getElementById('appView');
+          if (loginView) loginView.style.display = 'block';
+          if (appView) appView.style.display = 'none';
+          const prenomInput2 = document.getElementById('prenom');
+          const passwordInput2 = document.getElementById('password');
+          if (prenomInput2) prenomInput2.value = '';
+          const pw2 = document.getElementById('password');
+          if (pw2) pw2.value = '';
+          const pi2 = document.getElementById('prenom');
+          if (pi2) pi2.focus();
+          
+          // Ensure logout button loses focus
+          if (logoutBtn) logoutBtn.blur();
+        });
+      }
     }
 
     async function loadFamilyMembers() {
