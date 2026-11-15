@@ -1761,82 +1761,81 @@
 
         // Load first batch of photos (paginated)
         async function loadAllPhotos(reset = false) {
-          console.log('[DEBUG] loadAllPhotos called, reset:', reset);
-      
-          if (reset) {
-            photosPagination.lastKey = null;
-            photosPagination.hasMore = true;
-            allPhotos = {};
-          }
-      
-          if (photosPagination.isLoading || !photosPagination.hasMore) {
-            return;
-          }
-      
-          photosPagination.isLoading = true;
-      
-          try {
-            const photosRef = ref(db, 'photos');
-            let photosQuery;
-        
-            if (photosPagination.lastKey) {
-              photosQuery = query(
-                photosRef, 
-                orderByChild('createdAt'), 
-                limitToFirst(photosPagination.batchSize + 1),
-                startAfter(photosPagination.lastKey)
-              );
-            } else {
-              photosQuery = query(
-                photosRef, 
-                orderByChild('createdAt'), 
-                limitToLast(photosPagination.batchSize)
-              );
-            }
-        
-            const snapshot = await get(photosQuery);
-            console.log('[DEBUG] Photos get:', snapshot.val());
-        
-            if (snapshot.exists()) {
-              const data = snapshot.val();
-              const entries = Object.entries(data).map(([id, val]) => normalizePhoto(id, val))
-                .sort((a, b) => b.createdAt - a.createdAt);
-          
-              // If loading more (not first batch), we might have one extra item
-              if (photosPagination.lastKey && entries.length > photosPagination.batchSize) {
-                entries.pop(); // Remove the extra item used for pagination
-              }
-          
-              const isFirstBatch = !photosPagination.lastKey;
-          
-              entries.forEach(photo => {
-                allPhotos[photo.id] = photo;
-              });
-          
-              // Update pagination state
-              if (entries.length > 0) {
-                photosPagination.lastKey = entries[entries.length - 1].createdAt;
-              }
-          
-              photosPagination.hasMore = entries.length >= photosPagination.batchSize;
-          
-              console.log('[DEBUG] Photos loaded:', Object.keys(allPhotos).length, 'hasMore:', photosPagination.hasMore);
-          
-              // Re-render current album if an album is selected
-              if (currentAlbumId) {
-                renderAlbumGrid();
-              }
-            } else {
-              photosPagination.hasMore = false;
-            }
-        
-            photosPagination.isLoading = false;
-        
-          } catch (error) {
-            console.error('Load photos error:', error);
-            photosPagination.isLoading = false;
-          }
-        }
+                  console.log('[DEBUG] loadAllPhotos called, reset:', reset);
+     
+                  if (reset) {
+                    photosPagination.lastKey = null;
+                    photosPagination.hasMore = true;
+                    allPhotos = {};
+                  }
+     
+                  if (photosPagination.isLoading || !photosPagination.hasMore) {
+                    return;
+                  }
+     
+                  photosPagination.isLoading = true;
+     
+                  try {
+                    const photosRef = ref(db, 'photos');
+                    let photosQuery;
+       
+                    if (photosPagination.lastKey) {
+                      photosQuery = query(
+                        photosRef, 
+                        orderByKey(), 
+                        endAt(photosPagination.lastKey), 
+                        limitToLast(photosPagination.batchSize)
+                      );
+                    } else {
+                      photosQuery = query(
+                        photosRef, 
+                        orderByKey(), 
+                        limitToLast(photosPagination.batchSize)
+                      );
+                    }
+       
+                    const snapshot = await get(photosQuery);
+                    console.log('[DEBUG] Photos get:', snapshot.val());
+       
+                    if (snapshot.exists()) {
+                      const data = snapshot.val();
+                      const entries = Object.entries(data).map(([id, val]) => normalizePhoto(id, val))
+                        .sort((a, b) => b.createdAt - a.createdAt);
+         
+                      // If loading more (not first batch), remove the overlapping item
+                      if (photosPagination.lastKey && entries.length > photosPagination.batchSize) {
+                        entries.pop(); // Remove the overlapping item used for pagination
+                      }
+         
+                      entries.forEach(photo => {
+                        allPhotos[photo.id] = photo;
+                      });
+         
+                      // Update pagination state - use the OLDEST key (first in sorted results) for next page
+                      if (entries.length > 0) {
+                        // Results from orderByKey are ascending (oldest first), so first entry is oldest
+                        photosPagination.lastKey = entries[0].id;
+                      }
+         
+                      photosPagination.hasMore = entries.length >= photosPagination.batchSize;
+       
+                      console.log('[DEBUG] Photos loaded:', Object.keys(allPhotos).length, 'hasMore:', photosPagination.hasMore);
+       
+                      // Re-render current album if an album is selected
+                      if (currentAlbumId) {
+                        renderAlbumGrid();
+                      }
+                    } else {
+                      photosPagination.hasMore = false;
+                    }
+       
+                    photosPagination.isLoading = false;
+       
+                  } catch (error) {
+                    console.error('Load photos error:', error);
+                    photosPagination.isLoading = false;
+                  }
+                }
 
     function renderAlbumTabs() {
       const tabsContainer = document.getElementById('albumTabs');
