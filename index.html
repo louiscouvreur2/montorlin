@@ -2111,6 +2111,20 @@
                                     await set(ref(db, 'photos/' + photoId), photoData);
                                     console.log(`[UPLOAD] ✅ Firebase OK: ${file.name} en ${Date.now() - firebaseStart}ms`);
                                     
+                                    // Optimistic update: add to local cache immediately
+                                    const newPhoto = {
+                                      id: photoId,
+                                      title: file.name.replace(/\.[^/.]+$/, ''),
+                                      comment: '',
+                                      dataUrl,
+                                      mimeType: 'image/webp',
+                                      albumIds: selectedAlbumIds,
+                                      createdAt: Date.now(),
+                                      createdBy: currentUser
+                                    };
+                                    allPhotos[photoId] = newPhoto;
+                                    console.log(`[UPLOAD] ✅ Cache local mis à jour: ${photoId}`);
+                                    
                                     console.log(`[UPLOAD] 🎉 Upload complet: ${file.name} - TOTAL: ${Date.now() - uploadStart}ms`);
                                   } catch (error) {
                                     console.error('[UPLOAD] ❌ Erreur:', error);
