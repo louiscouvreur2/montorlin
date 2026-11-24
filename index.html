@@ -258,7 +258,16 @@
     .btn-danger::before { background: linear-gradient(90deg, #c85a4a 0%, #e87a6a 100%); }
     .btn-copper { background: var(--forest-light); color: var(--copper-light); }
     .btn-copper::before { background: linear-gradient(90deg, var(--copper) 0%, var(--copper-light) 100%); }
-    .btn-icon { padding: 0.625rem; }
+    .btn-icon {
+      padding: 0.625rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-icon svg {
+      position: relative;
+      z-index: 1;
+    }
     .error-message {
       display: none;
       text-align: center;
