@@ -1,0 +1,2623 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Montorlin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      /* Nature-inspired palette - forêt profonde & or chaleureux */
+      --forest-900: #0a160a;
+      --forest-800: #0f1f0f;
+      --forest-700: #162a16;
+      --forest-600: #1e381e;
+      --forest-500: #2a4a2a;
+      --forest-400: #3a5c3a;
+      --forest-300: #4a704a;
+      --moss-600: #3d6b3d;
+      --moss-500: #4a7c4a;
+      --moss-400: #5a8c5a;
+      --moss-300: #6a9c6a;
+      --moss-200: #8ab08a;
+      --moss-100: #b8d4b8;
+      --cream-100: #fefdf8;
+      --cream-200: #f5f0e1;
+      --cream-300: #e8e0cc;
+      --cream-400: #dcccb8;
+      --gold-500: #d4a843;
+      --gold-400: #e8c06a;
+      --gold-300: #f0d494;
+      --gold-200: #f5e4b8;
+      --gold-100: #faf0d8;
+      --rust-500: #c46838;
+      --rust-400: #d48858;
+      --rust-300: #e4a878;
+      --sage-500: #6b8c6b;
+      --sage-400: #8ab08a;
+      --white: #ffffff;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.15);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.25);
+      --shadow-lg: 0 12px 32px rgba(0,0,0,0.35);
+      --shadow-xl: 0 24px 48px rgba(0,0,0,0.45);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --radius-full: 9999px;
+      --touch-target: 48px;
+      --transition-fast: 150ms ease;
+      --transition-base: 250ms ease;
+      --transition-slow: 400ms ease;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --forest-900: #061006;
+        --forest-800: #0a180a;
+        --forest-700: #0f220f;
+        --forest-600: #142d14;
+        --forest-500: #1c3a1c;
+        --forest-400: #244824;
+        --forest-300: #305830;
+        --moss-600: #2d582d;
+        --moss-500: #3d6b3d;
+        --moss-400: #4d7c4d;
+        --moss-300: #5d8c5d;
+        --moss-200: #7da07d;
+        --moss-100: #a8c8a8;
+        --cream-100: #fefdf8;
+        --cream-200: #f0ebe0;
+        --cream-300: #e0d8c8;
+        --cream-400: #c8b8a8;
+        --gold-500: #c49838;
+        --gold-400: #d4b058;
+        --gold-300: #e4c488;
+        --gold-200: #f0e0b8;
+        --gold-100: #f8f0d8;
+        --rust-500: #b05830;
+        --rust-400: #c47848;
+        --rust-300: #d89868;
+        --sage-500: #5d7c5d;
+        --sage-400: #7da07d;
+        --white: #fefdf8;
+      }
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--forest-900);
+      min-height: 100vh;
+      color: var(--cream-200);
+      position: relative;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.6;
+      font-size: 16px;
+    }
+    /* Atmospheric background layers */
+    body::before,
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      background: 
+        radial-gradient(ellipse 100% 60% at 50% 100%, rgba(74, 107, 58, 0.12) 0%, transparent 65%),
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(212, 168, 67, 0.06) 0%, transparent 55%);
+    }
+    body::after {
+      background-image: 
+        radial-gradient(1px 1px at 12% 18%, var(--gold-300), transparent),
+        radial-gradient(1px 1px at 35% 32%, var(--cream-300), transparent),
+        radial-gradient(1.5px 1.5px at 62% 12%, var(--gold-200), transparent),
+        radial-gradient(1px 1px at 85% 28%, var(--cream-400), transparent),
+        radial-gradient(1px 1px at 15% 65%, var(--gold-300), transparent),
+        radial-gradient(1.5px 1.5px at 45% 75%, var(--cream-200), transparent),
+        radial-gradient(1px 1px at 78% 55%, var(--gold-200), transparent),
+        radial-gradient(1px 1px at 92% 82%, var(--cream-300), transparent);
+      background-repeat: repeat;
+      background-size: 600px 600px;
+      opacity: 0.15;
+      animation: starsTwinkle 6s ease-in-out infinite alternate;
+    }
+    @keyframes starsTwinkle {
+      0% { opacity: 0.08; transform: scale(1); }
+      100% { opacity: 0.18; transform: scale(1.02); }
+    }
+    /* Mountain silhouette */
+    .mountains {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 35vh;
+      min-height: 180px;
+      max-height: 260px;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+    .mountain {
+      position: absolute;
+      bottom: 0;
+      border-style: solid;
+      border-bottom: 0;
+      filter: drop-shadow(0 -4px 12px rgba(0,0,0,0.3));
+    }
+    .mountain-1 { left: -15%; width: 0; height: 0; border-left: 65vw solid transparent; border-right: 65vw solid transparent; border-top: 35vh solid var(--forest-800); opacity: 0.7; }
+    .mountain-2 { left: 10%; width: 0; height: 0; border-left: 50vw solid transparent; border-right: 50vw solid transparent; border-top: 28vh solid var(--forest-700); opacity: 0.85; }
+    .mountain-3 { right: -10%; width: 0; height: 0; border-left: 55vw solid transparent; border-right: 55vw solid transparent; border-top: 32vh solid var(--forest-800); opacity: 0.6; }
+    .mountain-4 { right: 15%; width: 0; height: 0; border-left: 40vw solid transparent; border-right: 40vw solid transparent; border-top: 22vh solid var(--forest-700); opacity: 0.75; }
+    /* Moon with glow */
+    .moon {
+      position: fixed;
+      top: 6%; right: 8%;
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, var(--cream-100) 0%, var(--cream-300) 45%, var(--cream-400) 100%);
+      box-shadow: 
+        0 0 32px rgba(212, 168, 67, 0.4),
+        0 0 64px rgba(212, 168, 67, 0.2),
+        0 0 96px rgba(212, 168, 67, 0.1),
+        inset -4px -4px 16px rgba(0,0,0,0.15),
+        inset 4px 4px 8px rgba(255,255,255,0.1);
+      pointer-events: none;
+      z-index: 2;
+      animation: moonPulse 5s ease-in-out infinite alternate;
+    }
+    @keyframes moonPulse {
+      0% { box-shadow: 0 0 32px rgba(212,168,67,0.4), 0 0 64px rgba(212,168,67,0.2), 0 0 96px rgba(212,168,67,0.1), inset -4px -4px 16px rgba(0,0,0,0.15), inset 4px 4px 8px rgba(255,255,255,0.1); }
+      100% { box-shadow: 0 0 48px rgba(212,168,67,0.55), 0 0 96px rgba(212,168,67,0.3), 0 0 144px rgba(212,168,67,0.15), inset -4px -4px 16px rgba(0,0,0,0.15), inset 4px 4px 8px rgba(255,255,255,0.1); }
+    }
+    /* Stars layer */
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      background-image: 
+        radial-gradient(1px 1px at 10% 20%, var(--cream-200), transparent),
+        radial-gradient(1.5px 1.5px at 30% 35%, var(--gold-200), transparent),
+        radial-gradient(1px 1px at 55% 18%, var(--cream-300), transparent),
+        radial-gradient(1px 1px at 75% 28%, var(--gold-100), transparent),
+        radial-gradient(1px 1px at 92% 22%, var(--cream-200), transparent),
+        radial-gradient(1.5px 1.5px at 18% 62%, var(--gold-200), transparent),
+        radial-gradient(1px 1px at 40% 72%, var(--cream-300), transparent),
+        radial-gradient(1px 1px at 82% 52%, var(--cream-200), transparent),
+        radial-gradient(1px 1px at 28% 85%, var(--gold-200), transparent),
+        radial-gradient(1.5px 1.5px at 68% 88%, var(--cream-300), transparent);
+      background-repeat: repeat;
+      background-size: 800px 800px;
+      opacity: 0.12;
+      animation: starfield 8s ease-in-out infinite alternate;
+    }
+    @keyframes starfield {
+      0% { opacity: 0.08; }
+      100% { opacity: 0.18; }
+    }
+    /* Main card */
+    .card {
+      position: relative;
+      z-index: 10;
+      background: 
+        linear-gradient(155deg, rgba(22, 42, 22, 0.97) 0%, rgba(10, 26, 10, 0.99) 100%);
+      border: 1px solid rgba(74, 107, 58, 0.25);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 960px;
+      margin: 0.75rem auto;
+      box-shadow: 
+        var(--shadow-xl),
+        0 0 0 1px rgba(74, 107, 58, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+    }
+    /* Typography */
+    h1, h2, h3, h4 { font-weight: 500; line-height: 1.3; color: var(--cream-100); }
+    h1 { font-size: clamp(1.75rem, 4.5vw, 2.25rem); font-weight: 400; letter-spacing: 0.02em; }
+    h2 { font-size: clamp(1.25rem, 3vw, 1.5rem); font-weight: 400; }
+    h3 { font-size: clamp(1rem, 2.5vw, 1.125rem); font-weight: 500; }
+    h4 { font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold-300); opacity: 0.9; }
+    p { color: var(--cream-300); }
+    /* Form elements */
+    .form-group { margin-bottom: 1.25rem; }
+    label { 
+      display: block; 
+      font-size: 0.6875rem; 
+      font-weight: 600; 
+      letter-spacing: 0.08em; 
+      text-transform: uppercase; 
+      color: var(--gold-300); 
+      margin-bottom: 0.5rem; 
+      opacity: 0.85; 
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 1rem 1.125rem;
+      background: rgba(16, 32, 16, 0.85);
+      border: 2px solid rgba(74, 107, 58, 0.25);
+      border-radius: var(--radius-md);
+      color: var(--cream-100);
+      font-family: inherit;
+      font-size: 1rem;
+      transition: all var(--transition-base);
+      outline: none;
+      min-height: var(--touch-target);
+    }
+    input::placeholder, textarea::placeholder { color: rgba(200, 220, 200, 0.45); }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--gold-400);
+      box-shadow: 
+        0 0 0 4px rgba(212, 168, 67, 0.12),
+        0 0 24px rgba(212, 168, 67, 0.08),
+        inset 0 0 0 1px rgba(212, 168, 67, 0.1);
+      background: rgba(16, 32, 16, 0.98);
+    }
+    input:not(:placeholder-shown):valid { border-color: var(--moss-400); }
+    input:not(:placeholder-shown):invalid { border-color: var(--rust-400); }
+    select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23d4a843' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 20px; padding-right: 3rem; }
+    textarea { min-height: 100px; resize: vertical; }
+    /* Buttons - unified system */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1rem 1.5rem;
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      min-height: var(--touch-target);
+      position: relative;
+      overflow: hidden;
+    }
+    .btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+    }
+    .btn:hover::before { opacity: 1; }
+    .btn:active { transform: scale(0.98); }
+    .btn:focus-visible { outline: 2px solid var(--gold-400); outline-offset: 2px; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold-500) 0%, var(--gold-400) 50%, var(--gold-500) 100%);
+      color: var(--forest-900);
+      box-shadow: 
+        0 4px 16px rgba(212, 168, 67, 0.35),
+        0 0 0 1px rgba(212, 168, 67, 0.2),
+        inset 0 1px 0 rgba(255,255,255,0.15);
+    }
+    .btn-primary:hover { 
+      box-shadow: 
+        0 8px 24px rgba(212, 168, 67, 0.45),
+        0 0 0 1px rgba(212, 168, 67, 0.3),
+        inset 0 1px 0 rgba(255,255,255,0.2);
+      transform: translateY(-2px);
+    }
+    .btn-secondary {
+      background: rgba(16, 32, 16, 0.8);
+      color: var(--cream-200);
+      border: 2px solid rgba(74, 107, 58, 0.3);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    .btn-secondary:hover {
+      background: rgba(74, 107, 58, 0.4);
+      border-color: var(--gold-400);
+      color: var(--cream-100);
+      transform: translateY(-1px);
+    }
+    .btn-danger {
+      background: linear-gradient(135deg, var(--rust-500) 0%, var(--rust-400) 100%);
+      color: var(--cream-100);
+      box-shadow: 0 4px 16px rgba(196, 104, 56, 0.35);
+    }
+    .btn-danger:hover { 
+      box-shadow: 0 8px 24px rgba(196, 104, 56, 0.45);
+      transform: translateY(-2px);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--cream-300);
+    }
+    .btn-ghost:hover { color: var(--gold-300); background: rgba(212, 168, 67, 0.1); }
+    .btn-icon { padding: 0.625rem; min-width: var(--touch-target); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    /* Layout helpers */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .actions-row { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem; }
+    .actions-row .btn { flex: 1; min-width: 140px; }
+    /* Logo */
+    .logo { text-align: center; margin-bottom: 1.5rem; }
+    .logo-icon {
+      width: 72px; height: 72px;
+      margin: 0 auto 1rem;
+      background: linear-gradient(135deg, var(--gold-500) 0%, var(--gold-400) 40%, var(--gold-500) 100%);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 
+        0 8px 32px rgba(212, 168, 67, 0.4),
+        0 0 0 2px rgba(212, 168, 67, 0.2),
+        inset 0 2px 8px rgba(255,255,255,0.2);
+      animation: logoFloat 6s ease-in-out infinite;
+    }
+    @keyframes logoFloat {
+      0%, 100% { transform: translateY(0) rotate(-1deg); }
+      50% { transform: translateY(-4px) rotate(1deg); }
+    }
+    .logo-icon svg { width: 36px; height: 36px; color: var(--forest-900); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+    .logo-subtitle { font-size: 0.8rem; color: var(--cream-400); font-weight: 400; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.7; }
+    /* Status indicator */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.375rem 0.875rem;
+      background: rgba(74, 107, 58, 0.2);
+      border: 1px solid rgba(74, 107, 58, 0.25);
+      border-radius: var(--radius-full);
+      font-size: 0.625rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gold-300);
+    }
+    .status-badge .dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--moss-400);
+      box-shadow: 0 0 8px var(--moss-400), 0 0 16px var(--moss-400);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .status-badge.syncing .dot { background: var(--gold-400); box-shadow: 0 0 8px var(--gold-400), 0 0 16px var(--gold-400); }
+    .status-badge.error .dot { background: var(--rust-400); box-shadow: 0 0 8px var(--rust-400), 0 0 16px var(--rust-400); }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.9); } }
+    /* User avatar */
+    .user-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold-500), var(--gold-400));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 700; color: var(--forest-900);
+      box-shadow: 0 2px 8px rgba(212, 168, 67, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+      border: 2px solid rgba(212, 168, 67, 0.3);
+    }
+    /* Tab navigation */
+    .tab-nav {
+      display: flex;
+      gap: 0.375rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(74, 107, 58, 0.12);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 0.25rem 0.75rem;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .tab-nav::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      flex: 0 0 auto;
+      scroll-snap-align: start;
+      padding: 0.625rem 1.125rem;
+      background: rgba(16, 32, 16, 0.6);
+      border: 1px solid rgba(74, 107, 58, 0.2);
+      border-radius: var(--radius-full);
+      color: var(--moss-300);
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      white-space: nowrap;
+      min-height: var(--touch-target);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .tab-btn:hover {
+      background: rgba(74, 107, 58, 0.3);
+      border-color: var(--gold-400);
+      color: var(--cream-100);
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--moss-500) 0%, var(--moss-400) 100%);
+      border-color: var(--moss-300);
+      color: var(--forest-900);
+      box-shadow: 0 2px 12px rgba(74, 107, 58, 0.4);
+    }
+    .tab-content { display: none; animation: fadeIn 0.3s ease; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    /* Header */
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(74, 107, 58, 0.12);
+    }
+    .app-header h1 { font-size: clamp(1.5rem, 3.5vw, 1.875rem); font-weight: 500; letter-spacing: 0.01em; color: var(--cream-100); text-shadow: 0 2px 12px rgba(0,0,0,0.4); }
+    .header-actions { display: flex; align-items: center; gap: 0.75rem; }
+    /* Calendar */
+    .calendar-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .calendar-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding: 0 0.25rem;
+    }
+    .calendar-header-title { font-size: 1.125rem; font-weight: 500; color: var(--cream-100); }
+    .calendar-nav {
+      display: flex;
+      gap: 0.375rem;
+    }
+    .calendar-nav-btn {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-full);
+      background: rgba(16, 32, 16, 0.7);
+      border: 1px solid rgba(74, 107, 58, 0.25);
+      color: var(--moss-300);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      min-width: var(--touch-target);
+    }
+    .calendar-nav-btn:hover {
+      background: rgba(74, 107, 58, 0.4);
+      border-color: var(--gold-400);
+      color: var(--cream-100);
+      transform: scale(1.05);
+    }
+    .calendar-header { 
+      display: grid; 
+      grid-template-columns: repeat(7, 1fr); 
+      gap: 2px; 
+      margin-bottom: 0.375rem; 
+      padding: 0 0.25rem; 
+    }
+    .calendar-day-name {
+      text-align: center;
+      padding: 0.5rem 0;
+      font-size: 0.625rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--gold-300);
+      opacity: 0.7;
+    }
+    .calendar-grid { 
+      display: grid; 
+      grid-template-columns: repeat(7, 1fr); 
+      gap: 3px; 
+      padding: 0 0.25rem; 
+    }
+    .calendar-day {
+      aspect-ratio: 1;
+      min-height: 56px;
+      border-radius: var(--radius-md);
+      background: rgba(16, 32, 16, 0.5);
+      border: 1px solid rgba(74, 107, 58, 0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 0.375rem 0.25rem;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      position: relative;
+      overflow: hidden;
+    }
+    .calendar-day:hover {
+      background: rgba(74, 107, 58, 0.25);
+      border-color: var(--gold-400);
+      transform: scale(1.02);
+      z-index: 5;
+    }
+    .calendar-day.today {
+      background: rgba(212, 168, 67, 0.15);
+      border-color: var(--gold-400);
+      box-shadow: inset 0 0 0 2px var(--gold-400);
+    }
+    .calendar-day.other-month { opacity: 0.35; }
+    .calendar-day.other-month:hover { opacity: 0.55; }
+    .day-number {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--cream-200);
+      margin-bottom: 0.25rem;
+    }
+    .calendar-day.today .day-number { color: var(--gold-400); font-weight: 600; }
+    .reservations-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      width: 100%;
+      overflow: hidden;
+    }
+    .reservation-chip {
+      font-size: 0.55rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 500;
+      line-height: 1.3;
+    }
+    .more-reservations {
+      font-size: 0.5rem;
+      color: var(--moss-300);
+      text-align: center;
+      padding: 2px;
+      opacity: 0.7;
+    }
+    /* Reservations panel */
+    .reservations-panel { margin-top: 1.5rem; }
+    .reservations-panel h3 { margin-bottom: 0.875rem; }
+    .reservations-list-full { display: flex; flex-direction: column; gap: 0.5rem; }
+    .reservation-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: rgba(16, 32, 16, 0.6);
+      border: 1px solid rgba(74, 107, 58, 0.15);
+      border-radius: var(--radius-md);
+      border-left: 4px solid var(--gold-400);
+      transition: all var(--transition-fast);
+    }
+    .reservation-item:hover {
+      background: rgba(74, 107, 58, 0.2);
+      border-color: var(--gold-400);
+      transform: translateX(4px);
+    }
+    .reservation-item-info { flex: 1; min-width: 0; }
+    .reservation-item-title { font-weight: 600; color: var(--cream-100); margin-bottom: 0.125rem; font-size: 0.875rem; }
+    .reservation-item-meta { 
+      display: flex; 
+      gap: 0.75rem; 
+      font-size: 0.6875rem; 
+      color: var(--cream-400); 
+      flex-wrap: wrap; 
+    }
+    .reservation-item-actions { display: flex; gap: 0.375rem; flex-shrink: 0; }
+    .reservation-item-actions .btn { padding: 0.5rem 0.875rem; font-size: 0.7rem; min-width: auto; }
+    /* Color legend */
+    .color-legend { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 0.5rem; 
+      margin-top: 1.25rem; 
+      padding-top: 1rem; 
+      border-top: 1px solid rgba(74, 107, 58, 0.12); 
+    }
+    .color-legend-item { 
+      display: flex; 
+      align-items: center; 
+      gap: 0.375rem; 
+      font-size: 0.625rem; 
+      color: var(--cream-300); 
+    }
+    .color-legend-dot { 
+      width: 10px; 
+      height: 10px; 
+      border-radius: 3px; 
+      box-shadow: 0 0 8px currentColor;
+    }
+    /* Album styles */
+    .album-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(74, 107, 58, 0.15);
+    }
+    .album-header h3 { margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--cream-100); }
+    .album-create-form {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .album-create-form input { flex: 1; min-width: 180px; }
+    .album-create-form .btn { white-space: nowrap; }
+    .album-tabs {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.75rem;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      margin-bottom: 1rem;
+    }
+    .album-tab-wrapper { display: inline-flex; align-items: center; gap: 0.375rem; flex: 0 0 auto; scroll-snap-align: start; }
+    .album-tab-btn {
+      scroll-snap-align: start;
+      padding: 0.625rem 1.125rem;
+      background: rgba(16, 32, 16, 0.8);
+      border: 2px solid rgba(74, 107, 58, 0.3);
+      border-radius: 999px;
+      color: var(--cream-300);
+      font-family: inherit;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      white-space: nowrap;
+      min-height: var(--touch-target);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .album-tab-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(212, 168, 67, 0.2) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .album-tab-btn:hover {
+      background: rgba(74, 107, 58, 0.4);
+      border-color: var(--gold-400);
+      color: var(--cream-100);
+      transform: translateY(-1px);
+    }
+    .album-tab-btn:hover::before { opacity: 1; }
+    .album-tab-btn.active {
+      background: linear-gradient(135deg, var(--moss-500) 0%, var(--moss-400) 100%);
+      border-color: var(--moss-300);
+      color: var(--forest-900);
+      box-shadow: 0 4px 20px rgba(74, 107, 58, 0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    .album-tab-btn.active::before { opacity: 1; background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%); }
+    .album-tab-actions { display: flex; gap: 0.125rem; }
+    .album-action-btn {
+      width: 32px; height: 32px;
+      border-radius: var(--radius-full);
+      background: rgba(16, 32, 16, 0.8);
+      border: 2px solid rgba(74, 107, 58, 0.3);
+      color: var(--moss-300);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      flex-shrink: 0;
+    }
+    .album-action-btn:hover {
+      background: rgba(74, 107, 58, 0.4);
+      border-color: var(--gold-400);
+      color: var(--gold-400);
+      transform: scale(1.05);
+    }
+    .album-action-btn.delete:hover { background: rgba(196, 104, 56, 0.2); border-color: var(--rust-400); color: var(--rust-400); }
+    .album-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 0.75rem;
+    }
+    .album-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 4rem 1.5rem;
+      color: var(--cream-300);
+      background: rgba(16, 32, 16, 0.4);
+      border: 2px dashed rgba(74, 107, 58, 0.3);
+      border-radius: 16px;
+      margin-top: 1rem;
+    }
+    .album-empty svg { width: 80px; height: 80px; opacity: 0.6; margin-bottom: 1.25rem; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2)); }
+    .album-empty p:first-of-type { font-size: 1.125rem; font-weight: 600; color: var(--cream-100); margin-bottom: 0.5rem; }
+    .album-empty p:last-of-type { font-size: 0.8125rem; color: var(--moss-200); opacity: 1; }
+    .photo-card {
+      background: rgba(16, 32, 16, 0.7);
+      border: 2px solid rgba(74, 107, 58, 0.25);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .photo-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(212, 168, 67, 0.05) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    .photo-card:hover {
+      border-color: var(--gold-400);
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 0 1px var(--gold-400);
+      z-index: 10;
+    }
+    .photo-card:hover::before { opacity: 1; }
+    .photo-thumb {
+      aspect-ratio: 1;
+      width: 100%;
+      object-fit: cover;
+      background: rgba(16, 32, 16, 0.4);
+    }
+    .photo-info { padding: 0.625rem; display: flex; flex-direction: column; gap: 0.25rem; min-height: 60px; }
+    .photo-title { 
+      font-size: 0.75rem; 
+      font-weight: 600; 
+      color: var(--cream-100); 
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .photo-meta { 
+      display: flex; 
+      gap: 0.5rem; 
+      font-size: 0.6rem; 
+      color: var(--moss-200); 
+      flex-wrap: wrap; 
+    }
+    .photo-actions {
+      display: flex;
+      justify-content: flex-end;
+      padding: 0.5rem;
+      gap: 0.25rem;
+      border-top: 1px solid rgba(74, 107, 58, 0.2);
+    }
+    .photo-action-btn {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: var(--forest-light);
+      border: 1px solid rgba(74, 107, 58, 0.3);
+      color: var(--moss-light);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.85rem;
+    }
+    .photo-action-btn:hover { background: var(--forest); border-color: var(--gold); color: var(--gold); }
+    .photo-action-btn.delete:hover { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #ef4444; }
+    /* Upload zone */
+    .upload-zone {
+      border: 3px dashed var(--gold-400);
+      border-radius: 16px;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      color: var(--cream-200);
+      background: linear-gradient(135deg, rgba(212, 168, 67, 0.08) 0%, rgba(16, 32, 16, 0.6) 100%);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      margin-bottom: 1.25rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .upload-zone::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(212, 168, 67, 0.15) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--gold-300);
+      background: linear-gradient(135deg, rgba(212, 168, 67, 0.15) 0%, rgba(16, 32, 16, 0.7) 100%);
+      color: var(--gold-200);
+      transform: scale(1.01);
+      box-shadow: 0 8px 32px rgba(212, 168, 67, 0.2);
+    }
+    .upload-zone:hover::before, .upload-zone.drag-over::before { opacity: 1; }
+    .upload-zone input { display: none; }
+    .upload-zone svg { width: 56px; height: 56px; margin-bottom: 1rem; opacity: 1; filter: drop-shadow(0 2px 8px rgba(212, 168, 67, 0.4)); transition: all 0.3s ease; }
+    .upload-zone:hover svg { transform: translateY(-3px) scale(1.05); }
+    .upload-zone p { margin: 0 0 0.75rem; font-size: 1rem; font-weight: 600; color: var(--cream-100); }
+    .upload-zone small { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.375rem 0.75rem; background: rgba(212, 168, 67, 0.15); border: 1px solid rgba(212, 168, 67, 0.3); border-radius: 999px; font-size: 0.6875rem; font-weight: 600; color: var(--gold-300); opacity: 1; }
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 16, 6, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 1rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--transition-base);
+    }
+    .modal-overlay.open { opacity: 1; visibility: visible; }
+    .modal {
+      background: linear-gradient(155deg, rgba(22, 42, 22, 0.98) 0%, rgba(10, 26, 10, 0.99) 100%);
+      border: 1px solid rgba(74, 107, 58, 0.3);
+      border-radius: var(--radius-xl);
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-xl), 0 0 0 1px rgba(74, 107, 58, 0.2), inset 0 1px 0 rgba(255,255,255,0.03);
+      transform: scale(0.95) translateY(12px);
+      transition: transform var(--transition-base);
+    }
+    .modal-overlay.open .modal { transform: scale(1) translateY(0); }
+    .photo-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 16, 6, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 1rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--transition-base);
+    }
+    .photo-modal-overlay.open { opacity: 1; visibility: visible; }
+    .photo-modal {
+      background: linear-gradient(155deg, rgba(22, 42, 22, 0.98) 0%, rgba(10, 26, 10, 0.99) 100%);
+      border: 1px solid rgba(74, 107, 58, 0.3);
+      border-radius: var(--radius-xl);
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-xl), 0 0 0 1px rgba(74, 107, 58, 0.2), inset 0 1px 0 rgba(255,255,255,0.03);
+      transform: scale(0.95) translateY(12px);
+      transition: transform var(--transition-base);
+    }
+    .photo-modal-overlay.open .photo-modal { transform: scale(1) translateY(0); }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid rgba(74, 107, 58, 0.15);
+    }
+    .modal-title { font-size: 1.125rem; color: var(--cream-100); margin: 0; }
+    .modal-close {
+      background: none; border: none; color: var(--moss-300); font-size: 1.5rem; cursor: pointer; padding: 0.5rem;
+      opacity: 0.7; transition: all var(--transition-fast); min-width: var(--touch-target); min-height: var(--touch-target);
+      display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm);
+    }
+    .modal-close:hover { opacity: 1; color: var(--cream-100); background: rgba(74, 107, 58, 0.2); }
+    .photo-modal-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+    .photo-modal-image { width: 100%; max-height: 60vh; object-fit: contain; border-radius: var(--radius-md); background: rgba(16, 32, 16, 0.4); }
+    .photo-modal-form { display: flex; flex-direction: column; gap: 1rem; }
+    .photo-modal-form .form-group { margin-bottom: 0; }
+    .album-create-form { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .album-create-form input { flex: 1; min-width: 180px; }
+    .album-create-form .btn { white-space: nowrap; }
+    .reservation-actions { display: flex; gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap; }
+    /* Edit modal */
+    .edit-form { display: flex; flex-direction: column; gap: 1rem; }
+    /* Album checkboxes */
+    .album-checkboxes { display: flex; flex-direction: column; gap: 0.5rem; max-height: 280px; overflow-y: auto; padding-right: 0.5rem; }
+    .album-checkbox { 
+      display: flex; align-items: center; gap: 0.75rem; 
+      padding: 0.875rem 1rem; 
+      background: rgba(16, 32, 16, 0.6); 
+      border: 1px solid rgba(74, 107, 58, 0.2); 
+      border-radius: var(--radius-md); 
+      cursor: pointer; 
+      transition: all var(--transition-fast); 
+    }
+    .album-checkbox:hover { border-color: var(--gold-400); background: rgba(212, 168, 67, 0.08); }
+    .album-checkbox input[type="checkbox"] { 
+      width: 22px; height: 22px; 
+      accent-color: var(--gold-500); 
+      cursor: pointer; flex-shrink: 0;
+    }
+    .album-checkbox-label { color: var(--cream-200); font-size: 0.875rem; flex: 1; cursor: pointer; }
+    /* Delete confirmation modal */
+    .delete-options { display: flex; flex-direction: column; gap: 0.625rem; margin-top: 1rem; }
+    .delete-options .btn { text-align: left; }
+    /* Error/success messages */
+    .error-message {
+      display: none;
+      padding: 0.875rem 1rem;
+      background: rgba(196, 104, 56, 0.15);
+      border: 1px solid rgba(196, 104, 56, 0.3);
+      border-radius: var(--radius-md);
+      color: var(--rust-300);
+      font-size: 0.8125rem;
+      animation: slideDown 0.3s ease;
+    }
+    .error-message.show { display: block; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+    /* Footer */
+    .footer-note { text-align: center; font-size: 0.625rem; color: var(--moss-300); margin-top: 1.5rem; opacity: 0.6; }
+    /* Responsive */
+    @media (min-width: 480px) {
+      .card { padding: 2rem; margin: 1rem auto; border-radius: 28px; }
+      h1 { font-size: 2.25rem; }
+      .logo-icon { width: 80px; height: 80px; }
+      .logo-icon svg { width: 40px; height: 40px; }
+      .calendar-day { min-height: 72px; }
+      .day-number { font-size: 1rem; }
+      .tab-btn { flex: 1; text-align: center; }
+      .header-actions { gap: 1rem; }
+      .form-row { grid-template-columns: 1fr 1fr; }
+    }
+    @media (min-width: 768px) {
+      .calendar-container { overflow-x: visible; }
+      .calendar-nav-btn { width: 44px; height: 44px; }
+      .tab-nav { overflow-x: visible; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+    @media (prefers-contrast: high) {
+      :root {
+        --cream-100: #ffffff; --cream-200: #f0f0f0; --cream-300: #e0e0e0; --cream-400: #d0d0d0;
+        --gold-500: #ffd700; --gold-400: #ffe066; --gold-300: #ffff99;
+        --moss-400: #90ee90; --moss-300: #b8f0b8;
+        --forest-900: #000000; --forest-800: #0a0a0a; --forest-700: #141414;
+      }
+      .calendar-day { border-width: 2px; }
+      .btn { border: 2px solid currentColor; }
+      input, select, textarea { border-width: 3px; }
+    }
+    /* Scrollbar styling */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(74, 107, 58, 0.4); border-radius: 4px; border: 2px solid transparent; background-clip: content-box; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(212, 168, 67, 0.5); }
+    ::-webkit-scrollbar-corner { background: transparent; }
+    /* Focus visible for accessibility */
+    :focus-visible { outline: 2px solid var(--gold-400); outline-offset: 2px; }
+    /* Selection */
+    ::selection { background: rgba(212, 168, 67, 0.3); color: var(--forest-900); }
+</style>
+</head>
+<body>
+  <div class="stars" aria-hidden="true"></div>
+  <div class="mountains" aria-hidden="true">
+    <div class="mountain mountain-1"></div>
+    <div class="mountain mountain-2"></div>
+    <div class="mountain mountain-3"></div>
+    <div class="mountain mountain-4"></div>
+  </div>
+  <div class="moon" aria-hidden="true"></div>
+
+  <!-- LOGIN VIEW -->
+  <main id="loginView" class="card" style="max-width: 420px; text-align: center;">
+    <header class="logo">
+      <div class="logo-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+      </div>
+      <h1>Montorlin</h1>
+    </header>
+
+    <div class="error-message" id="errorMsg" role="alert"></div>
+
+        <form id="loginForm" novalidate>
+          <div class="form-group">
+            <label for="prenom">PRÉNOM</label>
+            <input type="text" id="prenom" name="prenom" autocomplete="given-name" required aria-required="true">
+          </div>
+          <div class="form-group">
+            <label for="password">MOT DE PASSE</label>
+            <input type="password" id="password" name="password" autocomplete="current-password" required aria-required="true">
+          </div>
+          <button type="submit" class="btn" style="width: 100%;" id="submitBtn"><span>Entrer</span></button>
+        </form>
+  </main>
+
+  <!-- APP VIEW (hidden initially) -->
+  <main id="appView" class="card" style="display: none;">
+    <header class="app-header">
+      <h1>Montorlin</h1>
+      <div class="header-actions">
+        <div class="status-indicator" id="syncIndicator">
+          <span class="dot"></span>
+          <span id="syncText">Synchronisé</span>
+        </div>
+        <div class="user-avatar" id="userAvatar" aria-label="Utilisateur connecté">?</div>
+        <button class="btn btn-secondary header-btn" id="logoutBtn"><span>Déconnexion</span></button>
+      </div>
+    </header>
+
+    <!-- TAB NAVIGATION -->
+    <nav class="tab-nav" id="tabNav" role="tablist" aria-label="Navigation principale">
+      <button class="tab-btn active" role="tab" aria-selected="true" data-tab="reservations" id="tabReservations">📅 Réservations</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="album" id="tabAlbum">📸 Album</button>
+    </nav>
+
+    <!-- TAB RÉSERVATIONS -->
+    <div class="tab-content" id="tabContentReservations" role="tabpanel" aria-labelledby="tabReservations">
+      <div class="calendar-container">
+        <div class="calendar-header-row">
+          <h2 class="calendar-header-title" id="calendarTitle"></h2>
+          <div class="calendar-nav">
+            <button class="calendar-nav-btn" id="prevMonth" aria-label="Mois précédent" title="Mois précédent">◀</button>
+            <button class="calendar-nav-btn" id="nextMonth" aria-label="Mois suivant" title="Mois suivant">▶</button>
+          </div>
+        </div>
+        <div class="calendar-header" id="calendarHeader" role="rowheader"></div>
+        <div class="calendar-grid" id="calendarGrid" role="grid"></div>
+      </div>
+
+      <div class="reservations-panel">
+        <h3>Réservations à venir</h3>
+        <div class="reservations-list-full" id="reservationsList"></div>
+      </div>
+
+      <div class="color-legend" id="colorLegend"></div>
+    </div>
+
+    <!-- TAB ALBUM -->
+    <div class="tab-content" id="tabContentAlbum" role="tabpanel" aria-labelledby="tabAlbum" style="display: none;">
+      <div class="album-header">
+        <h3>📸 Album</h3>
+        <div class="album-create-form">
+          <input type="text" id="newAlbumName" placeholder="Nom de l'album" maxlength="50">
+          <button class="btn btn-secondary" id="createAlbumBtn"><span>Créer</span></button>
+        </div>
+      </div>
+
+      <div class="album-tabs" id="albumTabs" role="tablist" aria-label="Albums"></div>
+
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="photoUpload" accept="image/*" multiple>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        <p>Ajouter des photos</p>
+        <small>Max 8 Mo</small>
+      </div>
+
+      <div class="album-grid" id="albumGrid" role="grid" aria-label="Photos de l'album">
+        <div class="album-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <rect x="2" y="3" width="20" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+          <p>Aucune photo</p>
+          <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.6;">Créez un album et ajoutez des photos</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL FOR RESERVATION -->
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <header class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Nouvelle réservation</h2>
+        <button class="modal-close" id="modalClose" aria-label="Fermer">✕</button>
+      </header>
+      <form id="reservationForm">
+        <input type="hidden" id="reservationId">
+        <div class="form-group">
+          <label for="resTitle">Titre</label>
+          <input type="text" id="resTitle" placeholder="Titre" required maxlength="100">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="resStart">Arrivée</label>
+            <input type="date" id="resStart" required>
+          </div>
+          <div class="form-group">
+            <label for="resEnd">Départ</label>
+            <input type="date" id="resEnd" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="resColor">Couleur</label>
+          <select id="resColor">
+            <option value="#e8c06a">🟡 Or</option>
+            <option value="#6ab8e8">🔵 Bleu</option>
+            <option value="#e87a6a">🔴 Rouge</option>
+            <option value="#8ae8a0">🟢 Vert</option>
+            <option value="#d88ae8">🟣 Violet</option>
+            <option value="#e8b06a">🟠 Orange</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="resNotes">Notes</label>
+          <textarea id="resNotes" placeholder="Notes (optionnel)"></textarea>
+        </div>
+        <div class="reservation-actions">
+          <button type="button" class="btn btn-danger" id="deleteReservationBtn" style="display: none;"><span>Supprimer</span></button>
+          <button type="submit" class="btn"><span id="modalSubmitText">Créer</span></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- PHOTO MODAL -->
+  <div class="photo-modal-overlay" id="photoModalOverlay" role="dialog" aria-modal="true" aria-labelledby="photoModalTitle">
+    <div class="photo-modal">
+      <header class="photo-modal-header">
+        <h2 class="photo-modal-title" id="photoModalTitle">Photo</h2>
+        <button class="photo-modal-close" id="photoModalClose" aria-label="Fermer">✕</button>
+      </header>
+      <div class="photo-modal-body">
+        <img class="photo-modal-image" id="photoModalImage" src="" alt="">
+        <form class="photo-modal-form" id="photoModalForm">
+          <div class="form-group">
+            <label for="photoModalTitleInput">Titre</label>
+            <input type="text" id="photoModalTitleInput" placeholder="Titre" maxlength="100">
+          </div>
+          <div class="form-group">
+            <label for="photoModalCommentInput">Commentaire</label>
+            <textarea id="photoModalCommentInput" placeholder="Commentaire (optionnel)"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Albums</label>
+            <div id="photoModalAlbums" class="album-checkboxes"></div>
+          </div>
+          <div class="reservation-actions">
+            <button type="button" class="btn btn-danger" id="photoModalDeleteBtn" style="display: none;"><span>Supprimer</span></button>
+            <button type="submit" class="btn"><span>Sauvegarder</span></button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase Realtime Database SDK (CDN) -->
+  <script type="module">
+    console.log("[DEBUG] Module script STARTED - Firebase initialization");
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getDatabase, ref, push, remove, set, onValue, query, orderByChild, limitToLast, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+    // Firebase config (Realtime Database) - using the working site-montorlin project
+    const firebaseConfig = {
+      apiKey: "AIzaSyBzQTifoKJrIpipX3H0t-y9uFWcnAQrDZw",
+      authDomain: "site-montorlin.firebaseapp.com",
+      databaseURL: "https://site-montorlin-default-rtdb.firebaseio.com",
+      projectId: "site-montorlin",
+      storageBucket: "site-montorlin.firebasestorage.app",
+      messagingSenderId: "109488883918",
+      appId: "1:109488883918:web:d8c4b9fcc379aea9e7e89f"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const reservationsRef = ref(db, 'reservations');
+    console.log("[DEBUG] Firebase initialized, db:", db, "reservationsRef:", reservationsRef);
+
+    const FAMILY_PASSWORD = "refuge2026";
+
+    const RESERVATION_COLORS = [
+      { value: '#e8c06a', label: 'Or' },
+      { value: '#6ab8e8', label: 'Bleu' },
+      { value: '#e87a6a', label: 'Rouge' },
+      { value: '#8ae8a0', label: 'Vert' },
+      { value: '#d88ae8', label: 'Violet' },
+      { value: '#e8b06a', label: 'Orange' }
+    ];
+
+    // State
+    let currentUser = null;
+    let currentMonth = new Date();
+    let reservations = [];
+    let familyMembers = [];
+
+    // Album State - NEW: photos stored globally with albumIds array
+    let albums = [];
+    let allPhotos = {};  // All photos indexed by ID, each has albumIds: []
+    let currentAlbumId = null;
+    let currentAlbumName = null;
+
+    // NO DOM element declarations at module level!
+    // ALL DOM queries happen INSIDE functions
+
+    // Sync status
+    function setSyncStatus(status, text) {
+      const indicator = document.getElementById('syncIndicator');
+      if (!indicator) return;
+      indicator.classList.remove('syncing', 'error');
+      if (status === 'syncing') indicator.classList.add('syncing');
+      else if (status === 'error') indicator.classList.add('error');
+      const textEl = document.getElementById('syncText');
+      if (textEl) textEl.textContent = text || (status === 'ok' ? 'Synchronisé' : status === 'syncing' ? 'Synchronisation...' : 'Erreur');
+    }
+
+    // Helper: format date for input
+    function formatDateForInput(date) {
+      if (typeof date === 'string') return date;
+      return date.toISOString().split('T')[0];
+    }
+
+    function formatDateFR(date) {
+      return date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+    }
+
+    function getColorForUser(prenom) {
+      const colors = RESERVATION_COLORS.map(c => c.value);
+      let hash = 0;
+      for (let i = 0; i < prenom.length; i++) hash = prenom.charCodeAt(i) + ((hash << 5) - hash);
+      return colors[Math.abs(hash) % colors.length];
+    }
+
+    // Normalize reservation data - handles both old and new formats
+    function normalizeReservation(id, val) {
+      return {
+        id,
+        title: val.title || val.name || '',
+        start_date: val.start_date || val.start || val.startDate || '',
+        end_date: val.end_date || val.end || val.endDate || '',
+        color: val.color || getColorForUser(val.prenom || val.author || 'Inconnu'),
+        notes: val.notes || '',
+        prenom: val.prenom || val.author || val.user || 'Inconnu',
+        timestamp: val.timestamp || val.createdAt || val.time || Date.now()
+      };
+    }
+
+    // CALENDAR FUNCTIONS
+    function renderCalendarHeader() {
+      const headerEl = document.getElementById('calendarHeader');
+      if (!headerEl) return;
+      const days = ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM'];
+      headerEl.innerHTML = days.map(d => `<div class="calendar-day-name">${d}</div>`).join('');
+    }
+
+    function getMonthDays(year, month) {
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const daysInMonth = lastDay.getDate();
+      const startingDay = (firstDay.getDay() + 6) % 7;
+      const prevMonthLastDay = new Date(year, month, 0).getDate();
+
+      const days = [];
+      for (let i = startingDay - 1; i >= 0; i--) {
+        days.push({ date: new Date(year, month - 1, prevMonthLastDay - i), otherMonth: true });
+      }
+      for (let d = 1; d <= daysInMonth; d++) {
+        days.push({ date: new Date(year, month, d), otherMonth: false });
+      }
+      const totalCells = Math.ceil((startingDay + daysInMonth) / 7) * 7;
+      for (let d = 1; days.length < totalCells; d++) {
+        days.push({ date: new Date(year, month + 1, d), otherMonth: true });
+      }
+      return days;
+    }
+
+    function getReservationsForDay(dateStr) {
+      return reservations.filter(r => {
+        const start = new Date(r.start_date);
+        const end = new Date(r.end_date);
+        const check = new Date(dateStr);
+        return check >= start && check <= end;
+      });
+    }
+
+    function renderCalendar() {
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth();
+      const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+      
+      const headerTitle = document.getElementById('calendarTitle');
+      if (headerTitle) headerTitle.textContent = `${monthNames[month]} ${year}`;
+
+      const days = getMonthDays(year, month);
+      const gridEl = document.getElementById('calendarGrid');
+      if (!gridEl) return;
+      
+      gridEl.innerHTML = days.map(day => {
+        const dateStr = formatDateForInput(day.date);
+        const dayReservations = getReservationsForDay(dateStr);
+        const isToday = day.date.toDateString() === new Date().toDateString();
+        const isOtherMonth = day.otherMonth;
+        
+        return `
+          <div class="calendar-day ${isOtherMonth ? 'other-month' : ''} ${isToday ? 'today' : ''}" data-date="${dateStr}" role="gridcell" aria-label="${dateStr}${dayReservations.length ? ': ' + dayReservations.map(r => r.title).join(', ') : ''}">
+            <div class="day-number">${day.date.getDate()}</div>
+            <div class="reservations-list">
+              ${dayReservations.slice(0, 3).map(r => `
+                <div class="reservation-chip" style="background: ${r.color}; border-color: ${r.color};" data-id="${r.id}" title="${r.title} - ${r.prenom}${r.notes ? ': ' + r.notes : ''}">
+                  ${r.title}
+                </div>
+              `).join('')}
+              ${dayReservations.length > 3 ? `<div class="more-reservations">+${dayReservations.length - 3} autres</div>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.querySelectorAll('.calendar-day:not(.other-month)').forEach(dayEl => {
+        dayEl.addEventListener('click', (e) => {
+          if (!e.target.closest('.reservation-chip')) {
+            openModal(dayEl.dataset.date);
+          }
+        });
+      });
+
+      document.querySelectorAll('.reservation-chip').forEach(chip => {
+        chip.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openModal(null, chip.dataset.id);
+        });
+      });
+    }
+
+    function updateMonth(delta) {
+      currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + delta, 1);
+      renderCalendar();
+    }
+
+    function renderReservationsList() {
+      const upcoming = [...reservations]
+        .filter(r => new Date(r.end_date) >= new Date())
+        .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
+        .slice(0, 10);
+
+      const listEl = document.getElementById('reservationsList');
+      if (!listEl) return;
+
+      if (upcoming.length === 0) {
+        if (listEl) listEl.innerHTML = '<p style="text-align: center; color: var(--moss-light); padding: 2rem;">Aucune réservation à venir. Cliquez sur un jour pour en créer une.</p>';
+        return;
+      }
+
+      if (listEl) {
+        listEl.innerHTML = upcoming.map(r => `
+          <div class="reservation-item" style="border-left: 4px solid ${r.color};">
+            <div class="reservation-item-info">
+              <div class="reservation-item-title">${r.title}</div>
+              <div class="reservation-item-meta">
+                <span>${formatDateFR(new Date(r.start_date))} → ${formatDateFR(new Date(r.end_date))}</span>
+                <span>Par ${r.prenom}</span>
+              </div>
+            </div>
+            <div class="reservation-item-actions">
+              <button class="btn btn-secondary" onclick="openModal(null, '${r.id}')" style="padding: 0.5rem 1rem; font-size: 0.85rem;"><span>Modifier</span></button>
+              <button class="btn btn-danger" onclick="deleteReservation('${r.id}')" style="padding: 0.5rem 1rem; font-size: 0.85rem;"><span>Supprimer</span></button>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function renderColorLegend() {
+      const userColors = {};
+      reservations.forEach(r => { userColors[r.prenom] = r.color; });
+      
+      const legendEl = document.getElementById('colorLegend');
+      if (!legendEl) return;
+      
+      legendEl.innerHTML = Object.entries(userColors).map(([prenom, color]) => `
+        <div class="color-legend-item">
+          <span class="color-legend-dot" style="background: ${color};"></span>
+          ${prenom}
+        </div>
+      `).join('');
+    }
+
+    // MODAL FUNCTIONS
+    function openModal(dateStr = null, reservationId = null) {
+      const modalOverlay = document.getElementById('modalOverlay');
+      const isEdit = !!reservationId;
+      
+      // Declare all DOM elements once at the top
+      const titleEl = document.getElementById('modalTitle');
+      const submitTextEl = document.getElementById('modalSubmitText');
+      const idInput = document.getElementById('reservationId');
+      const titleInput = document.getElementById('resTitle');
+      const startInput = document.getElementById('resStart');
+      const endInput = document.getElementById('resEnd');
+      const colorSelect = document.getElementById('resColor');
+      const notesInput = document.getElementById('resNotes');
+      const deleteBtn = document.getElementById('deleteReservationBtn');
+      
+      if (isEdit) {
+        const res = reservations.find(r => r.id === reservationId);
+        if (!res) return;
+        if (titleEl) titleEl.textContent = 'Modifier la réservation';
+        if (submitTextEl) submitTextEl.textContent = 'Enregistrer';
+        if (idInput) idInput.value = res.id;
+        if (titleInput) titleInput.value = res.title;
+        if (startInput) startInput.value = formatDateForInput(new Date(res.start_date));
+        if (endInput) endInput.value = formatDateForInput(new Date(res.end_date));
+        if (colorSelect) colorSelect.value = res.color;
+        if (notesInput) notesInput.value = res.notes || '';
+        if (deleteBtn) {
+          deleteBtn.style.display = 'inline-flex';
+          deleteBtn.onclick = () => deleteReservation(res.id);
+        }
+      } else {
+        if (titleEl) titleEl.textContent = 'Nouvelle réservation';
+        if (submitTextEl) submitTextEl.textContent = 'Créer';
+        if (idInput) idInput.value = '';
+        if (titleInput) titleInput.value = '';
+        if (startInput) startInput.value = dateStr || formatDateForInput(new Date());
+        if (endInput) endInput.value = dateStr || formatDateForInput(new Date());
+        if (colorSelect) colorSelect.value = getColorForUser(currentUser);
+        if (notesInput) notesInput.value = '';
+        if (deleteBtn) deleteBtn.style.display = 'none';
+      }
+      
+      const modal = document.getElementById('modalOverlay');
+      if (modal) modal.classList.add('open');
+      setTimeout(() => {
+        if (titleInput) titleInput.focus();
+      }, 100);
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('modalOverlay');
+      if (modal) modal.classList.remove('open');
+      setTimeout(() => {
+        const form = document.getElementById('reservationForm');
+        if (form) form.reset();
+        const idInput = document.getElementById('reservationId');
+        if (idInput) idInput.value = '';
+        const deleteBtn = document.getElementById('deleteReservationBtn');
+        if (deleteBtn) deleteBtn.style.display = 'none';
+      }, 300);
+    }
+
+    // Custom confirmation modal (replaces native confirm)
+    function showConfirmModal(title, message, onConfirm) {
+      const existing = document.getElementById('confirmModalOverlay');
+      if (existing) existing.remove();
+      
+      const overlay = document.createElement('div');
+      overlay.id = 'confirmModalOverlay';
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal">
+          <header class="modal-header">
+            <h2 class="modal-title">${title}</h2>
+            <button class="modal-close" aria-label="Fermer">✕</button>
+          </header>
+          <div class="photo-modal-body">
+            <p style="color: var(--moss-light); margin-bottom: 1.5rem;">${message}</p>
+            <div class="reservation-actions">
+              <button type="button" class="btn btn-secondary" id="confirmCancel"><span>Annuler</span></button>
+              <button type="button" class="btn" id="confirmOk"><span>Supprimer</span></button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      
+      const closeModal = () => {
+        overlay.classList.remove('open');
+        setTimeout(() => overlay.remove(), 300);
+      };
+      
+      overlay.querySelector('.modal-close').addEventListener('click', closeModal);
+      overlay.querySelector('#confirmCancel').addEventListener('click', closeModal);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+      overlay.querySelector('#confirmOk').addEventListener('click', () => {
+        closeModal();
+        if (onConfirm) onConfirm();
+      });
+      
+      // Trigger open
+      requestAnimationFrame(() => overlay.classList.add('open'));
+    }
+
+    // Custom edit modal (replaces native prompt)
+    function showEditModal(title, label, currentValue, onConfirm) {
+      const existing = document.getElementById('editModalOverlay');
+      if (existing) existing.remove();
+      
+      const overlay = document.createElement('div');
+      overlay.id = 'editModalOverlay';
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal">
+          <header class="modal-header">
+            <h2 class="modal-title">${title}</h2>
+            <button class="modal-close" aria-label="Fermer">✕</button>
+          </header>
+          <div class="photo-modal-body">
+            <form class="edit-form" id="editForm">
+              <div class="form-group">
+                <label for="editInput">${label}</label>
+                <input type="text" id="editInput" value="${currentValue}" maxlength="100" autocomplete="off">
+              </div>
+              <div class="reservation-actions">
+                <button type="button" class="btn btn-secondary" id="editCancel"><span>Annuler</span></button>
+                <button type="submit" class="btn"><span>Enregistrer</span></button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      
+      const closeModal = () => {
+        overlay.classList.remove('open');
+        setTimeout(() => overlay.remove(), 300);
+      };
+      
+      const form = overlay.querySelector('#editForm');
+      const input = overlay.querySelector('#editInput');
+      
+      overlay.querySelector('.modal-close').addEventListener('click', closeModal);
+      overlay.querySelector('#editCancel').addEventListener('click', closeModal);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+      
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const value = input.value.trim();
+        closeModal();
+        if (onConfirm) onConfirm(value);
+      });
+      
+      // Trigger open
+      requestAnimationFrame(() => {
+        overlay.classList.add('open');
+        setTimeout(() => input.focus(), 100);
+      });
+    }
+
+    // RESERVATION CRUD - Firebase Realtime Database
+    async function loadReservations() {
+      console.log("[DEBUG] loadReservations called");
+      setSyncStatus('syncing', 'Chargement...');
+      try {
+        const reservationsQuery = query(reservationsRef, orderByChild('timestamp'), limitToLast(100));
+        onValue(reservationsQuery, (snapshot) => {
+          console.log("[DEBUG] onValue callback triggered, snapshot:", snapshot.val());
+          const data = snapshot.val();
+          if (data) {
+            reservations = Object.entries(data).map(([id, val]) => normalizeReservation(id, val))
+              .sort((a, b) => b.timestamp - a.timestamp);
+          } else {
+            reservations = [];
+          }
+          console.log("[DEBUG] Reservations loaded:", reservations);
+          renderCalendar();
+          renderReservationsList();
+          renderColorLegend();
+          setSyncStatus('ok', 'Synchronisé');
+        }, (error) => {
+          console.error('Firebase error:', error);
+          setSyncStatus('error', 'Erreur de connexion');
+        });
+      } catch (error) {
+        console.error('Load reservations error:', error);
+        setSyncStatus('error', 'Erreur chargement');
+      }
+    }
+
+    async function saveReservation(e) {
+      e.preventDefault();
+      
+      const idInput = document.getElementById('reservationId');
+      const titleInput = document.getElementById('resTitle');
+      const startInput = document.getElementById('resStart');
+      const endInput = document.getElementById('resEnd');
+      const colorSelect = document.getElementById('resColor');
+      const notesInput = document.getElementById('resNotes');
+      const errorMsg = document.getElementById('errorMsg');
+      const submitTextEl = document.getElementById('modalSubmitText');
+      
+      const isEdit = !!idInput?.value;
+      const title = titleInput?.value?.trim();
+      const start = startInput?.value;
+      const end = endInput?.value;
+      const color = colorSelect?.value;
+      const notes = notesInput?.value?.trim();
+      
+      if (!title || !start || !end) {
+        showError('Titre, arrivée et départ requis.');
+        return;
+      }
+      if (new Date(end) < new Date(start)) {
+        showError('La date de départ doit être après l\'arrivée.');
+        return;
+      }
+
+      const reservationData = {
+        title,
+        start_date: start,
+        end_date: end,
+        color,
+        notes,
+        prenom: currentUser,
+        timestamp: Date.now()
+      };
+
+      try {
+              setSyncStatus('syncing', isEdit ? 'Mise à jour...' : 'Création...');
+        
+              if (isEdit) {
+                const resId = document.getElementById('reservationId')?.value;
+                await set(ref(db, 'reservations/' + resId), reservationData);
+              } else {
+                await push(reservationsRef, reservationData);
+              }
+        
+              closeModal();
+              setSyncStatus('ok', 'Synchronisé');
+            } catch (error) {
+              console.error('Save reservation error:', error);
+              showError('Erreur lors de la sauvegarde: ' + error.message);
+              setSyncStatus('error', 'Erreur');
+            }
+          }
+
+          async function deleteReservation(id) {
+                showConfirmModal(
+                  'Supprimer cette réservation ?',
+                  'Cette action est irréversible.',
+                  async () => {
+                    try {
+                      setSyncStatus('syncing', 'Suppression...');
+                      await remove(ref(db, 'reservations/' + id));
+                      closeModal();
+                      setSyncStatus('ok', 'Synchronisé');
+                    } catch (error) {
+                      console.error('Delete error:', error);
+                      showError('Erreur suppression: ' + error.message);
+                      setSyncStatus('error', 'Erreur');
+                    }
+                  }
+                );
+                              }
+              
+                    function showError(message) {
+      const errorMsg = document.getElementById('errorMsg');
+      if (errorMsg) {
+        errorMsg.textContent = message;
+        errorMsg.classList.add('show');
+      }
+      const prenomInput = document.getElementById('prenom');
+      if (prenomInput) prenomInput.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+      const passwordInput = document.getElementById('password');
+      if (passwordInput) passwordInput.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+      setTimeout(() => {
+        const p = document.getElementById('prenom');
+        if (p) p.style.borderColor = '';
+        const pw = document.getElementById('password');
+        if (pw) pw.style.borderColor = '';
+      }, 3000);
+    }
+
+    function resetButton() {
+      const submitBtn = document.getElementById('submitBtn');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        const span = submitBtn.querySelector('span');
+        if (span) span.textContent = 'Entrer';
+        submitBtn.style.background = '';
+      }
+    }
+
+    function showApp(prenom) {
+      console.log("[DEBUG] showApp called with:", prenom);
+      const loginView = document.getElementById('loginView');
+      const appView = document.getElementById('appView');
+      
+      if (loginView) loginView.style.display = 'none';
+      if (appView) appView.style.display = 'block';
+      currentUser = prenom;
+      
+      const userAvatar = document.getElementById('userAvatar');
+      if (userAvatar) userAvatar.textContent = prenom.charAt(0).toUpperCase();
+      
+      const syncIndicator = document.getElementById('syncIndicator');
+      if (syncIndicator) syncIndicator.style.display = 'inline-flex';
+      
+      localStorage.setItem('montorlin-user', JSON.stringify({ prenom, loginTime: Date.now() }));
+      
+      loadFamilyMembers();
+      loadReservations();
+      loadAlbums();
+      renderCalendarHeader();
+    }
+
+    async function loadFamilyMembers() {
+      try {
+        const usersRef = ref(db, 'users');
+        onValue(usersRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            familyMembers = Object.values(data).map(u => u.prenom);
+          }
+        });
+      } catch (e) { console.warn('Could not load family members:', e); }
+    }
+
+    // ALBUM FUNCTIONS
+    function normalizeAlbum(id, val) {
+          return {
+            id,
+            name: val.name || val.title || 'Sans nom',
+            createdAt: val.createdAt || val.timestamp || Date.now(),
+            createdBy: val.createdBy || currentUser || 'Inconnu'
+          };
+        }
+
+        function normalizePhoto(id, val) {
+          return {
+            id,
+            title: val.title || val.name || '',
+            comment: val.comment || val.description || '',
+            dataUrl: val.dataUrl || val.url || '',
+            mimeType: val.mimeType || 'image/jpeg',
+            albumIds: val.albumIds || [],  // NEW: array of album IDs
+            createdAt: val.createdAt || val.time || Date.now(),
+            createdBy: val.createdBy || val.author || currentUser || 'Inconnu'
+          };
+        }
+
+    async function loadAlbums() {
+      console.log('[DEBUG] loadAlbums called');
+      setSyncStatus('syncing', 'Chargement albums...');
+      try {
+        const albumsRef = ref(db, 'albums');
+        const albumsQuery = query(albumsRef, orderByChild('createdAt'), limitToLast(50));
+        onValue(albumsQuery, (snapshot) => {
+          console.log('[DEBUG] Albums onValue:', snapshot.val());
+          const data = snapshot.val();
+          if (data) {
+            albums = Object.entries(data).map(([id, val]) => normalizeAlbum(id, val))
+              .sort((a, b) => b.createdAt - a.createdAt);
+          } else {
+            albums = [];
+          }
+          console.log('[DEBUG] Albums loaded:', albums);
+          renderAlbumTabs();
+          // Auto-select first album if none selected
+          if (albums.length > 0 && !currentAlbumId) {
+            selectAlbum(albums[0].id);
+          } else if (currentAlbumId) {
+            // Re-render current album in case photos changed
+            renderAlbumGrid();
+          }
+          setSyncStatus('ok', 'Synchronisé');
+        }, (error) => {
+          console.error('Firebase albums error:', error);
+          setSyncStatus('error', 'Erreur albums');
+        });
+      } catch (error) {
+        console.error('Load albums error:', error);
+        setSyncStatus('error', 'Erreur chargement albums');
+      }
+      
+      // Also load all photos globally
+      loadAllPhotos();
+    }
+
+    async function loadAllPhotos() {
+      console.log('[DEBUG] loadAllPhotos called');
+      try {
+        const photosRef = ref(db, 'photos');
+        const photosQuery = query(photosRef, orderByChild('createdAt'), limitToLast(200));
+        onValue(photosQuery, (snapshot) => {
+          console.log('[DEBUG] Photos onValue:', snapshot.val());
+          const data = snapshot.val();
+          if (data) {
+            allPhotos = Object.entries(data).map(([id, val]) => normalizePhoto(id, val))
+              .reduce((acc, photo) => { acc[photo.id] = photo; return acc; }, {});
+          } else {
+            allPhotos = {};
+          }
+          console.log('[DEBUG] Photos loaded:', Object.keys(allPhotos).length);
+          // Re-render current album if an album is selected
+          if (currentAlbumId) {
+            renderAlbumGrid();
+          }
+        }, (error) => {
+          console.error('Firebase photos error:', error);
+        });
+      } catch (error) {
+        console.error('Load photos error:', error);
+      }
+    }
+
+    function renderAlbumTabs() {
+      const tabsContainer = document.getElementById('albumTabs');
+      if (!tabsContainer) return;
+      
+      if (albums.length === 0) {
+        tabsContainer.innerHTML = '<span style="color: var(--moss-light); font-size: 0.75rem; padding: 0.5rem;">Aucun album. Créez-en un !</span>';
+        return;
+      }
+      
+      tabsContainer.innerHTML = albums.map(album => `
+        <div class="album-tab-wrapper" data-album-id="${album.id}">
+          <button class="album-tab-btn ${album.id === currentAlbumId ? 'active' : ''}" 
+                  role="tab" aria-selected="${album.id === currentAlbumId}" 
+                  data-album-id="${album.id}">
+            ${album.name}
+          </button>
+          <div class="album-tab-actions">
+            <button class="album-action-btn edit" onclick="editAlbum('${album.id}')" title="Modifier" aria-label="Modifier l'album">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
+            <button class="album-action-btn delete" onclick="deleteAlbum('${album.id}')" title="Supprimer" aria-label="Supprimer l'album">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      `).join('');
+      
+      // Add click listeners for tab buttons
+      tabsContainer.querySelectorAll('.album-tab-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          // Only select if not clicking on action buttons
+          if (!e.target.closest('.album-action-btn')) {
+            selectAlbum(btn.dataset.albumId);
+          }
+        });
+      });
+    }
+
+    function selectAlbum(albumId) {
+      const album = albums.find(a => a.id === albumId);
+      if (!album) return;
+      
+      currentAlbumId = album.id;
+      currentAlbumName = album.name;
+      
+      // Update tab buttons
+      document.querySelectorAll('.album-tab-btn').forEach(btn => {
+        const isActive = btn.dataset.albumId === albumId;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive);
+      });
+      
+      renderAlbumGrid();
+    }
+
+    function renderAlbumGrid() {
+      const gridEl = document.getElementById('albumGrid');
+      if (!gridEl) return;
+      
+      const album = albums.find(a => a.id === currentAlbumId);
+      if (!album) {
+        gridEl.innerHTML = '<div class="album-empty"><p>Sélectionnez un album</p></div>';
+        return;
+      }
+      
+      // NEW: Filter photos by albumIds containing currentAlbumId
+      const photos = Object.entries(allPhotos)
+        .filter(([id, photo]) => photo.albumIds && photo.albumIds.includes(currentAlbumId))
+        .map(([id, val]) => normalizePhoto(id, val))
+        .sort((a, b) => b.createdAt - a.createdAt);
+      
+      if (photos.length === 0) {
+        gridEl.innerHTML = `
+          <div class="album-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <rect x="2" y="3" width="20" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            <p>Aucune photo dans cet album</p>
+            <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.6;">Ajoutez des photos via la zone d'upload</p>
+          </div>
+        `;
+        return;
+      }
+      
+      gridEl.innerHTML = photos.map(photo => `
+        <div class="photo-card" data-photo-id="${photo.id}" role="gridcell" onclick="openPhotoModal('${photo.id}')">
+          <img class="photo-thumb" src="${photo.dataUrl}" alt="${photo.title || 'Photo'}" loading="lazy">
+          <div class="photo-info">
+            <div class="photo-title">${photo.title || (photo.createdAt ? new Date(photo.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'Sans titre')}</div>
+            <div class="photo-meta">
+              ${photo.createdBy ? `<span>${photo.createdBy}</span>` : ''}
+            </div>
+          </div>
+          <div class="photo-actions">
+            <button class="photo-action-btn delete" onclick="event.stopPropagation(); deletePhoto('${photo.id}')" title="Supprimer" aria-label="Supprimer la photo">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Photo file handling
+    function handleFileUpload(files) {
+          if (albums.length === 0) {
+            showError('Créez un album d\'abord');
+            return;
+          }
+      
+          // Always show album selection modal when uploading
+          showAlbumSelectionForUpload(files);
+        }
+
+        // Show album selection modal for upload
+        function showAlbumSelectionForUpload(files) {
+              // Convert FileList to Array immediately to avoid closure issues
+              const filesArray = Array.from(files);
+              const overlay = document.createElement('div');
+              overlay.className = 'modal-overlay';
+              overlay.innerHTML = `
+                <div class="modal">
+                  <header class="modal-header">
+                    <h2 class="modal-title">Choisir les albums</h2>
+                    <button class="modal-close" aria-label="Fermer">✕</button>
+                  </header>
+                  <div class="photo-modal-body">
+                    <p style="color: var(--cream); margin-bottom: 1.5rem;">Sélectionnez les albums pour <strong>${filesArray.length} photo${filesArray.length > 1 ? 's' : ''}</strong> :</p>
+                    <div id="uploadAlbumCheckboxes" class="album-checkboxes" style="max-height: 300px; overflow-y: auto;"></div>
+                    <div class="reservation-actions" style="margin-top: 1.5rem;">
+                      <button type="button" class="btn btn-secondary" id="uploadAlbumCancel"><span>Annuler</span></button>
+                      <button type="button" class="btn" id="uploadAlbumConfirm"><span>Ajouter aux albums sélectionnés</span></button>
+                    </div>
+                  </div>
+                </div>
+              `;
+              document.body.appendChild(overlay);
+      
+              // Render album checkboxes
+              const checkboxesContainer = overlay.querySelector('#uploadAlbumCheckboxes');
+              checkboxesContainer.innerHTML = albums.map(album => `
+                <label class="album-checkbox">
+                  <input type="checkbox" value="${album.id}" checked>
+                  <span class="album-checkbox-label">${album.name}</span>
+                </label>
+              `).join('');
+      
+              const closeModal = () => {
+                overlay.classList.remove('open');
+                setTimeout(() => overlay.remove(), 300);
+              };
+      
+              overlay.querySelector('.modal-close').addEventListener('click', closeModal);
+              overlay.querySelector('#uploadAlbumCancel').addEventListener('click', closeModal);
+              overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+      
+              overlay.querySelector('#uploadAlbumConfirm').addEventListener('click', async () => {
+                const selectedAlbumIds = [];
+                overlay.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+                  selectedAlbumIds.push(cb.value);
+                });
+      
+                if (selectedAlbumIds.length === 0) {
+                  showError('Sélectionnez au moins un album');
+                  return;
+                }
+      
+                closeModal();
+      
+                // Upload to each selected album
+                const maxSize = 8 * 1024 * 1024;
+                const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      
+                for (const file of filesArray) {
+                  if (!validTypes.includes(file.type)) {
+                    showError(`Format non supporté: ${file.name}`);
+                    continue;
+                  }
+                  if (file.size > maxSize) {
+                    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+                    showError(`Fichier trop volumineux: ${file.name} (${sizeMB} Mo > 8 Mo max)`);
+                    continue;
+                  }
+          
+                  setSyncStatus('syncing', `Upload ${file.name}...`);
+          
+                  try {
+                    const dataUrl = await fileToDataUrl(file);
+                    const photoId = push(ref(db, 'photos')).key;
+                    const photoData = {
+                      title: file.name.replace(/\.[^/.]+$/, ''),
+                      comment: '',
+                      dataUrl,
+                      mimeType: file.type,
+                      albumIds: selectedAlbumIds,
+                      createdAt: Date.now(),
+                      createdBy: currentUser
+                    };
+            
+                    await set(ref(db, 'photos/' + photoId), photoData);
+                  } catch (error) {
+                    console.error('Upload error:', error);
+                    showError('Erreur upload: ' + error.message);
+                    setSyncStatus('error', 'Erreur upload');
+                    return;
+                  }
+                }
+        
+                setSyncStatus('ok', 'Photos ajoutées');
+                renderAlbumGrid();
+              });
+      
+              requestAnimationFrame(() => overlay.classList.add('open'));
+            }
+
+    function fileToDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function deletePhoto(photoId) {
+      // Show custom confirmation modal with options
+      const photo = allPhotos[photoId];
+      if (!photo) {
+        showError('Photo introuvable');
+        return;
+      }
+      
+      const inMultipleAlbums = photo.albumIds && photo.albumIds.length > 1;
+      
+      if (inMultipleAlbums) {
+        // Photo in multiple albums - ask what to do
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.innerHTML = `
+          <div class="modal">
+            <header class="modal-header">
+              <h2 class="modal-title">Supprimer la photo</h2>
+              <button class="modal-close" aria-label="Fermer">✕</button>
+            </header>
+            <div class="photo-modal-body">
+              <p style="color: var(--cream); margin-bottom: 1.5rem;">Cette photo est dans <strong>${photo.albumIds.length} albums</strong>. Que souhaitez-vous faire ?</p>
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <button class="btn btn-danger" id="deleteAllBtn">
+                  <span>🗑️ Supprimer de TOUS les albums</span>
+                </button>
+                <button class="btn btn-secondary" id="deleteCurrentBtn">
+                  <span>➖ Retirer de l'album actuel seulement</span>
+                </button>
+                <button class="btn" id="deleteCancelBtn">
+                  <span>Annuler</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(overlay);
+        
+        const closeDeleteModal = () => {
+          overlay.classList.remove('open');
+          setTimeout(() => overlay.remove(), 300);
+        };
+        
+        overlay.querySelector('#deleteAllBtn').addEventListener('click', async () => {
+          closeDeleteModal();
+          await doDeletePhoto(photoId, true);
+        });
+        overlay.querySelector('#deleteCurrentBtn').addEventListener('click', async () => {
+          closeDeleteModal();
+          await doDeletePhoto(photoId, false);
+        });
+        overlay.querySelector('#deleteCancelBtn').addEventListener('click', closeDeleteModal);
+        overlay.querySelector('.modal-close').addEventListener('click', closeDeleteModal);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDeleteModal(); });
+        
+        requestAnimationFrame(() => overlay.classList.add('open'));
+      } else {
+        // Single album - confirm deletion
+        showConfirmModal(
+          'Supprimer cette photo ?',
+          'Cette action est irréversible.',
+          async () => await doDeletePhoto(photoId, true)
+        );
+      }
+    }
+    
+    async function doDeletePhoto(photoId, deleteFromAll) {
+      try {
+        setSyncStatus('syncing', 'Suppression...');
+        
+        const photo = allPhotos[photoId];
+        if (!photo) {
+          showError('Photo introuvable');
+          return;
+        }
+        
+        if (deleteFromAll || !photo.albumIds || photo.albumIds.length <= 1) {
+          // Delete completely
+          await remove(ref(db, 'photos/' + photoId));
+        } else {
+          // Remove only current album from albumIds
+          const newAlbumIds = photo.albumIds.filter(id => id !== currentAlbumId);
+          await set(ref(db, 'photos/' + photoId + '/albumIds'), newAlbumIds);
+        }
+        
+        setSyncStatus('ok', 'Photo supprimée');
+        closePhotoModal();
+        renderAlbumGrid();
+      } catch (error) {
+        console.error('Delete photo error:', error);
+        showError('Erreur suppression: ' + error.message);
+        setSyncStatus('error', 'Erreur');
+      }
+    }
+
+    // Photo Modal
+    function openPhotoModal(photoId) {
+      // Get photo from global allPhotos object
+      const photo = allPhotos[photoId];
+      if (!photo) return;
+      
+      const overlay = document.getElementById('photoModalOverlay');
+      const titleEl = document.getElementById('photoModalTitle');
+      const imgEl = document.getElementById('photoModalImage');
+      const titleInput = document.getElementById('photoModalTitleInput');
+      const commentInput = document.getElementById('photoModalCommentInput');
+      const deleteBtn = document.getElementById('photoModalDeleteBtn');
+      const albumsContainer = document.getElementById('photoModalAlbums');
+      
+      if (titleEl) titleEl.textContent = photo.title || 'Photo';
+      if (imgEl) {
+        imgEl.src = photo.dataUrl;
+        imgEl.alt = photo.title || 'Photo';
+      }
+      if (titleInput) titleInput.value = photo.title || '';
+      if (commentInput) commentInput.value = photo.comment || '';
+      if (deleteBtn) {
+        deleteBtn.onclick = () => {
+          closePhotoModal();
+          deletePhoto(photoId);
+        };
+      }
+      
+      // Render album checkboxes
+      if (albumsContainer) {
+        albumsContainer.innerHTML = albums.map(album => `
+          <label class="album-checkbox">
+            <input type="checkbox" value="${album.id}" ${photo.albumIds && photo.albumIds.includes(album.id) ? 'checked' : ''}>
+            <span class="album-checkbox-label">${album.name}</span>
+          </label>
+        `).join('');
+      }
+      
+      // Store current photo ID for save
+      const form = document.getElementById('photoModalForm');
+      if (form) form.dataset.photoId = photoId;
+      
+      if (overlay) overlay.classList.add('open');
+    }
+
+    function closePhotoModal() {
+      const overlay = document.getElementById('photoModalOverlay');
+      if (overlay) overlay.classList.remove('open');
+      setTimeout(() => {
+        const form = document.getElementById('photoModalForm');
+        if (form) {
+          form.reset();
+          delete form.dataset.photoId;
+        }
+      }, 300);
+    }
+
+    async function savePhotoMeta(e) {
+      e.preventDefault();
+      const form = e.target;
+      const photoId = form.dataset.photoId;
+      if (!photoId) return;
+      
+      const titleInput = document.getElementById('photoModalTitleInput');
+      const commentInput = document.getElementById('photoModalCommentInput');
+      const albumsContainer = document.getElementById('photoModalAlbums');
+      
+      // Get selected album IDs from checkboxes
+      const selectedAlbumIds = [];
+      if (albumsContainer) {
+        albumsContainer.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+          selectedAlbumIds.push(cb.value);
+        });
+      }
+      
+      // Get existing photo to preserve all fields
+      const existingPhoto = allPhotos[photoId];
+      if (!existingPhoto) {
+        showError('Photo introuvable');
+        return;
+      }
+      
+      try {
+        setSyncStatus('syncing', 'Sauvegarde...');
+        // Merge existing photo with updates, preserving all fields
+        const updatedPhoto = {
+          ...existingPhoto,
+          title: titleInput?.value?.trim() || existingPhoto.title || '',
+          comment: commentInput?.value?.trim() || existingPhoto.comment || '',
+          albumIds: selectedAlbumIds,
+          updatedAt: Date.now(),
+          updatedBy: currentUser
+        };
+        await set(ref(db, 'photos/' + photoId), updatedPhoto);
+        closePhotoModal();
+        // Return to albums view
+        selectAlbum(currentAlbumId || (albums[0]?.id));
+        setSyncStatus('ok', 'Sauvegardé');
+      } catch (error) {
+        console.error('Save photo meta error:', error);
+        showError('Erreur sauvegarde: ' + error.message);
+        setSyncStatus('error', 'Erreur');
+      }
+    }
+
+    async function createAlbum() {
+      const input = document.getElementById('newAlbumName');
+      const name = input?.value?.trim();
+      if (!name) {
+        showError('Nom d\'album requis');
+        return;
+      }
+      
+      try {
+        setSyncStatus('syncing', 'Création album...');
+        await push(ref(db, 'albums'), {
+          name,
+          createdAt: Date.now(),
+          createdBy: currentUser
+        });
+        input.value = '';
+        setSyncStatus('ok', 'Album créé');
+      } catch (error) {
+        console.error('Create album error:', error);
+        showError('Erreur création: ' + error.message);
+        setSyncStatus('error', 'Erreur');
+      }
+    }
+
+    async function editAlbum(albumId) {
+      const album = albums.find(a => a.id === albumId);
+      if (!album) return;
+      
+      showEditModal(
+        'Modifier le nom de l\'album',
+        'Nouveau nom :',
+        album.name,
+        async (newName) => {
+          if (!newName || newName.trim() === album.name) return;
+          
+          try {
+            setSyncStatus('syncing', 'Modification...');
+            await set(ref(db, 'albums/' + albumId), {
+              ...album,
+              name: newName.trim(),
+              updatedAt: Date.now(),
+              updatedBy: currentUser
+            });
+            setSyncStatus('ok', 'Album modifié');
+          } catch (error) {
+            console.error('Edit album error:', error);
+            showError('Erreur modification: ' + error.message);
+            setSyncStatus('error', 'Erreur');
+          }
+        }
+      );
+    }
+
+    async function deleteAlbum(albumId) {
+      showConfirmModal(
+        'Supprimer cet album et toutes ses photos ?',
+        'Cette action est irréversible.',
+        async () => {
+          try {
+            setSyncStatus('syncing', 'Suppression album...');
+            await remove(ref(db, 'albums/' + albumId));
+            // If we deleted the current album, select another
+            if (currentAlbumId === albumId) {
+              currentAlbumId = null;
+              const remainingAlbum = albums.find(a => a.id !== albumId);
+              if (remainingAlbum) {
+                selectAlbum(remainingAlbum.id);
+              } else {
+                renderAlbumTabs();
+                renderAlbumGrid();
+              }
+            } else {
+              renderAlbumTabs();
+            }
+            setSyncStatus('ok', 'Album supprimé');
+          } catch (error) {
+            console.error('Delete album error:', error);
+            showError('Erreur suppression: ' + error.message);
+            setSyncStatus('error', 'Erreur');
+          }
+        }
+      );
+    }
+
+    // Upload zone drag & drop
+    function setupUploadZone() {
+      const zone = document.getElementById('uploadZone');
+      const input = document.getElementById('photoUpload');
+      if (!zone || !input) return;
+      
+      zone.addEventListener('click', () => input.click());
+      
+      zone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        zone.classList.add('drag-over');
+      });
+      
+      zone.addEventListener('dragleave', () => {
+        zone.classList.remove('drag-over');
+      });
+      
+      zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        zone.classList.remove('drag-over');
+        if (e.dataTransfer.files.length) {
+          handleFileUpload(e.dataTransfer.files);
+        }
+      });
+      
+      input.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+          handleFileUpload(e.target.files);
+          input.value = '';
+        }
+      });
+    }
+
+    // INITIALIZATION - runs when DOM is ready
+    function init() {
+      // Calendar header
+      renderCalendarHeader();
+      
+      // Check existing session - only pre-fill username, still require password
+      const savedUser = localStorage.getItem('montorlin-user');
+      if (savedUser) {
+        try {
+          const user = JSON.parse(savedUser);
+          // Pre-fill username but still require password
+          const prenomInput = document.getElementById('prenom');
+          if (prenomInput && user.prenom) {
+            prenomInput.value = user.prenom;
+          }
+        } catch {
+          localStorage.removeItem('montorlin-user');
+        }
+      }
+    }
+
+    // EVENT LISTENERS - all DOM queries inside functions
+    function setupEventListeners() {
+      // Login form
+      const form = document.getElementById('loginForm');
+      if (form) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          
+          const prenomInput = document.getElementById('prenom');
+          const passwordInput = document.getElementById('password');
+          const submitBtn = document.getElementById('submitBtn');
+          const errorMsg = document.getElementById('errorMsg');
+          
+          const prenom = prenomInput?.value?.trim();
+          const password = passwordInput?.value;
+
+          console.log("[DEBUG] Login attempt:", prenom, password);
+          
+          if (errorMsg) errorMsg.classList.remove('show');
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            const span = submitBtn.querySelector('span');
+            if (span) span.textContent = 'Connexion...';
+          }
+
+          await new Promise(r => setTimeout(r, 600));
+
+          console.log("[DEBUG] Password check:", password, "vs", FAMILY_PASSWORD);
+          
+          if (password !== FAMILY_PASSWORD) {
+            showError("Mot de passe incorrect");
+            resetButton();
+            return;
+          }
+
+          if (!prenom) {
+            showError("Entre ton prénom.");
+            resetButton();
+            return;
+          }
+
+          // Save to Firebase
+          try {
+            setSyncStatus('syncing', 'Connexion...');
+            console.log("[DEBUG] Calling firebase set...");
+            await set(ref(db, 'users/' + prenom), {
+              prenom: prenom,
+              last_seen: Date.now(),
+              online: true
+            });
+            console.log("[DEBUG] Firebase set succeeded");
+            setSyncStatus('ok');
+          } catch (e) { 
+            console.error('[DEBUG] User set failed:', e);
+            showError('Erreur Firebase: ' + e.message);
+            resetButton();
+            return;
+          }
+
+          localStorage.setItem('montorlin-user', JSON.stringify({ prenom: prenom, loginTime: Date.now() }));
+          
+          const submitBtn2 = document.getElementById('submitBtn');
+          if (submitBtn2) {
+            const span2 = submitBtn2.querySelector('span');
+            if (span2) span2.textContent = 'Bienvenue...';
+            submitBtn2.style.background = 'linear-gradient(90deg, #22c55e, #4ade80)';
+          }
+          
+          console.log("[DEBUG] Calling showApp...");
+          setTimeout(() => showApp(prenom), 800);
+        });
+      }
+
+      // Logout
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          localStorage.removeItem('montorlin-user');
+          currentUser = null;
+          reservations = [];
+          const loginView = document.getElementById('loginView');
+          const appView = document.getElementById('appView');
+          if (loginView) loginView.style.display = 'block';
+          if (appView) appView.style.display = 'none';
+          const prenomInput2 = document.getElementById('prenom');
+          const passwordInput2 = document.getElementById('password');
+          if (prenomInput2) prenomInput2.value = '';
+          const pw2 = document.getElementById('password');
+          if (pw2) pw2.value = '';
+          const pi2 = document.getElementById('prenom');
+          if (pi2) pi2.focus();
+        });
+      }
+
+      // Modal
+      const modalClose = document.getElementById('modalClose');
+      const modalOverlay = document.getElementById('modalOverlay');
+      if (modalClose) modalClose.addEventListener('click', closeModal);
+      if (modalOverlay) modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
+
+      // Reservation form
+      const reservationForm = document.getElementById('reservationForm');
+      if (reservationForm) reservationForm.addEventListener('submit', saveReservation);
+
+      // Keyboard navigation
+      document.addEventListener('keydown', (e) => {
+        const appView = document.getElementById('appView');
+        if (appView?.style.display === 'none') return;
+        if (e.key === 'ArrowLeft') { updateMonth(-1); }
+        else if (e.key === 'ArrowRight') { updateMonth(1); }
+        else if (e.key === 'Escape') { closeModal(); }
+      });
+
+      // Tab navigation
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tab = btn.dataset.tab;
+          // Update active button
+          tabBtns.forEach(b => {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+          });
+          btn.classList.add('active');
+          btn.setAttribute('aria-selected', 'true');
+          // Show/hide tab content
+          document.querySelectorAll('.tab-content').forEach(content => {
+            content.style.display = 'none';
+          });
+          const targetContent = document.getElementById('tabContent' + tab.charAt(0).toUpperCase() + tab.slice(1));
+          if (targetContent) {
+            targetContent.style.display = 'block';
+            targetContent.setAttribute('aria-hidden', 'false');
+          }
+          // Update aria-hidden on others
+          document.querySelectorAll('.tab-content').forEach(content => {
+            if (content !== targetContent) content.setAttribute('aria-hidden', 'true');
+          });
+          
+          // If Album tab selected, ensure albums are loaded
+          if (tab === 'album' && albums.length === 0) {
+            loadAlbums();
+          }
+        });
+      });
+
+      // Album event listeners
+      const createAlbumBtn = document.getElementById('createAlbumBtn');
+      if (createAlbumBtn) createAlbumBtn.addEventListener('click', createAlbum);
+      
+      const newAlbumInput = document.getElementById('newAlbumName');
+      if (newAlbumInput) {
+        newAlbumInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') createAlbum();
+        });
+      }
+      
+      // Photo modal events
+      const photoModalClose = document.getElementById('photoModalClose');
+      const photoModalOverlay = document.getElementById('photoModalOverlay');
+      if (photoModalClose) photoModalClose.addEventListener('click', closePhotoModal);
+      if (photoModalOverlay) photoModalOverlay.addEventListener('click', (e) => { if (e.target === photoModalOverlay) closePhotoModal(); });
+      
+      // Photo modal form
+      const photoModalForm = document.getElementById('photoModalForm');
+      if (photoModalForm) photoModalForm.addEventListener('submit', savePhotoMeta);
+      
+      // Upload zone
+      setupUploadZone();
+      
+      // Keyboard escape for photo modal
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeModal();
+          closePhotoModal();
+        }
+      });
+    }
+
+    // Also handle calendar nav from header buttons
+    document.addEventListener('click', (e) => {
+      if (e.target.id === 'prevMonth') updateMonth(-1);
+      else if (e.target.id === 'nextMonth') updateMonth(1);
+    });
+
+    // Expose album functions to global scope for onclick handlers
+    window.openPhotoModal = openPhotoModal;
+    window.openModal = openModal;
+    window.deletePhoto = deletePhoto;
+    window.editAlbum = editAlbum;
+    window.savePhotoMeta = savePhotoMeta;
+    window.closePhotoModal = closePhotoModal;
+    window.createAlbum = createAlbum;
+    window.selectAlbum = selectAlbum;
+    window.deleteAlbum = deleteAlbum;
+    window.deleteReservation = deleteReservation;
+    window.handleFileUpload = handleFileUpload;
+
+    // Run init when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        init();
+        setupEventListeners();
+      });
+    } else {
+      init();
+      setupEventListeners();
+    }
+  </script>
+</body>
+</html>
