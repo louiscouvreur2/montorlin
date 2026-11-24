@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#1a2e1a">
   <meta name="description" content="Montorlin - Calendrier et album familial">
   <title>Montorlin</title>
-  <link rel="manifest" href="/manifest.json">
-  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="manifest.json">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -1832,8 +1832,7 @@
         });
       }
 
-      // User avatar dropdown for logout
-      const userAvatar = document.getElementById('userAvatar');
+      // User avatar dropdown for logout (userAvatar already declared above)
       if (userAvatar) {
         userAvatar.onclick = () => {
           const logoutBtn = document.getElementById('logoutBtn');
