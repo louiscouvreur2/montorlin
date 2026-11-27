@@ -214,6 +214,14 @@
       outline: none;
       min-height: var(--touch-target);
     }
+    /* Ensure date inputs match text inputs exactly */
+    input[type="date"] {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: none;
+      padding-right: 1rem;
+    }
     /* Hide native date picker calendar icon for visual consistency */
     input[type="date"]::-webkit-calendar-picker-indicator {
       display: none;
