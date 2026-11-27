@@ -214,6 +214,15 @@
       outline: none;
       min-height: var(--touch-target);
     }
+    /* Hide native date picker calendar icon for visual consistency */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      display: none;
+    }
+    input[type="date"]::-webkit-inner-spin-button,
+    input[type="date"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
     input::placeholder, textarea::placeholder { color: rgba(200, 220, 200, 0.5); }
     input:focus, select:focus, textarea:focus {
       border-color: var(--gold);
